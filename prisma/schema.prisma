@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  accounts  Account[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Account {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  provider        String
+  email           String
+  name            String
+  password        String?
+  bio             String          @default("busy")
+  avatar          String?
+  userId          String          @db.ObjectId
+  lastseen        DateTime        @default(now())
+  user            User            @relation(fields: [userId], references: [id])
+  sender          Message[]       @relation(name: "sender")
+  receiver        Message[]       @relation(name: "receiver")
+  groupUsers      groupUser[]
+  messageSenderId groupMessages[] @relation(name  :"messageSender")
+  requestSent friendRequest[] @relation(name : "sentRequest")
+  requestReceived friendRequest[] @relation(name : "receivedRequest")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now())
+
+  @@index([email])
+}
+
+model Message {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  senderId    String    @db.ObjectId
+  receiverId  String    @db.ObjectId
+  content     String?
+  image       String?
+  readAt      DateTime?
+  deliveredAt DateTime?
+  status      String    @default("sent")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sender      Account   @relation(name: "sender", fields: [senderId], references: [id])
+  receiver    Account   @relation(name: "receiver", fields: [receiverId], references: [id])
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, senderId])
+}
+
+model Groups {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  description    String?
+  name           String
+  image          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  users          groupUser[]
+  groupsMessages groupMessages[] @relation(name: "groupMessages")
+}
+
+model groupMessages {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  senderId    String    @db.ObjectId
+  sender      Account   @relation(fields: [senderId], references: [id], name: "messageSender")
+  content     String?
+  image       String?
+  groupId     String    @db.ObjectId
+  group       Groups    @relation(fields: [groupId], references: [id], name: "groupMessages")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  status messageStatus[]
+  @@index([id])
+  @@index([groupId])
+}
+
+model messageStatus {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  readAt      DateTime?
+  deliveredAt DateTime?
+  status String @default("sent")
+  userId String
+  groupMessage String @db.ObjectId
+  groupMessageId groupMessages @relation(fields: [groupMessage],references: [id])
+}
+
+model groupUser {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  User       Account  @relation(fields: [userId], references: [id])
+  groupId    String   @db.ObjectId
+  groupUsers Groups   @relation(fields: [groupId], references: [id])
+  role       String   @default("member")
+  joinedAt   DateTime @default(now())
+
+  @@index([groupId, userId])
+  @@index([groupId])
+}
+
+model friendRequest {
+  id String @map("_id") @db.ObjectId @id @default(auto())
+  receiverId String @db.ObjectId
+  receiver Account @relation(fields: [receiverId],references: [id],name: "receivedRequest")
+  senderId String @db.ObjectId
+  sender Account @relation(fields: [senderId],references: [id],name: "sentRequest")
+  createdAt DateTime @default(now())
+  status requestAccepted @default(Pending)
+}
+enum requestAccepted {
+  Pending
+  Accepted
+  Rejected
+}
