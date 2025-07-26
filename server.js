@@ -9,7 +9,9 @@ let app = next({ dev: process.env.NODE_ENV !== "production" });
 let handler = app.getRequestHandler();
 
 app.prepare().then(() => {
-    let server = createServer(handler);
+      const server = createServer((req, res) => {
+    handler(req, res);
+  })
 
     let io = new Server(server, {
         cors: {
