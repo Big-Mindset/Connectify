@@ -27,6 +27,7 @@ export async function middleware(request) {
     req: request,
     secret: process.env.AUTH_SECRET,
   });
+  console.log(process.env.AUTH_SECRET)
   console.log("in middleware")
   console.log(token)
   if (token?.user) {
