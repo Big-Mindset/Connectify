@@ -1,10 +1,11 @@
 "use client"
-
-import images from '@/image'
-import { messageStore } from '@/zustand/messageSearchStore'
-import { authStore } from '@/zustand/store'
+import Avatar from "@/assets/Avatar.webp"
+import properLogo from "@/assets/logop.webp"
+import SearchIcon from "@/assets/Search.svg"
+import { messagestore } from '@/zustand/messageSearchStore'
+import { authstore } from '@/zustand/store'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Check, MoreVertical, Plus, UserPlus, Users, X } from 'lucide-react'
@@ -17,12 +18,22 @@ import toast from 'react-hot-toast'
 import GroupUsers from './GroupUsers'
 
 import MoreOption from '../MoreOption'
-const ChatList = ({ setopenfriendSearch }) => {
+import useDebounce from "@/lib/useDebounce"
+const ChatList = React.memo(({ setopenfriendSearch }) => {
+
+
+const loading = authstore.use.loading();
+const getAllUsers = authstore.use.getAllUsers();
+const users = authstore.use.users();
+const Selected = authstore.use.Selected();
+const setselectedInfo = authstore.use.setselectedInfo();
+const session = authstore.use.session();
+
+const setCategory = messagestore.use.setCategory();
+const category = messagestore.use.category();
 
 
 
-  let { loading, getAllUsers, users, Selected, setSelected, setselectedInfo, session } = authStore()
-  let { setCategory, category } = messageStore()
   const [userSearch, setuserSearch] = useState("")
   const [searchResult, setsearchResult] = useState([])
   const [Create, setCreate] = useState(false)
@@ -36,23 +47,25 @@ const ChatList = ({ setopenfriendSearch }) => {
   }, [])
 
 
-
   let handleChange = (e) => {
     let value = e.target.value
+    let debounce = useDebounce(200 ,value )
     setuserSearch(value)
-    if (!value.trim()) {
-      setsearchResult([])
-      return
-    }
-
-    let searchedUsers = users?.filter(user => {
-
-      if (user.name.toLowerCase().includes(value.toLowerCase())) {
-        return true
+    
+    let searchedUsers = useMemo(()=>{
+      
+      if (!debounce.trim()) {
+        return []
       }
-
-
-    });
+      users?.filter(user => {
+  
+        if (user.name.toLowerCase().includes(value.toLowerCase())) {
+          return true
+        }
+  
+  
+      });
+    },[users,value])
 
     setsearchResult(searchedUsers)
   }
@@ -65,7 +78,12 @@ const ChatList = ({ setopenfriendSearch }) => {
 
   }, [Selected])
 
-  let userToMap = searchResult.length === 0 ? users : searchResult
+  let userToMap = useMemo(()=>{
+    return  searchResult.length === 0 ? users : searchResult
+
+  },[searchResult,users])
+    
+
 
 
   let handleAddToGroup = (userId) => {
@@ -102,6 +120,8 @@ const ChatList = ({ setopenfriendSearch }) => {
 
   }
 
+  let handleOpenSearch = useCallback(() => setopenfriendSearch(true),[])
+  let handleAddGroup = useCallback((user) => handleAddToGroup({ id: user.id, image: user.avatar, name: user.name }) , [])
   return (
     <>
       <div className={`absolute ${Create ? "left-0" : "-left-[100%]"} p-4 w-full z-50 bg-[#1A1035] duration-500 top-0 bottom-0`}>
@@ -179,7 +199,7 @@ const ChatList = ({ setopenfriendSearch }) => {
                 <Tooltip>
 
                   <TooltipTrigger
-                    onClick={() => handleAddToGroup({ id: user.id, image: user.avatar, name: user.name })} className={`p-1.5 rounded-lg transition-colors ${GroupUsersSelect?.some(u => u.id === user.id) ?
+                    onClick={()=>handleAddGroup(user)} className={`p-1.5 rounded-lg transition-colors ${GroupUsersSelect?.some(u => u.id === user.id) ?
                       'bg-purple-400/20 text-purple-300' :
                       'text-indigo-400/50 hover:text-purple-300 hover:bg-purple-400/10'}`}
                   >
@@ -211,7 +231,7 @@ const ChatList = ({ setopenfriendSearch }) => {
         <div className='flex justify-between items-center px-5'>
           <div className='flex gap-3 items-center'>
             <div className='rounded-full size-12 ring-2 ring-purple-400 overflow-hidden '>
-              <Image src={session?.user?.image || images.Avatar} alt='You' height={100} width={100} />
+              <Image src={session?.user?.image || Avatar} alt='You' height={100} width={100} />
             </div>
             <h1 className='font-bold text-indigo-100 text-[1.5rem]'>Chats</h1>
           </div>
@@ -222,7 +242,7 @@ const ChatList = ({ setopenfriendSearch }) => {
               </TooltipContent>
               <TooltipTrigger>
 
-                <div onClick={() => setopenfriendSearch(true)} className='relative hover:ring-1  ring-purple-500 rounded-full p-2 duration-100 '>
+                <div onClick={handleOpenSearch} className='relative hover:ring-1  ring-purple-500 rounded-full p-2 duration-100 '>
                   <Users className='text-green-600' />
                   <Plus className='absolute bottom-3 right-0 size-4 font-bold text-green-500' />
                 </div>
@@ -234,7 +254,7 @@ const ChatList = ({ setopenfriendSearch }) => {
         </div>
         <div className='flex items-center gap-2.5 px-2 py-1.5 transition-all duration-200 focus-within:ring-2 ring-indigo-500/50 rounded-lg bg-[#2D1A47]'>
           {Popover && <MoreOption />}
-          <Image src={images.SearchIcon} alt='Search' className='filter invert-[0.7]' />
+          <Image src={SearchIcon} alt='Search' className='filter invert-[0.7]' />
           <input
             placeholder='Search for Chats'
             type='text'
@@ -258,7 +278,7 @@ const ChatList = ({ setopenfriendSearch }) => {
       <div className='mt-4 '>
 
         {loading ? (<div className='absolute text-3xl left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
-          <Image src={images.properLogo} alt="Loading" width={100} height={100} className='animate-pulse duration-75' />
+          <Image src={properLogo} alt="Loading" width={100} height={100} className='animate-pulse duration-75' />
 
         </div>)
           :
@@ -287,6 +307,6 @@ const ChatList = ({ setopenfriendSearch }) => {
       </div>
     </>
   )
-}
+})
 
 export default ChatList

@@ -2,6 +2,7 @@ import axios from "axios"
 import toast from "react-hot-toast"
 import {create} from "zustand"
 import { authStore } from "./store"
+import { createSelectors } from "@/lib/Selector"
 
 
 export let groupStore = create((set,get)=>({
@@ -23,17 +24,12 @@ export let groupStore = create((set,get)=>({
         let updatedStatus = status.find((st)=>
             st.userId === session?.user.id
         )
-        console.log("the selectedGroup is ");
-        console.log(selectedGroup);
-        console.log("the message GroupId ",messages.groupId);
         
         if (selectedGroup && selectedGroup?.id === messages.groupId){
-            console.log("in if ....");
             
             
             socket?.emit("read-groupMessage",{...updatedStatus,readAt : new Date(),deliveredAt : new Date()},messages.groupId)
         }else{
-            console.log("in else ....");
             
             
             socket?.emit("delivered-groupMessage",{...updatedStatus,deliveredAt : new Date()},messages.groupId)
@@ -124,3 +120,5 @@ export let groupStore = create((set,get)=>({
       }
     },
 }))
+
+export const groupstore = createSelectors(groupStore);

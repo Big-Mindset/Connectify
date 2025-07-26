@@ -1,17 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
-import images from '@/image';
+import React, { useRef } from 'react';
+import Avatar from "@/assets/Avatar.webp"
+import ImageCLip from "@/assets/Paperclip.svg"
 import Image from 'next/image';
 import { groupValidate } from '@/zod/groupSchema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { authStore } from '@/zustand/store';
+import { authstore } from '@/zustand/store';
 import { LoaderCircle } from 'lucide-react';
 import axios from 'axios';
-import { groupStore } from '@/zustand/groupStore';
-export default function UserCardDialog({GroupUsersSelect , setOpen,setGroupUsersSelect}) {
-  let {loading,setLoading,socket} = authStore()
-  let {getGroup,groups} = groupStore()
+import { groupstore } from '@/zustand/groupStore';
+function UserCardDialog({GroupUsersSelect , setOpen,setGroupUsersSelect}) {
+const loading = authstore.use.loading();
+const setLoading = authstore.use.setLoading();
+const socket = authstore.use.socket();
+
+const getGroup = groupstore.use.getGroup();
+
+  
   let {register,handleSubmit,formState : {errors}} = useForm({
      
     resolver : zodResolver(groupValidate),
@@ -29,7 +35,6 @@ export default function UserCardDialog({GroupUsersSelect , setOpen,setGroupUsers
   }
 
 
-  console.log(GroupUsersSelect);
 
 
   let CreateGroup = async (data) => {
@@ -87,7 +92,7 @@ export default function UserCardDialog({GroupUsersSelect , setOpen,setGroupUsers
         <div className='relative'>
         <div className='rounded-full  overflow-hidden size-14 border-2 border-indigo-500/30'>
           <Image
-            src={images.Avatar}
+            src={Avatar}
             alt='User'
             width={100}
             height={100}
@@ -95,7 +100,7 @@ export default function UserCardDialog({GroupUsersSelect , setOpen,setGroupUsers
             />
         </div>
           <div className='absolute bottom-1 bg-blue-400 p-1 rounded-xl hover:bg-blue-500 right-0.5 size-4'>
-            <Image src={images.ImageCLip} alt="Choose Image" width={80} height={80} />
+            <Image src={ImageCLip} alt="Choose Image" width={80} height={80} />
           </div>
             </div>
 
@@ -149,3 +154,4 @@ export default function UserCardDialog({GroupUsersSelect , setOpen,setGroupUsers
 </div>
   );
 }
+export default React.memo(UserCardDialog)

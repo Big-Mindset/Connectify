@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { ImageIcon, Smile, X } from 'lucide-react'
-
-import images from '@/image'
+import PaperClip from "@/assets/Paperclip.svg"
 import FileInput from '../ChatInputs/FileInput'
 import RegularInput from '../ChatInputs/RegularInput'
 import ChatNav from './ChatNav'
@@ -12,34 +11,12 @@ import GroupMessage from './GroupMessage'
 import Emojies from '../Emojies'
 import NoMessages from './NoMessages'
 
-import { authStore } from '@/zustand/store'
-import { groupStore } from '@/zustand/groupStore'
-import axios from 'axios'
+import { authstore } from '@/zustand/store'
+import { groupstore } from '@/zustand/groupStore'
 
 const ChatMain = () => {
+
   const fileInputRef = useRef(null)
-  const bottomRef = useRef(null)
-
-  const {
-    messages,
-    Selected,
-    getMessages,
-    setMessages,
-    socket,
-    handleSendMessage,
-    session,
-    handleUpdate,
-    seleleton
-  } = authStore()
-
-  const {
-    groupMessages,
-    selectedGroup,
-    getGroupMessages,
-    handleReaded,
-    handleReadSuccess
-  } = groupStore()
-
   const [messageData, setMessageData] = useState({
     receiverId: '',
     content: '',
@@ -50,6 +27,22 @@ const ChatMain = () => {
   const [emojiList, setEmojiList] = useState([])
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('')
+
+  const messages = authstore.use.messages();
+  const Selected = authstore.use.Selected();
+  const getMessages = authstore.use.getMessages();
+  const socket = authstore.use.socket();
+  const handleSendMessage = authstore.use.handleSendMessage();
+  const session = authstore.use.session();
+  const handleUpdate = authstore.use.handleUpdate();
+  const seleleton = authstore.use.seleleton();
+  
+  const groupMessages = groupstore.use.groupMessages();
+  const selectedGroup = groupstore.use.selectedGroup();
+  const getGroupMessages = groupstore.use.getGroupMessages();
+  const handleReaded = groupstore.use.handleReaded();
+  
+  
   useEffect(() => {
     if (Selected) getMessages()
     if (selectedGroup) getGroupMessages(selectedGroup.id)
@@ -68,10 +61,8 @@ const ChatMain = () => {
   useEffect(() => {
     socket.on('delivered-success', handleUpdate)
     socket.on('changeToRead', handleReaded)
-    socket.on('groupRead-success', handleReadSuccess)
 
     return () => {
-      socket.off('groupRead-success', handleReadSuccess)
       socket.off('changeToRead', handleReaded)
       socket.off('delivered-success', handleUpdate)
     }
@@ -89,19 +80,19 @@ const ChatMain = () => {
  
   }, [selectedGroup,groupMessages])
 
-let handleFetchMore = async ()=>{
-  const oldestId = msgsRef.current[0].id
-  const res = await axios.get(
-          `/api/get-messages?senderId=${session?.user.id}&receiverId=${Selected}&lastMessage=${oldestId}`
-        )
+// let handleFetchMore = async ()=>{
+//   const oldestId = msgsRef.current[0].id
+//   const res = await axios.get(
+//           `/api/get-messages?senderId=${session?.user.id}&receiverId=${Selected}&lastMessage=${oldestId}`
+//         )
 
-        if (res.status === 200 && res.data.Messages.length) {
-          setMessages(prev => [
-            ...res.data.Messages.reverse(),
-            ...prev,
-          ])
-}
-}
+//         if (res.status === 200 && res.data.Messages.length) {
+//           setMessages(prev => [
+//             ...res.data.Messages.reverse(),
+//             ...prev,
+//           ])
+// }
+// }
 
   const handleSetEmoji = useCallback((emoji) => {
     setMessageData(prev => ({ ...prev, content: prev.content + emoji }))
@@ -152,11 +143,10 @@ let handleFetchMore = async ()=>{
     reader.readAsDataURL(file)
   }
 
-  console.log(groupMessages);
   
 
   return (
-    <div className='flex-1 bg-gradient-to-br from-indigo-900/30 via-[#0F0A1D] to-purple-900/30 flex flex-col backdrop-blur-lg'>
+    <div className='flex-1 bg-gradient-to-br from-indigo-900/30  via-[#0F0A1D] to-purple-900/30 flex flex-col backdrop-blur-lg'>
       <ChatNav />
       <main ref={chatContainerRef} className='flex-1 overflow-y-auto p-4 scroll relative'>
         <div className='flex flex-col gap-2 max-w-4xl mx-auto'>
@@ -244,7 +234,7 @@ let handleFetchMore = async ()=>{
             </button>
             <FileInput ref={fileInputRef} onChange={handleFileInput}>
               <div className='hover:bg-[#3A2466] p-2 duration-150 rounded-xl cursor-pointer'>
-                <Image src={images.PaperClip} alt='Attachment' width={24} height={24} className='filter invert-[0.4] brightness-125' />
+                <Image src={PaperClip} alt='Attachment' width={24} height={24} className='filter invert-[0.4] brightness-125' />
               </div>
             </FileInput>
           </div>

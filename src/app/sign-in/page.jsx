@@ -1,11 +1,9 @@
 "use client"
-
-import images from "@/image"
-import { Button } from "@/components/ui/button"
 import { Inder, Roboto } from "next/font/google"
 import Image from "next/image"
+import properLogo from  "@/assets/logop.webp"
+import AuthenticationImage from  "@/assets/authentication.png"
 import Link from "next/link"
-import react from "react"
 import Input from "@/components/Input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -68,7 +66,7 @@ const login = () => {
 
                         <div className="flex gap-2 justify-center items-center">
 
-                            <Image src={images.properLogo} alt="Logo" width={40} />
+                            <Image src={properLogo} alt="Logo" width={40} />
                             <p className="text-[2rem] text-white">Chat</p>
                         </div>
 
@@ -104,7 +102,7 @@ const login = () => {
                 </div>
 
                 <div >
-                    <Image src={images.AuthenticationImage} className="w-full justify-self-end max-w-[80%] h-[99.4%]" alt="Authentication" />
+                    <Image src={AuthenticationImage} className="w-full justify-self-end max-w-[80%] h-[99.4%]" alt="Authentication" />
                 </div>
             </div>
         </div>

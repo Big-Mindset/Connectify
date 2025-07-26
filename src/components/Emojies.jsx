@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import {  motion } from 'framer-motion'
 import {
   Tooltip,
   TooltipContent,
@@ -8,15 +8,14 @@ import {
   TooltipProvider
 } from "@/components/ui/tooltip"
 import { X } from 'lucide-react'
-import { messageStore } from '@/zustand/messageSearchStore'
 
 const Emojies = React.memo(({ setOpenEmoji,handleSetEmoji}) => {
+
   const [Emojies, setEmojies] = useState([])
   const [SelectedCategory, setSelectedCategory] = useState("")
   const containerRef = useRef(null)
   const scrollTimeout = useRef(null)
   let emojipicker = useRef(null)
-  let {selectedEmoji} = messageStore()
   const getEmojiByName = (name, data) => {
     return data.emojis[name]?.skins[0]?.native || "❓"
   } 

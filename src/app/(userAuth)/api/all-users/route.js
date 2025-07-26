@@ -12,8 +12,6 @@ export async function GET(req) {
 
         }
         let userId = session?.user?.id
-        console.log("in all users",userId);
-        
         
         let allusers = await prisma.friendRequest.findMany({
             where : {
@@ -51,8 +49,6 @@ export async function GET(req) {
         }
         return NextResponse.json({users : [...allusers]},{status : 200})
     } catch (error) {
-        console.log("the error is ")
-        console.log(error.message)
         return NextResponse.json({message : "Netowrk Error try again"},{status : 500})
     }
 }

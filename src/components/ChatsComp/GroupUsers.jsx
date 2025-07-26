@@ -1,15 +1,15 @@
-import images from '@/image'
-import { groupStore } from '@/zustand/groupStore'
-import { authStore } from '@/zustand/store'
-import axios from 'axios'
+import Avatar from "@/assets/Avatar.webp"
+import { groupstore } from '@/zustand/groupStore'
+import { authstore } from '@/zustand/store'
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
 
 const GroupUsers = () => {
-    
-    let {setSelected} = authStore()
-    let {setselectedGroup,selectedGroup,groups} = groupStore()
+  
+const setSelected = authstore.use.setSelected();
+const setselectedGroup = groupstore.use.setselectedGroup();
+const selectedGroup = groupstore.use.selectedGroup();
+const groups = groupstore.use.groups();
+
 
   
     
@@ -44,7 +44,7 @@ const GroupUsers = () => {
                 <div className="relative transition-transform duration-300 group-hover:scale-105">
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-700/30 to-purple-500/30 opacity-0 transition-opacity group-hover:opacity-100" />
                   <Image
-                    src={group.image || images.Avatar}
+                    src={group.image || Avatar}
                     alt={group.name}
                     width={56}
                     height={56}

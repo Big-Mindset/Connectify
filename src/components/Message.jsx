@@ -1,15 +1,17 @@
 "use client"
 
-import images from "@/image";
-import { authStore } from "@/zustand/store";
+import twoTicks2 from "@/assets/ticksTwo2.svg"
+import ColoredTick from "@/assets/coloredTick.svg"
+import singleTick from "@/assets/singleTick.svg"
+import { authstore, authStore } from "@/zustand/store";
 import Image from "next/image";
-import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion"
-import { messageStore } from "@/zustand/messageSearchStore";
+import React from "react";
 
 
-const Message = memo(({ content, time, senderId, status,image }) => {
-  let { session } = authStore()
+const Message = React.memo(({ content, time, senderId, status,image }) => {
+
+  let session  = authstore.use.session()
 
 
 
@@ -42,19 +44,19 @@ const Message = memo(({ content, time, senderId, status,image }) => {
             {
               senderId === session?.user.id && (
                 status === "delivered" ?
-                  (<Image loading="lazy" className="size-3 invert-75 mb-1" src={images.ColoredTick} alt="delivered" />)
+                  (<Image loading="lazy" className="size-3 invert-75 mb-1" src={ColoredTick} alt="delivered" />)
                   : status === "read" ?
 
                     (
              
   
                       
-                        <Image loading="lazy" className="size-3  mb-1" src={images.twoTicks2} alt="read" />
+                        <Image loading="lazy" className="size-3  mb-1" src={twoTicks2} alt="read" />
          
 
                     ) :
 
-                    (<Image loading="lazy" className="size-2.5 invert-75 mb-1" src={images.singleTick} alt="send" />)
+                    (<Image loading="lazy" className="size-2.5 invert-75 mb-1" src={singleTick} alt="send" />)
               )
             }
 

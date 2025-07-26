@@ -13,7 +13,7 @@ app.prepare().then(() => {
 
     let io = new Server(server, {
         cors: {
-            origin: process.env.RenerUrl,
+            origin: process.env.NODE_ENV === "production" ? "http://localhost:3000": "http://localhost:3000",
             credentials: true
         }
     });
@@ -131,7 +131,7 @@ app.prepare().then(() => {
             }
         })
         socket.on("delivered-groupMessage", async (message, groupId) => {
-            console.log("delivered to "+message);
+            
             if (message.deliveredAt !== null && message.id) {
 
                 await prisma.messageStatus.update({
@@ -147,7 +147,7 @@ app.prepare().then(() => {
             }
         })
         socket.on("read-groupMessage",async (message,groupId)=>{
-            console.log("readed by"+message);
+
             if (message.deliveredAt !== null && message.readAt !== null && message.id) {
 
                 await prisma.messageStatus.update({

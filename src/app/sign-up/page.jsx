@@ -1,11 +1,13 @@
 "use client"
 
-import images from "@/image"
-import { Button } from "@/components/ui/button"
+import properLogo from  "@/assets/logop.webp"
+import AuthenticationImage from  "@/assets/authentication.png"
+import google from "@/assets/google.svg"
+import github from "@/assets/github.svg"
 import { Inder, Roboto } from "next/font/google"
 import Image from "next/image"
 import Link from "next/link"
-import react, { useRef, useState } from "react"
+import  { useState } from "react"
 import Input from "@/components/Input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -13,9 +15,9 @@ import { signupValidations } from "@/zod/userSchema"
 import { motion } from "framer-motion"
 import { authStore } from "@/zustand/store"
 import axios from "axios"
-import { Loader, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import toast from "react-hot-toast"
-import { signIn, useSession } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 const inder = Inder({
     weight: ["400"],
@@ -96,7 +98,7 @@ const signUp = () => {
 
                         <div className="flex gap-2 justify-center items-center">
 
-                            <Image src={images.properLogo} alt="Logo" width={40} />
+                            <Image src={properLogo} alt="Logo" width={40} />
                             <p className="text-[2rem] text-white">Chat</p>
                         </div>
 
@@ -139,7 +141,7 @@ const signUp = () => {
                             <Loader2 className="animate-spin opacity-65 text-white"/> 
                             :
                             <Image
-                            src={images.google}
+                            src={google}
                             alt="Google"
                                     width={24}
                                     height={24}
@@ -155,7 +157,7 @@ const signUp = () => {
                             <Loader2 className="animate-spin text-white opacity-65"/> 
                             :
                                 <Image
-                                src={images.github}
+                                src={github}
                                 alt="Github"
                                 width={24}
                                 height={24}
@@ -172,7 +174,7 @@ const signUp = () => {
                 </div>
 
                 <div>
-                    <Image src={images.AuthenticationImage} className="w-full justify-self-end max-w-[80%] h-[99.4%]" alt="Authentication" />
+                    <Image src={AuthenticationImage} className="w-full justify-self-end max-w-[80%] h-[99.4%]" alt="Authentication" />
                 </div>
             </div>
         </div>

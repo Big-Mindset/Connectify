@@ -1,3 +1,4 @@
+import { createSelectors } from "@/lib/Selector";
 import {create} from "zustand"
 
 export let messageStore = create((set)=>({
@@ -9,3 +10,4 @@ export let messageStore = create((set)=>({
     category : "All",
     setCategory : (category)=>set({category}),
 }))
+export const messagestore = createSelectors(messageStore);

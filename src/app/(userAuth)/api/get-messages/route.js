@@ -12,8 +12,6 @@ export async function GET(req){
     let senderId = searchParams.get("senderId")
     let receiverId = searchParams.get("receiverId")
     let cursor = searchParams.get("lastMessage")
-    console.log("the id is this "+cursor);
-    
     try {
         let Messages;
 if (cursor){

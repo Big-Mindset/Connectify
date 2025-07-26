@@ -4,6 +4,7 @@ import toast from "react-hot-toast"
 import { io } from "socket.io-client"
 import { create } from "zustand"
 import { groupStore } from "./groupStore"
+import { createSelectors } from "@/lib/Selector"
 
 export let authStore = create((set, get) => ({
   loading: false,
@@ -101,7 +102,7 @@ export let authStore = create((set, get) => ({
    
    
   },
-  getMessages: async (messageId) => {
+  getMessages: async () => {
   
     set({seleleton : true})
     try {
@@ -129,7 +130,7 @@ export let authStore = create((set, get) => ({
     
   },
   connectSocket: async () => {
-     
+
     let userId =get().session?.user?.id
     
     if (userId) {
@@ -174,8 +175,7 @@ export let authStore = create((set, get) => ({
         get().socket?.emit('read-message', { receiver: get().Selected, update: true })
       }
       if (selectedGroup !== null){
-        console.log("In if");
-        
+             
         let groupData = {...rest,content : contents , senderId: get().session?.user.id,groupId : selectedGroup?.id,createdAt: date,status : "pending",uniqueId : uniqueId}
         setGroupMessages([...groupMessages,groupData]) 
         get().socket?.emit("send-groupMessage",groupData)
@@ -226,3 +226,4 @@ export let authStore = create((set, get) => ({
 
 }))
 
+export let authstore = createSelectors(authStore)

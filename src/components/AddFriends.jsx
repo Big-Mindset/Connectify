@@ -1,15 +1,11 @@
-import images from '@/image'
 import useDebounce from '@/lib/useDebounce'
 import {motion} from "framer-motion"
-import {   UserSearch, X } from 'lucide-react'
-import Image from 'next/image'
+import {UserSearch, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import SearchedUsers from './SearchedUsers'
-import { authStore } from '@/zustand/store'
 
-const AddFriends = ({setopenfriendSearch}) => {
-  let {selectedInfo , Selected} = authStore()
-  
+const AddFriends = React.memo(({setopenfriendSearch}) => {
+
   const [search, setsearch] = useState("")
   const [searchResult, setsearchResult] = useState(null)
   let debounce = useDebounce(200,search)
@@ -76,6 +72,6 @@ const AddFriends = ({setopenfriendSearch}) => {
 }
     </motion.div>
   )
-}
+})
 
 export default AddFriends

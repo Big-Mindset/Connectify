@@ -1,11 +1,15 @@
-import { groupStore } from '@/zustand/groupStore'
-import { authStore } from '@/zustand/store'
+import { groupstore } from '@/zustand/groupStore'
+import { authstore } from '@/zustand/store'
 import Image from 'next/image'
 import React from 'react'
 
-const User = ({ user, idx }) => {
-  let { Selected, onlineUsers, setSelected } = authStore()
-  let { setselectedGroup } = groupStore()
+const User = React.memo(({ user, idx }) => {
+  const Selected = authstore.use.Selected();
+  const onlineUsers = authstore.use.onlineUsers();
+  const setSelected = authstore.use.setSelected();
+  
+  const setselectedGroup = groupstore.use.setselectedGroup();
+  
   const handleSelect = (userId) => {
     setSelected(userId)
     setselectedGroup(null)
@@ -50,7 +54,7 @@ const User = ({ user, idx }) => {
       </div>
     </div>
   )
-}
+})
 
 export default User
 

@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from "framer-motion";
 import {  useRouter } from 'next/navigation';
-import { Users, Users2, UserSquare } from 'lucide-react';
+import { UserSquare } from 'lucide-react';
 const MoreOption = () => {
+
    let route = useRouter()
     let handleNavigate = (prop)=>{
     route.push(prop)

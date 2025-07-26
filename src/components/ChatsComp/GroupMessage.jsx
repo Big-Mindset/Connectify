@@ -1,9 +1,11 @@
 "use client"
-
-import images from "@/image";
+import twoTicks2 from "@/assets/ticksTwo2.svg"
+import pending from "@/assets/pending.svg"
+import ColoredTick from "@/assets/coloredTick.svg"
+import singleTick from "@/assets/singleTick.svg"
 import { authStore } from "@/zustand/store";
 import Image from "next/image";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useMemo } from "react";
 import { motion } from "framer-motion"
 
 
@@ -16,13 +18,11 @@ function useAllReadAt(status) {
   return useMemo(() => status === "pending" ? status : status.every(s => s.readAt != null), [status]);
 }
 const GroupMessage = memo(({ messageData }) => {
-  
-  let { session } = authStore()
+  let  session  = authStore.use.session()
   
   let newtime = new Date(messageData.createdAt)
   let delivered = useAllDelivered(messageData.status)
   let readed = useAllReadAt(messageData.status)
-console.log(messageData.senderId === session?.user.id);
 
   return (
     <motion.div
@@ -45,14 +45,14 @@ console.log(messageData.senderId === session?.user.id);
             {
               messageData?.senderId === session?.user?.id && (
                 delivered === "pending" ?
-                  (<Image loading="lazy" className="size-3 invert-75 mb-1" src={images.pending} alt="pending" />) :
+                  (<Image loading="lazy"  className="size-3 invert-75 mb-1" src={pending} alt="pending" />) :
                   readed ? 
-                    (<Image loading="lazy" className="size-3  mb-1" src={images.twoTicks2} alt="read" />)
+                    (<Image loading="lazy" className="size-3  mb-1" src={twoTicks2} alt="read" />)
                   : delivered && delivered !== "pending" ?
-                  (<Image loading="lazy" className="size-3 invert-75 mb-1" src={images.ColoredTick} alt="delivered" />) :
+                  (<Image loading="lazy" className="size-3 invert-75 mb-1" src={ColoredTick} alt="delivered" />) :
                      
 
-                    (<Image loading="lazy" className="size-2.5 invert-75 mb-1" src={images.singleTick} alt="send" />)
+                    (<Image loading="lazy" className="size-2.5 invert-75 mb-1" src={singleTick} alt="send" />)
               )
             }
 

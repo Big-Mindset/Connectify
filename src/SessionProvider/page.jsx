@@ -2,9 +2,9 @@
 
 import React, { useEffect } from 'react'
 import { SessionProvider } from 'next-auth/react'
-import { authStore } from '@/zustand/store'
+import { authstore } from '@/zustand/store'
 const Session = ({children,session}) => {
-  let {setsession} = authStore()
+  let setsession =  authstore.use.setsession()
   useEffect(() => {
     setsession(session)
   }, [session])

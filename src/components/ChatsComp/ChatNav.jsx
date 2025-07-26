@@ -1,10 +1,12 @@
-import images from "@/image"
-import { groupStore } from "@/zustand/groupStore"
-import { authStore } from "@/zustand/store"
+import Avatar from "@/assets/Avatar.webp"
+import SearchIcon from "@/assets/Search.svg"
+import { groupstore } from "@/zustand/groupStore"
+import { authstore } from "@/zustand/store"
 import Image from "next/image"
   const ChatNav = () => {
-    let {selectedInfo} = authStore()
-    const { selectedGroup } = groupStore()
+const selectedInfo = authstore.use.selectedInfo();
+const selectedGroup = groupstore.use.selectedGroup();
+
     
     return (
         <nav className="sticky  left-0 top-0 right-0 border-b-[1px] border-white/20">
@@ -13,7 +15,7 @@ import Image from "next/image"
 
                     <div className='rounded-full overflow-hidden size-14 border-2 border-indigo-500/30'>
                         <Image 
-                            src={selectedInfo?.avatar || selectedGroup?.images || images.Avatar}
+                            src={selectedInfo?.avatar || selectedGroup?.images || Avatar}
                             alt='User'
                             width={100}
                             height={100}
@@ -30,7 +32,7 @@ import Image from "next/image"
 
                 </div>
                 <div className='flex flex-1 bg-[#000427] items-center gap-2.5 px-2 py-1.5 transition-all duration-200 focus-within:ring-2 ring-indigo-500/50 rounded-lg '>
-                    <Image   src={images.SearchIcon} alt='Search' className='filter invert-[0.7]' />
+                    <Image   src={SearchIcon} alt='Search' className='filter invert-[0.7]' />
                     <input
                     onChange={((e)=>handleSearch(e))}
                         placeholder='Search Messages'

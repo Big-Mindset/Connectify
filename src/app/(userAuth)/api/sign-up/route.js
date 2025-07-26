@@ -12,8 +12,6 @@ export async function POST(req) {
         if (!email || !password || !name) {
             return NextResponse.json({ message: "All fields are required" }, { status: 400 })
         }
-        let verifciationCode = Math.floor(100000 + Math.random() * 800000).toString()
-
         let expiryDate = new Date()
         expiryDate.setMinutes(expiryDate.getMinutes() + 30)
         let [salt, isExisted] = await Promise.all([

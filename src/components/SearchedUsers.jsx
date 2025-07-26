@@ -1,14 +1,21 @@
 "use client"
 
-import { authStore } from '@/zustand/store'
+import { authstore } from '@/zustand/store'
 import axios from 'axios'
 import { Check, Hourglass, MessageCircleMoreIcon, UserPlus2, X } from 'lucide-react'
 import Image from 'next/image'
-import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 
 const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
-  const { onlineUsers, session,setSelected,Selected,users,setselectedInfo } = authStore()
+
+  const onlineUsers = authstore.use.onlineUsers();
+  const session = authstore.use.session();
+  const setSelected = authstore.use.setSelected();
+  const Selected = authstore.use.Selected();
+  const users = authstore.use.users();
+  const setselectedInfo = authstore.use.setselectedInfo();
+  
+  
 
   const handleSendRequest = async () => {
     try {
