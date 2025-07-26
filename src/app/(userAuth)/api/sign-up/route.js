@@ -25,11 +25,11 @@ export async function POST(req) {
             })
         ])
 
-        const __filename = fileURLToPath(import.meta.url);
-        const __dirname = path.dirname(__filename);
+        // const __filename = fileURLToPath(import.meta.url);
+        // const __dirname = path.dirname(__filename);
 
-        const avatarPath = path.join(__dirname, "avatar.png");
-        let cloudImage = await cloudinary.uploader.upload(avatarPath)
+        // const avatarPath = path.join(__dirname, "avatar.png");
+        // let cloudImage = await cloudinary.uploader.upload(avatarPath)
 
         let hashedPassword = await bcrypt.hash(password, salt)
         if (isExisted) {
@@ -43,7 +43,7 @@ export async function POST(req) {
                     name: name,
                     password: hashedPassword,
                     provider: "credentials",
-                    avatar: cloudImage.secure_url,
+                    avatar: cloudImage.secure_url || "",
                     userId: isExisted.id,
                 }
             })
