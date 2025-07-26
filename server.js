@@ -7,7 +7,7 @@ let createServer = require("http").createServer;
 
 let app = next({ dev: process.env.NODE_ENV !== "production" });
 let handler = app.getRequestHandler();
-let port = process.env.port
+let port = process.env.port || 3000
 app.prepare().then(() => {
     let server = createServer(handler);
 
