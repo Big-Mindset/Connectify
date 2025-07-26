@@ -7,7 +7,7 @@ let createServer = require("http").createServer;
 
 let app = next({ dev: process.env.NODE_ENV !== "production" });
 let handler = app.getRequestHandler();
-let port = 3000
+let port = process.env.port
 app.prepare().then(() => {
     let server = createServer(handler);
 
@@ -284,7 +284,7 @@ app.prepare().then(() => {
         });
     });
 
-    server.listen(port || 4000, () => {
+    server.listen(port || '0.0.0.0', () => {
         console.log("> Server running on http://localhost:3000");
     });
 });
