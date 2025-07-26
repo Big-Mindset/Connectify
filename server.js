@@ -13,7 +13,7 @@ app.prepare().then(() => {
 
     let io = new Server(server, {
         cors: {
-            origin:  process.env.NEXTAUTH_URL ||  "http://localhost:3000",
+            origin:  process.env.NEXTAUTH_URL,
             credentials: true
         }
     });
