@@ -52,14 +52,16 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                     
                     
                    
-                    if (!user || !user.accounts.length > 0) {
-                        throw new Error("User not found");
+                    if (!user) {
+                        return null
                     }
 
                     let isPasswordCorrect = await bcrypt.compare(credentials.password, user.accounts[0]?.password)
                     if (!isPasswordCorrect) {
+                        console.log("incorrect password");
+                        
+                        return null
 
-                        throw new Error("Invalid credentials - try again");
 
                     } else {
                         user.accounts[0].password = null
@@ -67,11 +69,14 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
 
 
-                    return user.accounts[0]
+                    return {
+                        id: user.accounts[0].id,
+
+                    }
                 } catch (error) {
                     console.log(error.message);
 
-                    throw error
+                    return null
 
                 }
             },

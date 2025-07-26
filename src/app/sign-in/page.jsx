@@ -39,13 +39,13 @@ const login = () => {
             setLoading(true)
         try {
             let res = await signIn("credentials",{...data,redirect : false})
-            
-            if (res.ok){
+            console.log(res)
+            if (res.url !== null && res.ok){
                 toast.success("Login successfully")
-                router.push("/Chat-app")
+                router.push("/")
 
             }else{
-                toast.error(res.error)
+                toast.error("Invalid Email or Password")
             }
             
         } catch (error) {
