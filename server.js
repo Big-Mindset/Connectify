@@ -9,9 +9,7 @@ let app = next({ dev: process.env.NODE_ENV !== "production" });
 let handler = app.getRequestHandler();
 
 app.prepare().then(() => {
-      const server = createServer((req, res) => {
-    handler(req, res);
-  })
+    let server = createServer(handler);
 
     let io = new Server(server, {
         cors: {
@@ -133,7 +131,7 @@ app.prepare().then(() => {
             }
         })
         socket.on("delivered-groupMessage", async (message, groupId) => {
-            
+
             if (message.deliveredAt !== null && message.id) {
 
                 await prisma.messageStatus.update({
@@ -286,7 +284,7 @@ app.prepare().then(() => {
         });
     });
 
-    server.listen(3000, () => {
+    server.listen(process.env.PORT || 3000, () => {
         console.log("> Server running on http://localhost:3000");
     });
 });
