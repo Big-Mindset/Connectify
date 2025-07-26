@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "./lib/auth";
+import { getToken } from "next-auth/jwt";
 
 // Define route constants
 const PUBLIC_ROUTES = ["/sign-up", "/sign-in"];
@@ -23,8 +23,13 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-
-  if (auth?.user) {
+  const token = await getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET,
+  });
+  console.log("in middleware")
+  console.log(token)
+  if (token?.user) {
 
     if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
       return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
