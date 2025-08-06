@@ -86,7 +86,8 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
     ],
     callbacks: {
         async jwt({ token, user, account }) {
-                
+            console.log("auth is next")
+            console.log(await auth())
                 if (user) {
                 if (user?.provider === "credentials") {
                     token.user = user

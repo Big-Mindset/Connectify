@@ -27,11 +27,7 @@ export async function middleware(request) {
     req: request,
     secret: process.env.AUTH_SECRET,
   });
-  console.log("the toke is below");
-  
-  console.log(token);
-  
-  
+
 
   if (token?.user) {
 
