@@ -42,6 +42,7 @@ model Account {
   updatedAt       DateTime        @default(now())
 
   @@index([email])
+
 }
 
 model Message {
@@ -50,8 +51,6 @@ model Message {
   receiverId  String    @db.ObjectId
   content     String?
   image       String?
-  readAt      DateTime?
-  deliveredAt DateTime?
   status      String    @default("sent")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -119,6 +118,9 @@ model friendRequest {
   sender Account @relation(fields: [senderId],references: [id],name: "sentRequest")
   createdAt DateTime @default(now())
   status requestAccepted @default(Pending)
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([status])
 }
 enum requestAccepted {
   Pending

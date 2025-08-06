@@ -1,5 +1,7 @@
+
 import "./globals.css";
-import { Geist, Geist_Mono } from "next/font/google";
+
+import { Geist, Geist_Mono,Roboto } from "next/font/google";
 
 import { Toaster } from "react-hot-toast";
 import Session from "@/SessionProvider/page"; 
@@ -11,6 +13,10 @@ const geistSans = Geist({
 });
 
 const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+const roboto = Roboto({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
@@ -34,9 +40,9 @@ export default async function RootLayout({ children }) {
     
     <html lang="en">
       <body
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} antialiased`}>
       <Session session={session}>
-        <div className="h-dvh  bg-gradient-to-bl from-[#141414] via-50% via-[#170080] to-[#572C74]">
+        <div className="h-dvh  bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       <Toaster/>
       
             {children}

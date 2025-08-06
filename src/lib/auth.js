@@ -24,6 +24,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                 password: { label: "password", type: "password" }
             },
             async authorize(credentials) {
+
                 try {
                     if (!credentials) return null
                     let user = await prisma.user.findUnique({

@@ -9,6 +9,7 @@ const setSelected = authstore.use.setSelected();
 const setselectedGroup = groupstore.use.setselectedGroup();
 const selectedGroup = groupstore.use.selectedGroup();
 const groups = groupstore.use.groups();
+const setselectedInfo = authstore.use.setselectedInfo();
 
 
   
@@ -33,8 +34,11 @@ const groups = groupstore.use.groups();
             key={group.id}
      
      onClick={()=>{setselectedGroup(group)
-       setSelected(null)}
+       setSelected(null)
+       setselectedInfo(null)
+      
       }
+     }
             style={{ animationDelay: `${index * 75}ms` }}
             className="animate-fade-in-up  opacity-0 [animation-fill-mode:forwards]"
           >

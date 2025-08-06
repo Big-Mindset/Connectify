@@ -10,6 +10,7 @@ export async function POST(res){
                 return NextResponse.json({message : "Unauthorized - login and try again"},{status : 401})
             }
         let {data} = await res.json()
+  console.log(data);
   
         let secure_url ;
         if (data.image){

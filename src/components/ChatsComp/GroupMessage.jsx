@@ -3,7 +3,7 @@ import twoTicks2 from "@/assets/ticksTwo2.svg"
 import pending from "@/assets/pending.svg"
 import ColoredTick from "@/assets/coloredTick.svg"
 import singleTick from "@/assets/singleTick.svg"
-import { authStore } from "@/zustand/store";
+import { authstore } from "@/zustand/store";
 import Image from "next/image";
 import { memo, useMemo } from "react";
 import { motion } from "framer-motion"
@@ -18,7 +18,7 @@ function useAllReadAt(status) {
   return useMemo(() => status === "pending" ? status : status.every(s => s.readAt != null), [status]);
 }
 const GroupMessage = memo(({ messageData }) => {
-  let  session  = authStore.use.session()
+  let  session  = authstore.use.session()
   
   let newtime = new Date(messageData.createdAt)
   let delivered = useAllDelivered(messageData.status)
@@ -31,7 +31,7 @@ const GroupMessage = memo(({ messageData }) => {
       transition={{ duration: 0.3 }}
       className={`flex text-gray-50   ${messageData.senderId === session?.user.id ? 'justify-end' : 'justify-start'}`}>
 
-      <div className={`max-w-[550px] rounded-md font-[300]  px-[5px] py-[4px] ${messageData.senderId === session?.user.id ? 'bg-indigo-600/90 ' : 'bg-gradient-to-r from-black/50 to-black/20 '}`}>
+      <div className={`inline-block max-w-[80%]  sm:max-w-[70%] md:max-w-[65%] rounded-lg px-2.5 py-1.5 shadow-sm ${messageData.senderId === session?.user.id ? 'bg-indigo-600/85 rounded-br-sm ' : 'bg-slate-800/60 rounded-bl-sm'}`}>
 
 
         <div className="flex  gap-1.5">

@@ -1,13 +1,12 @@
 "use client"
 
-import properLogo from  "@/assets/logop.webp"
-import AuthenticationImage from  "@/assets/authentication.png"
+import properLogo from "@/assets/logop.webp"
 import google from "@/assets/google.svg"
 import github from "@/assets/github.svg"
 import { Inder, Roboto } from "next/font/google"
 import Image from "next/image"
 import Link from "next/link"
-import  { useState } from "react"
+import { useState } from "react"
 import Input from "@/components/Input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -15,7 +14,7 @@ import { signupValidations } from "@/zod/userSchema"
 import { motion } from "framer-motion"
 import { authStore } from "@/zustand/store"
 import axios from "axios"
-import { Loader2 } from "lucide-react"
+import { ArrowRight, Loader2, Lock, Shield, UserPlus } from "lucide-react"
 import toast from "react-hot-toast"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -30,9 +29,9 @@ const roboto = Roboto({
 
 
 const signUp = () => {
-    let {loading , setLoading} = authStore()
+    let { loading, setLoading } = authStore()
     let router = useRouter()
-    // Use-From
+ 
     let { handleSubmit, formState: { errors }, register } = useForm({
         resolver: zodResolver(signupValidations),
         defaultValues: {
@@ -43,140 +42,265 @@ const signUp = () => {
     })
     const [authLoading, setauthLoading] = useState("")
 
-    // Form Submission
     let handleForm = async (data) => {
         try {
             setLoading(true)
-            let res = await axios.post("/api/sign-up",data)
-            
-            if (res.status === 201){
+            let res = await axios.post("/api/sign-up", data)
+
+            if (res.status === 201) {
                 toast.success(res?.data?.message)
                 router.push("/sign-in")
-            }else{
+            } else {
                 toast.error(res?.data?.message)
             }
         } catch (error) {
-            if (error.response.status === 409){
+            if (error.response.status === 409) {
                 toast.error(error.response?.data?.message)
-            }else if (error.response.status === 400){
+            } else if (error.response.status === 400) {
                 toast.error(error.response?.data?.message)
-            }else {
+            } else {
                 toast.error(error?.response?.data?.message || "Check your network Connection")
-            }     
-        }finally{
+            }
+        } finally {
             setLoading(false)
 
         }
     }
 
-    // Google and Github SignUp
 
-    let handleSignUp = async (provider)=>{
+    let handleSignUp = async (provider) => {
         setauthLoading(provider)
 
         try {
-            
-            let res = await signIn(provider,{redirect : true})
-            
+
+            let res = await signIn(provider, { redirect: true })
+
         } catch (error) {
             console.log(error.message);
             toast.error("Network Error try again")
-            
-        }finally{
+
+        } finally {
             setauthLoading("")
 
         }
     }
 
-    
+
     return (
-        <div className={` ${inder.className}  h-[calc(100vh-10rem)]`} >
-            <div className=" min-h-full w-full rounded-md grid grid-cols-2 bg-gradient-to-bl  from-[#0600C0]/83 to-[#111416]/88 max-w-[1455px] mx-auto">
-                <div className="flex flex-col  ml-9 p-2.5  gap-10">
+        <div className={`${inder.className} min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4`}>
 
-                    <div className=" flex flex-col gap-2 items-center">
 
-                        <div className="flex gap-2 justify-center items-center">
 
-                            <Image src={properLogo} alt="Logo" width={40} />
-                            <p className="text-[2rem] text-white">Chat</p>
-                        </div>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="relative w-full max-w-lg"
+            >
 
-                        <h1 className="text-[3rem] text-center text-white">
-                            Welcome to  <span className="text-[#00B7F9]">Connectify</span>
-                        </h1>
-
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-10"
+                >
+                    <div className="bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-full px-4 py-2 flex items-center gap-2">
+                        <Shield className="size-4 text-emerald-400" />
+                        <span className="text-emerald-300 text-sm font-medium">Secure Authentication</span>
                     </div>
-                    <div className="w-full mx-auto max-w-[500px] p-4 ">
-                        <h1 className="text-xl  text-white">Create a new Account</h1>
-                        <div className="flex flex-col gap-5 ">
-                            <motion.hr
-                                initial={{ width: 0, opacity: 0 }}
-                                animate={{ width: 210, opacity: 1 }}
-                                transition={{ duration: 0.5, ease: "easeIn" }}
-                                className="w-[50%] mr-2 border-[#0095FF] border-2" />
-                            <p className="text-gray-300 font-medium">Already have an Account?<Link className="text-blue-400 hover:underline" href={"/sign-in"}>Sign-in</Link></p>
-                        </div>
-                        <form
-                            onSubmit={handleSubmit(handleForm)}
-                            className={`mt-4 flex  ${roboto.className} flex-col gap-6`}
+                </motion.div>
+
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+
+                    <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 p-8 text-center border-b border-white/10">
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3, duration: 0.5 }}
+                            className="flex flex-col items-center gap-4"
                         >
-                            <Input label="Name" id="name" placeholder="Enter your name" type="text" register={register}  errors={errors} />
-                            <Input label="Email" id="email" placeholder="Enter your email" type="email" register={register} errors={errors}  />
-                            <Input label="Password" id="password" placeholder="Enter your password" type="password" register={register} errors={errors}  />
-                            <button
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-lg"></div>
+                                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-full p-3">
+                                    <Image src={properLogo} alt="Logo" width={32} height={32} />
+                                </div>
+                            </div>
+
+                            <div>
+                                <h1 className="text-2xl font-bold text-white mb-2">
+                                    Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Connectify</span>
+                                </h1>
+                                <p className="text-white/60 text-sm">Create your secure account to get started</p>
+                            </div>
+                        </motion.div>
+                    </div>
+
+                    <div className="p-8">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4, duration: 0.5 }}
+                            className="text-center mb-8"
+                        >
+                            <p className="text-white/70 text-sm">
+                                Already have an account?{" "}
+                                <Link
+                                    href="/sign-in"
+                                    className="text-blue-400 hover:text-blue-300 font-medium hover:underline transition-colors inline-flex items-center gap-1"
+                                >
+                                    Sign in <ArrowRight className="size-3" />
+                                </Link>
+                            </p>
+                        </motion.div>
+
+                        <motion.form
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5, duration: 0.5 }}
+                            onSubmit={handleSubmit(handleForm)}
+                            className={`${roboto.className} space-y-6`}
+                        >
+                            <Input
+                                label="Full Name"
+                                id="name"
+                                placeholder="Enter your full name"
+                                type="text"
+                                register={register}
+                                errors={errors}
+                            />
+                            <Input
+                                label="Email Address"
+                                id="email"
+                                placeholder="Enter your email address"
+                                type="email"
+                                register={register}
+                                errors={errors}
+                            />
+                            <Input
+                                label="Password"
+                                id="password"
+                                placeholder="Create a strong password"
+                                type="password"
+                                register={register}
+                                errors={errors}
+                            />
+
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 disabled={loading}
-                             type="submit" 
-                             variant="secondary" 
-                             className="cursor-pointer text-white bg-[#0697FF] rounded-md hover:bg-[#068fff] duration-100 focus:ring-1 focus:ring-white px-3.5 py-2  " >
-                             
-                               {loading ? <Loader2 className="animate-spin ease-in-out mx-auto" /> : "Sign up"} 
-                            </button>
-                        </form>
-                        <p className="text-center mb-6 mt-3 text-[1.2rem] text-white">or</p>
+                                type="submit"
+                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-blue-800 disabled:to-indigo-800 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {loading ? (
+                                    <Loader2 className="size-5 animate-spin" />
+                                ) : (
+                                    <>
+                                        <UserPlus className="size-5" />
+                                        Create Account
+                                    </>
+                                )}
+                            </motion.button>
+                        </motion.form>
 
-                        <div className="flex justify-center gap-4 mt-6">
-                            <button  onClick={()=>handleSignUp("google")} className="px-4 py-3 w-full flex items-center justify-center gap-2 hover:bg-white/10 active:bg-white/5 transition-all duration-150 ease-out cursor-pointer border border-white/30 rounded-lg group backdrop-blur-sm">
-                            {authLoading === "google" ? 
-                            <Loader2 className="animate-spin opacity-65 text-white"/> 
-                            :
-                            <Image
-                            src={google}
-                            alt="Google"
-                                    width={24}
-                                    height={24}
-                                    className="filter brightness-0 invert group-hover:brightness-100 group-hover:invert-1 transition-all"
-                                    />
-                                }
-                                <span className="text-base font-semibold text-white/90 group-hover:text-white">
-                                    Google
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6, duration: 0.5 }}
+                            className="relative my-8"
+                        >
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-white/10"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-slate-900/50 text-white/60 backdrop-blur-sm rounded-full">
+                                    Or continue with
                                 </span>
-                            </button>
-                            <button onClick={()=>handleSignUp("github")} className="px-4 py-3 w-full flex items-center justify-center gap-2 hover:bg-white/10 active:bg-white/5 transition-all duration-150 ease-out cursor-pointer border border-white/30 rounded-lg group backdrop-blur-sm">
-                                {authLoading === "github" ? 
-                            <Loader2 className="animate-spin text-white opacity-65"/> 
-                            :
-                                <Image
-                                src={github}
-                                alt="Github"
-                                width={24}
-                                height={24}
-                                className="filter brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all"
-                                />
-                            }
-                                <span className="text-base font-semibold text-white/90 group-hover:text-white">
-                                    Github
-                                </span>
-                            </button>
-                        </div>
+                            </div>
+                        </motion.div>
 
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.7, duration: 0.5 }}
+                            className="grid grid-cols-2 gap-4"
+                        >
+                            <motion.button
+                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleSignUp("google")}
+                                disabled={authLoading === "google"}
+                                className="group relative bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-200 backdrop-blur-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {authLoading === "google" ? (
+                                    <Loader2 className="size-6 animate-spin text-white/70 mx-auto" />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-red-500/20 rounded-full blur-sm group-hover:blur-md transition-all"></div>
+                                            <Image
+                                                src={google}
+                                                alt="Google"
+                                                width={24}
+                                                height={24}
+                                                className="relative"
+                                            />
+                                        </div>
+                                        <span className="text-sm font-medium text-white/80 group-hover:text-white">
+                                            Google
+                                        </span>
+                                    </div>
+                                )}
+                            </motion.button>
+
+                            <motion.button
+                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleSignUp("github")}
+                                disabled={authLoading === "github"}
+                                className="group relative bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-200 backdrop-blur-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {authLoading === "github" ? (
+                                    <Loader2 className="size-6 animate-spin text-white/70 mx-auto" />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-gray-400/20 rounded-full blur-sm group-hover:blur-md transition-all"></div>
+                                            <Image
+                                                src={github}
+                                                alt="Github"
+                                                width={24}
+                                                height={24}
+                                                className="relative filter brightness-0 invert"
+                                            />
+                                        </div>
+                                        <span className="text-sm font-medium text-white/80 group-hover:text-white">
+                                            GitHub
+                                        </span>
+                                    </div>
+                                )}
+                            </motion.button>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8, duration: 0.5 }}
+                            className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Lock className="size-5 text-emerald-400 flex-shrink-0" />
+                                <div>
+                                    <p className="text-emerald-300 text-sm font-medium">Secure & Private</p>
+                                    <p className="text-emerald-200/70 text-xs mt-1">
+                                        Your data is encrypted and protected .
+                                    </p>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
-
-                <div>
-                    <Image src={AuthenticationImage} className="w-full justify-self-end max-w-[80%] h-[99.4%]" alt="Authentication" />
-                </div>
-            </div>
+            </motion.div>
         </div>
     )
 }

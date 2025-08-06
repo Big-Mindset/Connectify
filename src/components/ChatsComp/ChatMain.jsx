@@ -1,8 +1,9 @@
+"use client"
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { Scrollbar } from 'react-scrollbars-custom'
 import Image from 'next/image'
 import { ImageIcon, Smile, X } from 'lucide-react'
-import PaperClip from "@/assets/Paperclip.svg"
 import FileInput from '../ChatInputs/FileInput'
 import RegularInput from '../ChatInputs/RegularInput'
 import ChatNav from './ChatNav'
@@ -13,6 +14,7 @@ import NoMessages from './NoMessages'
 
 import { authstore } from '@/zustand/store'
 import { groupstore } from '@/zustand/groupStore'
+import { useWidth } from '@/app/page'
 
 const ChatMain = () => {
 
@@ -30,21 +32,21 @@ const ChatMain = () => {
 
   const messages = authstore.use.messages();
   const Selected = authstore.use.Selected();
+  const selectedInfo = authstore.use.selectedInfo();
   const getMessages = authstore.use.getMessages();
   const socket = authstore.use.socket();
   const handleSendMessage = authstore.use.handleSendMessage();
   const session = authstore.use.session();
   const handleUpdate = authstore.use.handleUpdate();
   const seleleton = authstore.use.seleleton();
-  
+
   const groupMessages = groupstore.use.groupMessages();
   const selectedGroup = groupstore.use.selectedGroup();
   const getGroupMessages = groupstore.use.getGroupMessages();
   const handleReaded = groupstore.use.handleReaded();
-  
-  
+
   useEffect(() => {
-    if (Selected) getMessages()
+    if (Selected) getMessages(Selected, selectedInfo.id)
     if (selectedGroup) getGroupMessages(selectedGroup.id)
   }, [Selected, selectedGroup?.id])
 
@@ -53,7 +55,8 @@ const ChatMain = () => {
     if (Selected && receiverId) {
       socket.emit('message-readed', {
         receiverId,
-        senderId: Selected
+        senderId: Selected,
+        chatId: selectedInfo?.id
       })
     }
   }, [socket, messages, Selected])
@@ -67,32 +70,13 @@ const ChatMain = () => {
       socket.off('delivered-success', handleUpdate)
     }
   }, [])
- let chatContainerRef = useRef()
-  useEffect(() => {
-    let container = chatContainerRef.current
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
 
-  }, [messages])
   useEffect(() => {
-     
+
     let userId = session?.user.id
-    socket?.emit("Groupmessage-readed",{userId,groupId : selectedGroup?.id})
- 
-  }, [selectedGroup,groupMessages])
+    socket?.emit("Groupmessage-readed", { userId, groupId: selectedGroup?.id })
 
-// let handleFetchMore = async ()=>{
-//   const oldestId = msgsRef.current[0].id
-//   const res = await axios.get(
-//           `/api/get-messages?senderId=${session?.user.id}&receiverId=${Selected}&lastMessage=${oldestId}`
-//         )
-
-//         if (res.status === 200 && res.data.Messages.length) {
-//           setMessages(prev => [
-//             ...res.data.Messages.reverse(),
-//             ...prev,
-//           ])
-// }
-// }
+  }, [selectedGroup, groupMessages])
 
   const handleSetEmoji = useCallback((emoji) => {
     setMessageData(prev => ({ ...prev, content: prev.content + emoji }))
@@ -101,7 +85,7 @@ const ChatMain = () => {
   const toggleEmojiPicker = () => {
     setIsEmojiPickerOpen(prev => !prev)
   }
-  
+
   const getEmojiByName = (name, data) => {
     return data.emojis[name]?.skins[0]?.native || '❓'
   }
@@ -110,7 +94,7 @@ const ChatMain = () => {
     try {
       const res = await fetch('emojies/all.json')
       const data = await res.json()
-      
+
       const categories = data?.categories?.map(category => {
         const id = category.id
         if (id === 'flags') return { id, Emoji: [] }
@@ -120,20 +104,24 @@ const ChatMain = () => {
         }))
         return { id, Emoji }
       })
-      
+
       const filtered = categories.filter(cat => cat.Emoji.length !== 0)
       setEmojiList(filtered)
       if (filtered.length > 0) setSelectedCategory(filtered[0].id)
-      } catch (err) {
-    console.error('Failed to load emojis:', err)
-  }
+    } catch (err) {
+      console.error('Failed to load emojis:', err)
+    }
   }
   useEffect(() => {
     fetchEmojis()
   }, [])
-  
+
+
   const handleFileInput = (e) => {
     const file = e.target.files[0]
+    if (!file || !(file instanceof Blob)) {
+      return
+    }
     const reader = new FileReader()
 
     reader.onload = (e) => {
@@ -143,13 +131,59 @@ const ChatMain = () => {
     reader.readAsDataURL(file)
   }
 
-  
+  const scrollbarsRef = useRef(null);
 
+  useEffect(() => {
+    if (scrollbarsRef.current) {
+      scrollbarsRef.current.scrollToBottom();
+    }
+  }, [messages]);
+
+  let sendMessages = useCallback(
+    () => {
+      handleSendMessage(messageData, setMessageData)
+    }
+    , [messageData])
+  let onchnage = useCallback(
+    e => {
+      setMessageData(prev => ({ ...prev, content: e.target.value }))
+    }
+
+    , [])
+  console.log(groupMessages);
+  let width = useWidth()
   return (
-    <div className='flex-1 bg-gradient-to-br from-indigo-900/30  via-[#0F0A1D] to-purple-900/30 flex flex-col backdrop-blur-lg'>
+    <motion.div
+      initial={{ x: width > 768 ? 0 : "100%", }}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+
+      className='flex-1 relative flex flex-col'>
       <ChatNav />
-      <main ref={chatContainerRef} className='flex-1 overflow-y-auto p-4 scroll relative'>
-        <div className='flex flex-col gap-2 max-w-4xl mx-auto'>
+
+
+
+
+      <Scrollbar
+        ref={scrollbarsRef}
+        style={{ width: '100%', height: 700 }}
+        className='flex-1 relative group'
+        thumbYProps={{
+          style : {backgroundColor : "rgba(200,0,100,0.8)",borderRadius : "4px",width : "5px"},
+          renderer: props => {
+            const { elementRef, style, ...restProps } = props
+            return (
+              <div
+                ref={elementRef}
+                style={style}
+                {...restProps}
+                className="bg-blue-500 rounded-md w-[6px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              />
+            )
+          }
+        }}
+      >
+        <div className='flex flex-col gap-2 max-w-[95%]  mx-auto'>
           {seleleton ? (
             [...Array(8)].map((_, i) => {
               const isSent = i % 3 === 0
@@ -160,7 +194,7 @@ const ChatMain = () => {
                   key={i}
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.3, delay: i * 0.03 }}
+                  transition={{ duration: 0.3, }}
                   className={`flex ${isSent ? 'justify-end' : 'justify-start'} items-end gap-2`}
                 >
                   <div
@@ -207,10 +241,10 @@ const ChatMain = () => {
             </>
           )}
         </div>
-      </main>
+      </Scrollbar>
 
       {messageData.image && (
-        <div className='mx-4 mb-3 bg-[#3A2466] rounded-lg border border-indigo-700/50 overflow-hidden transition-all duration-300'>
+        <div className='mx-4 mb-3 bg-gradient-to-r from-blue-600/20 to-indigo-600/40 rounded-lg border border-indigo-700/50 overflow-hidden transition-all duration-300'>
           <div className='flex justify-between items-center p-2 bg-[#2D1A47] border-b border-indigo-700/50'>
             <div className='flex items-center gap-2 text-indigo-300'>
               <ImageIcon size={16} />
@@ -226,23 +260,33 @@ const ChatMain = () => {
         </div>
       )}
 
-      <div className='sticky w-full bottom-0 bg-[#2D1A47]/95 backdrop-blur-lg p-4 border-t border-indigo-900/30'>
-        <div className='flex items-center gap-4'>
-          <div className='flex gap-4'>
-            <button onClick={toggleEmojiPicker} className='hover:bg-[#3A2466] p-2 duration-150 rounded-xl text-blue-500'>
-              <Smile size={24} strokeWidth={1.5} className='text-indigo-400' />
+      <div className='sticky right-0 left-0 bottom-1 overflow-hidden  p-2'>
+        <div className='flex items-center rounded-full overflow-hidden pl-4 pr-2 py-1    bg-black  gap-2'>
+          <div className='flex items-center gap-1 '>
+            <button
+              onClick={toggleEmojiPicker}
+              className={`group relative p-2.5 duration-200 rounded-full transition-all ${isEmojiPickerOpen
+                ? 'bg-indigo-500/20 border border-indigo-500/30'
+                : 'bg-slate-800/50 hover:bg-slate-700/70 border border-slate-700/30 hover:border-slate-600/50'
+                }`}
+            >
+              <Smile
+                size={18}
+                className={`transition-colors duration-200 ${isEmojiPickerOpen ? 'text-indigo-400' : 'text-slate-300 group-hover:text-indigo-400'}`}
+              />
+              <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Add emoji
+              </div>
             </button>
             <FileInput ref={fileInputRef} onChange={handleFileInput}>
-              <div className='hover:bg-[#3A2466] p-2 duration-150 rounded-xl cursor-pointer'>
-                <Image src={PaperClip} alt='Attachment' width={24} height={24} className='filter invert-[0.4] brightness-125' />
-              </div>
             </FileInput>
           </div>
           <RegularInput
             value={messageData.content}
-            handleSendMessage={() => handleSendMessage(messageData, setMessageData)}
-            placeholder={messageData.image ? 'Add Captions (optional)' : 'Start Chatting'}
-            onchange={(e) => setMessageData({ ...messageData, content: e.target.value })}
+            handleSendMessage={sendMessages}
+            placeholder={messageData.image ? 'Add Captions (optional)' : 'type a Message'}
+            onchange={onchnage}
+            hasContent={messageData.content.length === 0 && !messageData.image}
           />
         </div>
       </div>
@@ -252,7 +296,7 @@ const ChatMain = () => {
           <Emojies setOpenEmoji={setIsEmojiPickerOpen} handleSetEmoji={handleSetEmoji} />
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
 

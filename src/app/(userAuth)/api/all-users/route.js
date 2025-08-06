@@ -24,30 +24,68 @@ export async function GET(req) {
            
             select : {
                 id : true,
+                
                 sender : {
+                    
                     select : {
                         id : true,
                      avatar : true,
                      name : true,
-                     bio : true
-                    }
-                },
+                     bio : true,
+                        lastseen : true
+
+                }
+            },
                 receiver : {
                     select : {
                         id : true,
                      avatar : true,
                      name : true,
-                     bio : true
+                     bio : true,
+                     lastseen : true
+                     
                     }
                 }
             },
 
         })
         
-        if (!allusers){
-            return NextResponse.json({message : "Users not found"},{status : 200})
+        let friends = allusers.map((user)=>{
+            let isme = user.sender.id === userId
+            let friend = isme ? user.receiver : user.sender
+            return {id : user.id,friend}
+        })
+
+   
+        let Users = await Promise.all(
+
+            friends.map(async(user)=>{
+                let lastmessage =  await prisma.message.findFirst({
+            where : {
+                OR : [
+                    {senderId : userId , receiverId : user.friend.id},
+                    {receiverId : userId , senderId : user.friend.id}
+                ]
+            },
+            orderBy : {
+                createdAt : "desc"
+            },
+            select : {
+                content : true,
+                image : true,
+                status : true,
+                senderId : true,
+                createdAt : true
+            }
+        })
+        return  {...user,lastmessage}
+        
+    }))
+        
+    if (!allusers){
+        return NextResponse.json({message : "Users not found"},{status : 200})
         }
-        return NextResponse.json({users : [...allusers]},{status : 200})
+        return NextResponse.json({users :Users},{status : 200})
     } catch (error) {
         return NextResponse.json({message : "Netowrk Error try again"},{status : 500})
     }

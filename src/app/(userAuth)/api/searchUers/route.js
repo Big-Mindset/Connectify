@@ -23,6 +23,7 @@ export async function GET(req) {
                 id : true , 
                 bio : true,
                 avatar : true,
+                lastseen : true,
                 requestReceived : {
                     where : {
                         senderId : userId

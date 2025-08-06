@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import prisma, { message } from "@/lib/prisma";
 import { getSession } from "@/lib/getserverSession";
 import { NextResponse } from "next/server";
 
@@ -35,6 +35,8 @@ if (cursor){
         })
         
     }else{
+        console.log("fetching...");
+        
         Messages = await prisma.message.findMany({
             where : {
                 OR : [
@@ -42,13 +44,15 @@ if (cursor){
                         {receiverId : senderId ,senderId : receiverId  }
                     ]
                 },
-                take : 50,
                 orderBy : {
-                    createdAt : "asc"
+                    createdAt : "desc"
                 },
+                take : 50,
                 
             })
     }
+    console.log(Messages[0]);
+    
         return NextResponse.json({message : "Messsages available",Messages},{status : 200})
 
     } catch (error) {

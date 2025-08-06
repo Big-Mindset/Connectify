@@ -1,9 +1,6 @@
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { NextResponse } from "next/server"
-import cloudinary from "@/lib/cloudinary"
-import path from "path";
-import { fileURLToPath } from "url";
 
 export async function POST(req) {
     try {

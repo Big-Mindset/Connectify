@@ -3,21 +3,35 @@
 import { Send } from "lucide-react"
 import { memo } from "react"
 
-const RegularInput = memo(({value,onchange,placeholder,handleSendMessage})=>{
-    
+const RegularInput = memo(({value,onchange,placeholder,handleSendMessage,hasContent})=>{
+  
     return(
-                <div className='flex-1 flex items-center overflow-hidden bg-[#3A2466] rounded-lg focus-within:ring-2 ring-indigo-500/50 duration-300'>
-                  <input
-                    type="text"
-                    value={value}
-                    onChange={onchange}
-                    placeholder={placeholder}
-                    className='flex-1 outline-none p-3 text-indigo-50 placeholder:text-indigo-400/80 bg-transparent'
-                    />
-                  <button onClick={handleSendMessage} className='p-3 mr-0.5 hover:bg-indigo-600  rounded-r-md bg-indigo-500 text-white transition-colors duration-200'>
-                    <Send size={20} />
-                  </button>
-                </div>
+                <div className='flex-1 flex items-center overflow-hidden relative'>
+      <input
+        type="text"
+        value={value}
+        onChange={onchange}
+        placeholder={placeholder}
+        className='w-[calc(100%-40px)] outline-none px-4 py-3 text-white/90 placeholder:text-slate-400 bg-transparent text-sm resize-none   transition-all duration-200 backdrop-blur-sm'
+        onKeyPress={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSendMessage()
+          }
+        }}
+      />
+      <button 
+        onClick={handleSendMessage} 
+        disabled={hasContent}
+        className={`absolute right-2 p-2.5 rounded-full  transition-all duration-200 ${
+          !hasContent 
+            ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg shadow-indigo-500/25 scale-100' 
+            : 'bg-slate-700/50 text-slate-400 scale-95 cursor-not-allowed'
+        }`}
+      >
+        <Send size={16} className={!hasContent ? '' : 'opacity-50'} />
+      </button>
+    </div>
     )
 
 })

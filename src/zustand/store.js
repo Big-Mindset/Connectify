@@ -5,6 +5,7 @@ import { io } from "socket.io-client"
 import { create } from "zustand"
 import { groupStore } from "./groupStore"
 import { createSelectors } from "@/lib/Selector"
+import { addallmessages, addmessage, getmessagebyid, getOneMessage, updatemessage, updatemessagestatus, updateToRead } from "@/database/indexdb"
 
 export let authStore = create((set, get) => ({
   loading: false,
@@ -13,6 +14,10 @@ export let authStore = create((set, get) => ({
   socket: null,
   setsession: (session) => set({ session }),
   users: [],
+  setUsers: (updaterFn) =>
+    set((state) => ({
+      users: updaterFn(state.users)
+    })),
   onlineUsers: [],
   Selected: null,
   setSelected: (newSelected) => set({ Selected: newSelected }),
@@ -52,24 +57,11 @@ export let authStore = create((set, get) => ({
     set({ loading: true })
     try {
       let res = await axios.get("/api/all-users")
-      if (res.status === 200) {
-         let result = res?.data.users.map((user) => {
-            let userId = get().session?.user.id
-            let isMe = user.sender.id === userId
-            let friend = isMe ? user.receiver : user.sender
-            return {
-              name: friend.name,
-              bio: friend.bio,
-              id: friend.id,
-              avatar: friend.avatar,
-              friendId: user.id
-            }
-          })
-          set({users : result})
-        
-      }
 
-    } catch (error) {
+      if (res.status === 200) {
+         let users = res?.data.users
+          set({users : users})
+    }} catch (error) {
       console.log(error);
 
       if (error?.response?.status === 404) {
@@ -89,26 +81,47 @@ export let authStore = create((set, get) => ({
     }
 
   },
-  handleUpdate: (messageId) => {
+  handleUpdate: async (uniqueId,message) => {
+    console.log(message);
+    
+    await updatemessagestatus(message)
    if (!get().Selected) return
-   let messages = get().messages
-   let newArray = messages.map((val)=>{
-    if (val.uniqueId === messageId){
-      return {...val,status : "delivered"}
-    }
-    return val
-   })
-   set({messages : newArray})
+   set(state=>({
+    messages : state.messages.map((val)=>{
+      if (val?.uniqueId === uniqueId){
+       return {...val,status : "delivered"}
+     }
+     return val
+   }) 
    
+   }))
+   let chatId = get().selectedInfo.id
+   set((state)=>({
+    users : state.users.map((user)=>{
+      if (user?.id === chatId){
+        return {...user , lastmessage : {...user.lastmessage , status : "delivered"}}
+      }
+      return user
+    })
+   }))
    
   },
-  getMessages: async () => {
-  
-    set({seleleton : true})
+  getMessages: async (receiverId,userId) => {
+    let senderId = get().session.user.id
+    let messages = await getmessagebyid(userId)
+    if (messages.length > 0){
+     let sorted = messages.sort((a,b)=>new Date(a.createdAt) - new Date(b.createdAt))
+      set({messages : sorted})
+
+      return
+    }
     try {
-      let senderId = get().session?.user.id
-      let res = await axios.get(`/api/get-messages?senderId=${senderId}&receiverId=${get().Selected}`)
-      set({ messages: res?.data?.Messages })
+    set({seleleton : true})
+    let res = await axios.get(`/api/get-messages?senderId=${senderId}&receiverId=${receiverId}`)
+    let messgs = res?.data.Messages.reverse()
+    if (res.status === 200){
+      set({messages : messgs})
+    }
     } catch (error) {
       if (error?.response?.status === 404) {
         set({ messages: [] })
@@ -121,11 +134,12 @@ export let authStore = create((set, get) => ({
       set({seleleton : false})
     }
   },
-  handleGetMessage: (message,acknowledge) => {
+  handleGetMessage:async (message,userId,acknowledge) => {
+    if (message.senderId !== get().Selected) {
+      await addmessage({...message , userId : userId})
+      return
+    }
     acknowledge()
-    if (message.senderId !== get().Selected) return
-    
-    
     set({ messages: [...get().messages, message] })
     
   },
@@ -139,9 +153,9 @@ export let authStore = create((set, get) => ({
         withCredentials: true,
         auth: {
           userId: userId
-        }
+        },
+        autoConnect : false
       })
-
       set({ socket: Socket })
       Socket.on("connect", () => {
         Socket.on("getOnlines", onlineUsers => {
@@ -153,23 +167,35 @@ export let authStore = create((set, get) => ({
 
   handleSendMessage:  async (data, setData) => {
      let {selectedGroup,setGroupMessages,groupMessages} = groupStore.getState()
-     
      let contents = data.content 
      let image = data.image 
      if (!contents && !image) return
      let { content, ...rest } = data
-     let uniqueId = Date.now().toString()
+     let uniquId = Date.now().toString()
      let date = new Date()
      if (get().Selected !== null){
-     let newdata = { ...rest, content: contents, receiverId: get().Selected, senderId: get().session?.user.id, uniqueId: uniqueId, createdAt: date, status: "sent" }
+    let chatId = get().selectedInfo.id
+    
+      
+     let newdata = { ...rest, content: contents, receiverId: get().Selected, senderId: get().session?.user.id, uniqueId: uniquId, createdAt: date, status: "sent" }
+     let {uniqueId ,...others } = newdata
+      await addmessage({...others , id : uniqueId,userId : chatId})
+     set((state)=>({
+      users : state.users.map((user)=>{
+        if (user.id === chatId){
+          return {...user , lastmessage : newdata}
+        }
+        return user
+      })
+     }))
+     set(state=>({ messages: [...state.messages, newdata] }))
      
-       set({ messages: [...get().messages, newdata] })
        
-       get().socket.emit("receiver-data", newdata)
+       get().socket.emit("receiver-data", newdata,chatId)
        setData({
          receiver: "",
          content: "",
-         captionContent: ""
+         image : ""
         })
         
         get().socket?.emit('read-message', { receiver: get().Selected, update: true })
@@ -178,24 +204,40 @@ export let authStore = create((set, get) => ({
              
         let groupData = {...rest,content : contents , senderId: get().session?.user.id,groupId : selectedGroup?.id,createdAt: date,status : "pending",uniqueId : uniqueId}
         setGroupMessages([...groupMessages,groupData]) 
+        setData({
+          receiver: "",
+          content: "",
+          image: ""
+         })
+         
         get().socket?.emit("send-groupMessage",groupData)
         
       }
       },
-  readed: () => {
-
+  readed: async(userId) => {
+    let chatId = get().selectedInfo.id
+    await updateToRead(userId)
     let messages = get().messages
     if (messages.length === 0) return
-    let updated = messages.map(msg => {
-      if (msg.status !== "read") {
-
-        return {
-          ...msg, status: "read"
+    set(state=>({
+      messages : state.messages.map(msg => {
+        if (msg.status !== "read") {
+  
+          return {
+            ...msg, status: "read"
+          }
         }
-      }
-      return msg
-    })
-    set({ messages: updated })
+        return msg
+      })
+    }))
+    set((state)=>({
+      users : state.users.map((user)=>{
+        if (user.id === chatId){
+          return {...user , lastmessage : {...user.lastmessage , status : "read"}}
+        }
+        return user
+      })
+     }))
 
   },
   changeAllStatus : (userId)=>{
@@ -221,7 +263,39 @@ export let authStore = create((set, get) => ({
       
       setGroupMessages(updatedMessage)
     }
-  } 
+  } ,
+  getAllMessages :async ()=>{
+    
+    try {
+      let messages = await getOneMessage()
+      if (messages !== null) {
+        
+            let res = await axios.get("/api/getLastSeenMessages")
+            console.log(res);
+            if (res.status === 200 && res.data?.Messages.length > 0){
+                await addallmessages(res.data?.Messages)
+            }
+       return null
+      }
+
+        let res = await axios.get("/api/getAllMessages")
+        
+        if (res.status === 200 && res.data?.Messages.length > 0){
+          await addallmessages(res.data?.Messages)
+        }
+      
+    } catch (error) {
+      console.log("Error");
+      
+      console.log(error);
+      
+    }
+  },
+  updateInIndexdb :async(id,message)=>{
+    let userId = get().selectedInfo.id
+    await updatemessage(id,message,userId)
+  },
+
     
 
 }))
