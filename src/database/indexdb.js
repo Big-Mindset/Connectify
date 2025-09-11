@@ -1,30 +1,32 @@
 
 class ChatData{
     constructor(){
-        this.initialized = false,
         this.name = "Connectify",
         this.version = 1,
         this.db = null
     }
     async init (){
-        if (this.initialized) return this.db
+        if (this.db) return this.db
         let request = indexedDB.open(this.name,this.version)
         return new Promise((res,rej)=>{
 
             request.onsuccess = ()=>{
                 this.db = request.result
-                this.initialized = true
+                this.db.onclose = () => {
+                    console.warn("DB connection closed, resetting...");
+                    this.db = null; 
+                  };
                 res(this.db)
             }
             request.onerror = ()=>{
-                console.log("Error Connecting" + request.error)
+                
                 rej(request.error)
                 
             },
             request.onupgradeneeded = (event)=>{
                 let db = event.target.result
-                if (!db.objectStoreNames.contains("Sessions")){
-                    db.createObjectStore("Session",{autoIncrement : true})
+                if (!db.objectStoreNames.contains("Session")){
+                    db.createObjectStore("Session",{keyPath : "id"})
                 }
                 if (!db.objectStoreNames.contains("Emojies")){
                     db.createObjectStore("Emojies",{autoIncrement : true})
@@ -32,6 +34,7 @@ class ChatData{
                 if (!db.objectStoreNames.contains("Message")){
                    let createMessage =  db.createObjectStore("Message",{keyPath : "id"})
                    createMessage.createIndex("userId", "userId",{unique : false})
+                   createMessage.createIndex("userId_createdAt", ["userId","createdAt"],{unique : false})
                 }
             }
         })
@@ -41,13 +44,12 @@ class ChatData{
         await this.init()
         let tx = this.db.transaction(["Session"],"readwrite")
         let sessionObject = tx.objectStore("Session")
-        let addsession =  sessionObject.add(session)
+        let addsession =  sessionObject.add({session , id : session?.user?.id})
         return new Promise((resolve, reject) => {
             addsession.onsuccess = ()=>{
                 resolve(addsession.result)
             },
             addsession.onerror = ()=>{
-                console.log("Error adding Session");
                 
                 reject(addsession.error)
             }
@@ -60,10 +62,31 @@ class ChatData{
         let getsession = sessionObject.getAll()
         return new Promise((resolve, reject) => {
             getsession.onsuccess = ()=>{
-                resolve(getsession.result[0])
+                resolve(getsession.result[0]?.session)
             },
             getsession.onerror = ()=>{
-                console.log("Error getting Session");
+                
+                reject(getsession.error)
+            }
+        })
+    }
+    async updateSession(data){
+       
+        await this.init()
+        let tx = this.db.transaction(["Session"],"readwrite")
+        let sessionObject = tx.objectStore("Session")
+        let getsession = sessionObject.getAll()
+        return new Promise((resolve, reject) => {
+            getsession.onsuccess = ()=>{
+                let session = getsession.result[0].session
+                if (session){
+                    session = {...session, user : {...session.user , ...data}}
+                   
+                    sessionObject.put({session , id : session?.user?.id})
+                    resolve(session)
+                }
+            },
+            getsession.onerror = ()=>{
                 
                 reject(getsession.error)
             }
@@ -79,7 +102,6 @@ class ChatData{
                 resolve("Emojies added")
             },
             addEmoji.onerror = ()=>{
-                console.log("Error getting Session");
                 
                 reject(addEmoji.error)
             }
@@ -95,28 +117,29 @@ class ChatData{
                 resolve(getemoji.result[0])
             },
             getemoji.onerror = ()=>{
-                console.log("Error getting Session");
                 
                 reject(getemoji.error)
             }
         })
     }
     async addMessages (message){
+  
         await this.init()
-        let tx = this.db.transaction("Message")
-        let objectStore = tx.objectStore(["Message"],"readwrite")
-        let addMessages = objectStore.add(message)
+     
+        let tx = this.db.transaction(["Message"],"readwrite")
+        let objectStore = tx.objectStore("Message")
+        let addMessages = objectStore.put(message)
         return new Promise((resolve , reject)=>{
             addMessages.onsuccess = ()=>{
+                
                 resolve("Message Added successfully")
             },
             addMessages.onerror = ()=>{
-                console.log("Error getting Session");
                 
                 reject(getemoji.error)
             }
         })
-
+        
     }
     async AddAllMessages (allMessages){
         await this.init()
@@ -127,7 +150,7 @@ class ChatData{
             let messagesId= allMessages[i].id
             for (let j = 0; j < messages.length; j++) {
                 let message = messages[j]
-                msgStore.add({...message ,userId : messagesId })
+                msgStore.put({...message ,userId : messagesId })
                 
             }
             
@@ -135,7 +158,6 @@ class ChatData{
         return new Promise((resolve , reject)=>{
 
             tx.oncomplete = ()=>{
-                console.log("Messages Added Successfully");
                     resolve()
             }
             tx.onerror = ()=>{
@@ -155,10 +177,8 @@ class ChatData{
                 const cursor = event.target.result
     
                 if (cursor) {
-                    console.log("One message found")
                     resolve(cursor.value) 
                 } else {
-                    console.log("No messages found")
                     resolve(null) 
                 }
             }
@@ -178,30 +198,14 @@ class ChatData{
         let messages = indexing.getAll(userId)
         return new Promise((resolve , reject)=>{
             messages.onsuccess = ()=>{
-                console.log("Messages found");
                 
                 resolve(messages.result)
             }
             messages.onerror = ()=>{
-                console.log("Error getting messages");
+                
                 
                 reject(messages.error)
             }
-        })
-    }
-    async addmessage(message){
-        await this.init()
-        let tx = this.db.transaction(["Message"],"readwrite")
-        let msgStore = tx.objectStore("Message")
-        let addmessage = msgStore.add(message)
-        return new Promise((resolve, reject) => {
-            addmessage.onsuccess = ()=>{
-                console.log("Message updated")
-                resolve("Message Added")
-            }
-            addmessage.onerror = ()=>{
-                reject("Error adding messages")
-            }   
         })
     }
     async updatemessage(id,message,userId){
@@ -223,6 +227,45 @@ class ChatData{
             }   
         })
     }
+    async deleteMessage(id,boolean){
+        console.log("running delete" , id , boolean);
+        
+        await this.init()
+        let tx = this.db.transaction(["Message"],"readwrite")
+        let msgStore = tx.objectStore("Message")
+        if (!boolean){
+            msgStore.delete(id)
+            console.log("deleted the message");
+            
+            return new Promise((resolve, reject) => {
+                msgStore.onsuccess = ()=>resolve("Deleted")
+                msgStore.onerror = ()=>{
+                    reject("Error deleting message")
+                }   
+            })
+        }
+        let message = msgStore.get(id)
+        return new Promise((resolve, reject) => {
+            message.onsuccess = ()=>{
+                let result = message.result
+                let fields = {DeleteForEveryone : true, }
+                let updatedMessage = {...result ,...fields,content : "",Reactors : [] }
+                console.log(updatedMessage);
+                
+                let update = msgStore.put(updatedMessage)
+                update.onsuccess = ()=>{
+                        resolve("Deleted")
+                }
+                update.onerror = ()=>{
+                    resolve(update.error)
+
+                }
+          }
+          message.onerror = ()=>{
+                reject("error deleting message")
+          }
+    })
+    }
     async updatemessagestatus(message){
         await this.init()
         let tx = this.db.transaction(["Message"],"readwrite")
@@ -230,7 +273,6 @@ class ChatData{
         let updateMsg = msgStore.put(message)
         return new Promise((resolve, reject) => {
             updateMsg.onsuccess = ()=>{
-                console.log("Message updated")
                 resolve("Message Added")
             }
             updateMsg.onerror = ()=>{
@@ -239,6 +281,8 @@ class ChatData{
         })
     }
     async updateToRead(userId){
+        console.log(userId);
+        
         await this.init()
         let tx = this.db.transaction(["Message"],"readwrite")
         let msgStore = tx.objectStore("Message")
@@ -268,6 +312,149 @@ class ChatData{
         })
        
     }
+    async DeleteReation(data) {
+        await this.init()
+        let transaction = this.db.transaction(["Message"],"readwrite")
+        let objectStore = transaction.objectStore("Message")
+        let response = objectStore.get(data.id)
+
+        return new Promise((res,rej)=>{
+            response.onsuccess = ()=>{
+                let message = response.result
+                let reactors = message.Reactors.filter((obj)=>obj.id !== data.reactionId)
+                message.Reactors = reactors
+                let resp = objectStore.put(message)
+                
+                resp.onsuccess= ()=>res("Successful")
+                resp.onerror = ()=>rej("Error updating data")
+              
+            }
+            response.onerror = ()=> rej("Error getting Message")
+            
+        })
+    }
+    async UpdateReaction(data) {
+        await this.init()
+        let transaction = this.db.transaction(["Message"],"readwrite")
+        let objectStore = transaction.objectStore("Message")
+        let response = objectStore.get(data.id)
+
+        return new Promise((res,rej)=>{
+            response.onsuccess = ()=>{
+                let message = response.result
+                let reactors = message.Reactors.map((obj)=>{
+                    if (obj.id === data.reactionId){
+                        return {...obj,emoji : data.url}
+                    }
+                    return obj
+                })
+                message.Reactors = reactors
+                let resp = objectStore.put(message)
+                
+                resp.onsuccess= ()=>res("Successful")
+                resp.onerror= ()=>rej("Error updating data"
+              )
+            }
+            response.onerror = ()=> rej("Error getting Message")
+            
+        })
+    }
+    async deleteLastMessage(userId) {
+            await this.init();
+            
+            const transaction = this.db.transaction(["Message"], "readwrite");
+            const objectStore = transaction.objectStore("Message");
+            const index = objectStore.index("userId_createdAt");
+            let count =  await new Promise((resolve, reject) => { 
+                let req =  index.count()
+                
+                req.onsuccess = ()=>{
+                    let result = req.result
+                    resolve(result)
+                }
+                req.onerror = ()=>{
+                    
+                    reject(req.error)
+                }
+            })
+            if (count > 200){
+
+                return new Promise((resolve, reject) => {
+                    const range = IDBKeyRange.bound(
+                    [userId, ""],     
+                    [userId, "~"],   
+                    false,            
+                    false           
+                );
+                
+                const request = index.openCursor(range, "next");
+                
+                request.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    
+                    if (cursor) {
+                        
+                        const deleteRequest = cursor.delete();
+                        
+                        deleteRequest.onsuccess = () => {
+                            resolve(cursor.value);
+                        };
+                        
+                        deleteRequest.onerror = () => {
+                            reject(deleteRequest.error);
+                        };
+                    } else {
+                        resolve(null);
+                    }
+                };
+                
+                request.onerror = () => {
+                    reject(request.error);
+                };
+            });
+        }
+        
+        
+    }
+   async updateAllReactions(array){
+    await this.init()
+    
+    let tx = this.db.transaction(["Message"] , "readwrite")
+    let messageStore = tx.objectStore("Message")
+    for (let i = 0; i < array.length; i++) {
+        let reactions = array[i].Chat_Reactions
+
+
+        for (let j = 0; j < reactions.length; j++) {
+        let reaction = reactions[j]
+        let getmessage  = messageStore.get(reaction.reactTo)
+        await new Promise((resolve, reject) => {
+            getmessage.onsuccess = ()=>{
+                let message = getmessage.result
+                if (message){
+                    let updated  = []
+                    message.Reactors.forEach((r)=>{
+                        if (r.id === reaction.id){
+                            updated.push(reaction)
+                        }else{
+                            updated.push(r)
+                        }
+                    })
+                    
+                    message.Reactors = updated
+                    messageStore.put(message)              
+                }
+            }
+            resolve()
+            getmessage.onerror = reject
+        })
+        
+                        
+         }  
+    }
+    await tx.done
+   }
+
     
 }
 let chat = new ChatData()
@@ -278,8 +465,14 @@ let getemoji = ()=>chat.getEmojies()
 let addallmessages = (allMessages)=>chat.AddAllMessages(allMessages)
 let getOneMessage = ()=>chat.getOneMessage()
 let getmessagebyid = (userId)=>chat.getmessagebyid(userId)
-let addmessage = (message)=>chat.addmessage(message)
+let addmessage = (message)=>chat.addMessages(message)
 let updatemessage = (id,message,userId)=>chat.updatemessage(id,message,userId)
 let updatemessagestatus = (message)=>chat.updatemessagestatus(message)
 let updateToRead = (userId)=>chat.updateToRead(userId)
-export {addsession,getsession,addemoji,getemoji,addallmessages,getOneMessage,getmessagebyid,addmessage,updatemessage,updatemessagestatus,updateToRead}
+let updateSession = (data)=>chat.updateSession(data)
+let deletereaction = (data)=>chat.DeleteReation(data)
+let updatereaction = (data)=>chat.UpdateReaction(data)
+let deletelastmessage = (chatId)=>chat.deleteLastMessage(chatId)
+let deletemessage = (id,boolean)=>chat.deleteMessage(id,boolean)
+let updateallreactions = (array)=>chat.updateAllReactions(array)
+export {addsession,getsession,addemoji,getemoji,addallmessages,getOneMessage,getmessagebyid,addmessage,updatemessage,updatemessagestatus,updateToRead,updateSession,deletereaction,updatereaction,deletelastmessage,deletemessage,updateallreactions}

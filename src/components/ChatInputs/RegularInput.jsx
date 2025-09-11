@@ -6,19 +6,22 @@ import { memo } from "react"
 const RegularInput = memo(({value,onchange,placeholder,handleSendMessage,hasContent})=>{
   
     return(
-                <div className='flex-1 flex items-center overflow-hidden relative'>
+                <div
+                
+                className='flex-1 flex  items-center overflow-hidden relative'>
       <input
         type="text"
         value={value}
         onChange={onchange}
         placeholder={placeholder}
-        className='w-[calc(100%-40px)] outline-none px-4 py-3 text-white/90 placeholder:text-slate-400 bg-transparent text-sm resize-none   transition-all duration-200 backdrop-blur-sm'
+        className='w-[calc(100%-40px)] emoji outline-none px-4 py-3 text-black/90 dark:text-white/90 placeholder:text-slate-400 bg-transparent text-sm resize-none   transition-all duration-200 backdrop-blur-sm'
         onKeyPress={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             handleSendMessage()
           }
         }}
+        
       />
       <button 
         onClick={handleSendMessage} 

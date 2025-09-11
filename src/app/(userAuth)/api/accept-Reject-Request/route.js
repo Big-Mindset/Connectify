@@ -6,6 +6,7 @@ export  async function PUT(req) {
     try {
         let {friendRequestId,status} = await req.json()
         
+        console.log(friendRequestId , status);
         
         await prisma.friendRequest.update({
             where : {

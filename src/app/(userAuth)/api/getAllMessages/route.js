@@ -33,13 +33,18 @@ export async function GET(req) {
                         where : {
 
                             OR : [
-                                {senderId : user.senderId , receiverId : user.receiverId},
+                                {senderId : user.senderId , receiverId : user.receiverId,DeleteForMe : false},
                                 {receiverId : user.senderId , senderId : user.receiverId},
                             ],
+                         
                         },
-                        take : 100,
+                        take : 200,
                         orderBy : {
                             createdAt : "desc"
+                        },
+                        
+                        include : {
+                            Reactors : true
                         }
                     })
                     return {id : user.id , messages}

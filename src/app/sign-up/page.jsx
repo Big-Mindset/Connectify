@@ -31,7 +31,7 @@ const roboto = Roboto({
 const signUp = () => {
     let { loading, setLoading } = authStore()
     let router = useRouter()
- 
+
     let { handleSubmit, formState: { errors }, register } = useForm({
         resolver: zodResolver(signupValidations),
         defaultValues: {
@@ -45,26 +45,26 @@ const signUp = () => {
     let handleForm = async (data) => {
         try {
             setLoading(true)
-            let res = await axios.post("/api/sign-up", data)
-
-            if (res.status === 201) {
-                toast.success(res?.data?.message)
-                router.push("/sign-in")
-            } else {
-                toast.error(res?.data?.message)
-            }
-        } catch (error) {
-            if (error.response.status === 409) {
-                toast.error(error.response?.data?.message)
-            } else if (error.response.status === 400) {
-                toast.error(error.response?.data?.message)
-            } else {
-                toast.error(error?.response?.data?.message || "Check your network Connection")
-            }
-        } finally {
-            setLoading(false)
-
+            let res = await axios.post("api/saveDataToRedis",data)
+            
+            
+        let token = res?.data.token
+        if (res.status === 200){  
+            router.push(`/EmailVerification?token=${token}`)
         }
+    } catch (error) {
+        if (error?.response.status === 400){
+            toast.error(error.response.data.message)
+        }else{
+            console.log(error.message);
+            
+        }
+        
+    }finally{
+        setLoading(false)
+    }
+        
+
     }
 
 
@@ -87,7 +87,7 @@ const signUp = () => {
 
 
     return (
-        <div className={`${inder.className} min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4`}>
+        <div className={`${inder.className} min-h-screen dark:bg-gradient-to-br bg-gray-200 dark:from-slate-950 dark:via-blue-950  dark:to-slate-900 flex items-center justify-center p-4`}>
 
 
 
@@ -104,15 +104,15 @@ const signUp = () => {
                     transition={{ delay: 0.2, duration: 0.5 }}
                     className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-10"
                 >
-                    <div className="bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-full px-4 py-2 flex items-center gap-2">
+                    <div className="dark:bg-emerald-500/20 backdrop-blur-sm border bg-white/90 border-emerald-400/30 rounded-full px-4 py-2 flex items-center gap-2">
                         <Shield className="size-4 text-emerald-400" />
                         <span className="text-emerald-300 text-sm font-medium">Secure Authentication</span>
                     </div>
                 </motion.div>
 
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+                <div className="dark:bg-white/5  backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
 
-                    <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 p-8 text-center border-b border-white/10">
+                    <div className="dark:bg-gradient-to-r dark:bg-blue-500/70 bg-blue-500 dark:from-blue-600/20 dark:to-indigo-600/20 p-8 text-center border-b border-white/10">
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -120,8 +120,8 @@ const signUp = () => {
                             className="flex flex-col items-center gap-4"
                         >
                             <div className="relative">
-                                <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-lg"></div>
-                                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-full p-3">
+                                <div className="absolute inset-0 dark:bg-blue-500/30 bg-indigo-500 rounded-full blur-lg"></div>
+                                <div className="relative dark:bg-white/10 bg-white/90 backdrop-blur-sm border border-white/20 rounded-full p-3">
                                     <Image src={properLogo} alt="Logo" width={32} height={32} />
                                 </div>
                             </div>
@@ -130,7 +130,7 @@ const signUp = () => {
                                 <h1 className="text-2xl font-bold text-white mb-2">
                                     Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Connectify</span>
                                 </h1>
-                                <p className="text-white/60 text-sm">Create your secure account to get started</p>
+                                <p className="dark:text-white/60 text-white/80 text-sm">Create your secure account to get started</p>
                             </div>
                         </motion.div>
                     </div>
@@ -142,7 +142,7 @@ const signUp = () => {
                             transition={{ delay: 0.4, duration: 0.5 }}
                             className="text-center mb-8"
                         >
-                            <p className="text-white/70 text-sm">
+                            <p className="dark:text-white/70 text-black text-sm">
                                 Already have an account?{" "}
                                 <Link
                                     href="/sign-in"
@@ -226,14 +226,16 @@ const signUp = () => {
                             className="grid grid-cols-2 gap-4"
                         >
                             <motion.button
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ duration: 0.4, delay: 1.0 }}
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => handleSignUp("google")}
                                 disabled={authLoading === "google"}
-                                className="group relative bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-200 backdrop-blur-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
+                                className="group relative bg-white/5 hover:bg-white/10 border dark:border-white/10 dark:hover:border-white/20 rounded-xl p-4 transition-all border-gray-300  duration-200 backdrop-blur-sm dark:hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
                                 {authLoading === "google" ? (
-                                    <Loader2 className="size-6 animate-spin text-white/70 mx-auto" />
+                                    <Loader2 className="size-6 animate-spin text-blue-500 dark:text-white/70 mx-auto" />
                                 ) : (
                                     <div className="flex flex-col items-center gap-3">
                                         <div className="relative">
@@ -246,7 +248,7 @@ const signUp = () => {
                                                 className="relative"
                                             />
                                         </div>
-                                        <span className="text-sm font-medium text-white/80 group-hover:text-white">
+                                        <span className="text-sm font-medium  text-black/90 dark:text-white/80 dark:group-hover:text-white">
                                             Google
                                         </span>
                                     </div>
@@ -254,14 +256,17 @@ const signUp = () => {
                             </motion.button>
 
                             <motion.button
+                                initial={{ x: 20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                transition={{ duration: 0.4, delay: 1.1 }}
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => handleSignUp("github")}
                                 disabled={authLoading === "github"}
-                                className="group relative bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl p-4 transition-all duration-200 backdrop-blur-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
+                                className="group relative bg-white/5 hover:bg-white/10 border dark:border-white/10 border-gray-300  dark:hover:border-white/20 rounded-xl p-4 transition-all
+                                                          duration-200 backdrop-blur-sm dark:hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
                                 {authLoading === "github" ? (
-                                    <Loader2 className="size-6 animate-spin text-white/70 mx-auto" />
+                                    <Loader2 className="size-6 animate-spin dark:text-white/70 text-blue-500 mx-auto" />
                                 ) : (
                                     <div className="flex flex-col items-center gap-3">
                                         <div className="relative">
@@ -271,10 +276,10 @@ const signUp = () => {
                                                 alt="Github"
                                                 width={24}
                                                 height={24}
-                                                className="relative filter brightness-0 invert"
+                                                className="relative filter brightness-0 dark:invert"
                                             />
                                         </div>
-                                        <span className="text-sm font-medium text-white/80 group-hover:text-white">
+                                        <span className="text-sm font-medium dark:text-white/80 text-black/90 dark:group-hover:text-white">
                                             GitHub
                                         </span>
                                     </div>

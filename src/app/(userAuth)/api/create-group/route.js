@@ -12,36 +12,47 @@ export async function POST(req) {
         if (!session){
             return NextResponse.json({message : "Unauthorize - login first"},{status : 401})
         }
+        if (!name || !userIds?.length) {
+            return NextResponse.json(
+                { message: "Name and at least one user are required" },
+                { status: 400 }
+            )
+        }
         let sec_url;
         
         if (image){
              sec_url = await cloudinary.uploader.upload(image)
         }
         
-        let newGroup = await prisma.$transaction(async (tx)=>{
-
-            let group = await tx.Groups.create({
+        console.log(userIds);
+        let objects = userIds.map(id=>({
+          userId : id
+            
+        }))
+        let group = await prisma.groups.create({
                 data : {
                     name,
                     description,
                     image : sec_url?.secure_url || "",
+
+                    users : {
+                        create : objects
+                    }
+                },
+                select  : {
+                    id : true
                 }
+                
             })
-             await tx.groupUser.createMany({
-                data : userIds.map(id=>({
-                    groupId : group.id,
-                    userId : id,
-                }))
-             })
-            return group
-        })
+        
+           
         
         
-    if (!newGroup){
+    if (!group){
         return NextResponse.json({message : "Group creation failed..."},{status : 404})
         
     }
-    return NextResponse.json({message : "Group Created",groupId : newGroup?.id},{status : 201})
+    return NextResponse.json({message : "Group Created",groupId : group?.id},{status : 201})
 } catch (error) {
     console.log(error.message);
     

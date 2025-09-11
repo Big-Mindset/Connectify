@@ -26,8 +26,14 @@ export async function GET(req) {
                 lastseen : true,
                 requestReceived : {
                     where : {
-                        senderId : userId
+                        senderId : userId,
+                        status : {in : ["Accepted" , "Pending"]}
+
                     },
+                    orderBy : {
+                        createdAt : "desc"
+                    },
+                    take : 1,
                     select : {
                         id : true ,
                         status : true
@@ -35,8 +41,13 @@ export async function GET(req) {
                 },
                 requestSent : {
                     where : {
-                        receiverId : userId
+                        receiverId : userId,
+                        status : {in : ["Accepted" , "Pending"]}
                     },
+                    orderBy : {
+                        createdAt : "desc"
+                    },
+                    take : 1,
                     select : {
                         id : true,
                         status : true

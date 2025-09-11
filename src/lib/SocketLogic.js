@@ -20,12 +20,21 @@ const SocketLogic = () => {
     const setUsers = authstore.use.setUsers();
    const setselectedInfo = authstore.use.setselectedInfo()
    const selectedInfo = authstore.use.selectedInfo()
+   const updateReaction2 = authstore.use.updateReaction2()
+   const d_reaction = authstore.use.d_reaction()
+   const u_reaction = authstore.use.u_reaction()
+   const delete_message = authstore.use.delete_message()
+   const handleRequestNotification = authstore.use.handleRequestNotification()
+   const handleAccpeted = authstore.use.handleAccpeted()
     
     useEffect(() => {
-      connectSocket()
+      if (session?.user?.id){
+
+        connectSocket()
+      }
         return () => socket?.disconnect()
         
-      }, [session])
+      }, [session?.user?.id])
       let sockets = useMemo(()=>({
         "get-message" : handleGetMessage,
         "readed" : readed,
@@ -33,9 +42,16 @@ const SocketLogic = () => {
         "receiveMessages" : handleGetMessages,
         "groupDelivered-success" : handleGroupDelivered,
         "fetch-groups" : getGroup,
-        "upodateIndexdb" : updateInIndexdb
+        "upodateIndexdb" : updateInIndexdb,
+        "receive-reaction" : updateReaction2,
+        "d-reaction" : d_reaction,
+        "u-reaction" : u_reaction,
+        "deleleMessage" : delete_message,
+        "request_receive_notification" : handleRequestNotification,
+        "request_accepted" : handleAccpeted,
+        
   
-      }),[handleGetMessage,readed,changeAllStatus,handleGetMessage,handleGroupDelivered,getGroup,updateInIndexdb])
+      }),[handleGetMessage,readed,changeAllStatus,handleGetMessage,handleGroupDelivered,getGroup,updateInIndexdb,updateReaction2,d_reaction,u_reaction,delete_message,handleRequestNotification,handleAccpeted])
       useEffect(() => {
     
     
@@ -80,7 +96,6 @@ const SocketLogic = () => {
             }
             
         })
-        getGroup()
     }, [socket,users])
     
   

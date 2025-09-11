@@ -1,47 +1,61 @@
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
+import { client } from "@/lib/redis";
 
 export async function POST(req) {
     try {
-        let { email, password, name } = await req.json()
-
-        if (!email || !password || !name) {
-            return NextResponse.json({ message: "All fields are required" }, { status: 400 })
+        let { token, verifyOtp,getData } = await req.json()
+        if (!token) {
+            return NextResponse.json({ message: "Something went wrong try again" }, { status: 400 })
         }
-        let expiryDate = new Date()
-        expiryDate.setMinutes(expiryDate.getMinutes() + 30)
-        let [salt, isExisted] = await Promise.all([
-            bcrypt.genSalt(10),
-            prisma.user.findUnique({
+        let userData = await client.hGetAll(`User_Session-${token}`)
+        console.log(userData);
+        
+        let { email , name , password , otp , otpExpiresAt} = userData
+        if (getData){
+            console.log("it is");
+            
+            return NextResponse.json({ message: "Account created",userData : {
+                email ,
+                name
+            } }, { status: 201 })
+        }   
+     console.log(Date.now() > parseInt(otpExpiresAt));
+     
+        if (Date.now() > parseInt(otpExpiresAt) ){
+            client.hDel(`User_Session-${token}`,"otp")
+            return NextResponse.json({ message: "Resend otp and try again" }, { status: 404 })
+
+        }
+        
+
+        let isExisted = await prisma.user.findUnique({
                 where: { email: email },
                 select: {
                     id: true,
                     accounts: { select: { provider: true } }
                 }
             })
-        ])
+      
+        if (otp !== verifyOtp) {
+            return NextResponse.json({ message: "Invalid otp try again" }, { status: 400 })
 
-        // const __filename = fileURLToPath(import.meta.url);
-        // const __dirname = path.dirname(__filename);
-
-        // const avatarPath = path.join(__dirname, "avatar.png");
-        // let cloudImage = await cloudinary.uploader.upload(avatarPath)
-
-        let hashedPassword = await bcrypt.hash(password, salt)
+        }
+        console.log(isExisted);
+        
         if (isExisted) {
-            if (isExisted.accounts.some(acc => acc.provider === "credentials")) {
-                return NextResponse.json({ message: "Account already existed with this email" }, { status: 409 })
-            }
             await prisma.account.create({
 
                 data: {
                     email: email,
                     name: name,
-                    password: hashedPassword,
+                    password: password,
                     provider: "credentials",
-                    avatar: cloudImage.secure_url || "",
+                    avatar: "",
                     userId: isExisted.id,
+
+
                 }
             })
 
@@ -55,30 +69,29 @@ export async function POST(req) {
                         create: {
                             email: email,
                             name: name,
-                            password: hashedPassword,
+                            password: password,
                             provider: "credentials",
-                            avatar: cloudImage.secure_url,
+                            avatar: "",
+
+
                         }
                     }
                 },
+
 
             })
         }
 
 
-
-        return NextResponse.json({ message: "Account created" }, { status: 201 })
-
+        const response =  NextResponse.json({ message: "Account created" }, { status: 201 })
+        client.del(`User_Session-${token}`)
+        return response
     } catch (error) {
         console.log(error.message);
 
         return NextResponse.json({ message: "Server Error", error: error.message }, { status: 500 })
     }
 }
-
-
-//
-
 
 
 

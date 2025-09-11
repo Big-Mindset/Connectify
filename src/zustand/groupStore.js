@@ -8,13 +8,14 @@ import { createSelectors } from "@/lib/Selector"
 export let groupStore = create((set,get)=>({
     setselectedGroup : (selectedGroup)=>set({selectedGroup}),
     selectedGroup : null,
-    groups : null,
+    groups : [],
     setgroups : (groups)=>set({groups}),
     groupMessages : [],
     setGroupMessages : (groupMessages)=>set({groupMessages}),
 
 
     handleGetMessages :  (messages,uniqueId)=>{
+        
         let selectedGroup = get().selectedGroup
         let {socket,session} = authStore.getState()
         let sender = session?.user.id
@@ -57,6 +58,8 @@ export let groupStore = create((set,get)=>({
         
     },
     getGroupMessages : async (groupId)=>{
+        let setSkeleton = authStore.getState().setSkeleton
+        setSkeleton(true)
         try{
             let res = await axios.get(`api/groupMessages?groupId=${groupId}`)
             if (res.status === 200){
@@ -71,6 +74,9 @@ export let groupStore = create((set,get)=>({
                 console.log(err.message);
                 
             }
+        }finally{
+        setSkeleton(false)
+
         }
     },
 

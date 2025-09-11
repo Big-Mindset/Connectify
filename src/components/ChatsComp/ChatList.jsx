@@ -1,11 +1,11 @@
 "use client"
-
 import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { Check, Plus, Search, User2, UserPlus, Users, UsersIcon, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import Setting from '@/components/Settings'
+import { Check, Folder, FolderOpen, Plus, PlusCircleIcon, Search, Settings, User2, UserPlus, UserPlus2, UserPlusIcon, UserRoundPlusIcon, Users, Users2, UsersRound, UserX2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from "../ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import Avatar from '@/assets/Avatar.webp'
 import properLogo from '@/assets/logop.webp'
 import { messagestore } from '@/zustand/messageSearchStore'
@@ -14,22 +14,18 @@ import User from './User'
 import UserCardDialog from './UserCardDialog'
 import GroupUsers from './GroupUsers'
 import useDebounce from '@/lib/useDebounce'
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider
-} from '@/components/ui/tooltip'
 import UserAccount from '../UserAccount'
+import { dropDown } from '@/zustand/dropdown'
+import { DotsVerticalIcon, InfoCircledIcon } from '@radix-ui/react-icons'
+import FriendRequests from './FriendRequests'
 
 const ChatList = React.memo(({ setopenfriendSearch }) => {
   const loading = authstore.use.loading()
   const users = authstore.use.users()
-  const Selected = authstore.use.Selected()
   const session = authstore.use.session()
   const setCategory = messagestore.use.setCategory()
   const category = messagestore.use.category()
+
 
   const [userSearch, setuserSearch] = useState("")
   const [searchResult, setsearchResult] = useState([])
@@ -37,7 +33,8 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
   const [GroupUsersSelect, setGroupUsersSelect] = useState([])
   const [error, seterror] = useState("")
   const [Open, setOpen] = useState(false)
-
+  const [settings, setsettings] = useState(false)
+  const [focus, setfocus] = useState(false)
   const debounce = useDebounce(200, userSearch)
 
   const searchedUsers = useMemo(() => {
@@ -57,15 +54,23 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
 
   const handleChange = e => {
     setuserSearch(e.target.value)
+    
+         
+        
   }
 
-  const handleAddToGroup = userId => {
-    if (GroupUsersSelect.includes(userId)) {
-      const updated = GroupUsersSelect.filter(id => userId !== id)
-      setGroupUsersSelect(updated)
-      return
+  const handleAddToGroup = (User) => {
+    let userId = User.id
+
+    let isAvailable = GroupUsersSelect.some((user) => user.id === userId)
+    if (!isAvailable) {
+      setGroupUsersSelect(prev => [...prev, User])
+    } else {
+      let filteredData = GroupUsersSelect.filter((user) => user.id !== User.id)
+      setGroupUsersSelect(filteredData)
+
     }
-    setGroupUsersSelect([...GroupUsersSelect, userId])
+
   }
 
   const handleOpen = () => {
@@ -90,44 +95,38 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
   }
 
   const handleOpenSearch = useCallback(() => setopenfriendSearch(true), [])
-  const handleAddGroup = useCallback(
-    user => handleAddToGroup({ id: user.id, image: user.avatar, name: user.name }),
-    []
-  )
+  const [Menu, setMenu] = useState(false)
 
-  let handlepopup = useCallback(() => {
-    setCreate(true)
-  }, [])
+  const [openFriendRequest, setopenFriendRequest] = useState(false)
 
   return (
     <>
-      <div className={`absolute ${Create ? "left-0" : "-left-[100%]"} p-4 w-full z-50  bg-black duration-500 top-0 bottom-0`}>
+        {openFriendRequest && <FriendRequests setopenFriendRequest={setopenFriendRequest} />}
+      <div className={`absolute ${Create ? "left-0" : "-left-[100%]"} p-4 w-full z-50  dark:bg-black bg-gray-200 duration-500 top-0 bottom-0`}>
         {Open && <UserCardDialog GroupUsersSelect={GroupUsersSelect} Open={Open} setOpen={setOpen} setGroupUsersSelect={setGroupUsersSelect} />}
 
         <div className='flex gap-2.5 items-center mb-8'>
           <div onClick={() => {
             setCreate(false)
             setGroupUsersSelect([])
-          }} className='p-1.5 rounded-lg transition-all duration-200 cursor-pointer hover:bg-indigo-500/20 focus:bg-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-purple-400/50'>
-            <X className='w-6 h-6 text-indigo-400 hover:text-indigo-300 transition-colors' />
+          }} className='p-1.5  transition-all duration-200 cursor-pointer rounded-full hover:bg-gray-300 dark:hover:bg-indigo-500/20 focus:bg-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-purple-400/50'>
+            <X className='w-6 h-6 dark:text-indigo-400 text-black/70 dark:hover:text-indigo-300 transition-colors' />
           </div>
-          <h1 className='text-xl font-semibold text-indigo-200'>Create Group</h1>
+          <h1 className='text-xl font-semibold text-black dark:text-indigo-200'>Create Group</h1>
         </div>
 
         <div className="relative group mb-6">
-          <input type="text" placeholder=" " className="w-full px-4 py-3 bg-indigo-800/30 rounded-lg border-2 border-indigo-600/50 focus:border-purple-500/60 outline-none text-indigo-50 placeholder-transparent peer" />
-          <label className="absolute left-4 -top-3.5 text-indigo-400 text-sm px-1.5 transition-all duration-300 peer-placeholder-shown:text-base peer-placeholder-shown:text-indigo-500 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-sm rounded-b-2xl peer-focus:border-b-2 peer-focus:bg-[#1A1035]">
-            Search users...
-          </label>
-          <div className="absolute bottom-0 left-0 w-0 h-1 bg-purple-500/80 transition-all duration-300 group-hover:w-full peer-focus:w-full"></div>
+          <input type="text" placeholder="Search for Users" className="w-full px-4 py-3 dark:bg-indigo-800/30 rounded-lg border-t border-r border-l peer  dark:placeholder:text-gray-200 dark:placeholder:text-[0.9rem] dark:border-indigo-600/50 dark:focus:border-purple-500/60 outline-none dark:text-indigo-50  " />
+
+          <div className="absolute bottom-0 left-0 w-0 h-[1px]  bg-black dark:bg-purple-500/80 transition-all rounded-lg duration-300 group-hover:w-full peer-focus:w-[calc(100%-8px)] mx-auto "></div>
         </div>
 
-        <div className="h-[calc(100%-180px)] scroll overflow-y-scroll relative bg-gradient-to-br from-indigo-900/20 to-purple-900/20 rounded-xl p-3 border border-indigo-800/50 shadow-[inset_0_4px_12px_rgba(99,102,241,0.05)]">
+        <div className="h-[calc(100%-140px)]  scroll overflow-y-auto relative bg-gradient-to-br border-gray-400 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-3 border dark:border-indigo-800/50 shadow-[inset_0_4px_12px_rgba(99,102,241,0.05)]">
           {userToMap?.map(user => (
-            <div key={user.friend.id} className={`group flex justify-between items-center w-full rounded-xl p-2.5 mb-3 ${Selected === user.id ? "bg-gradient-to-r from-purple-500/15 to-blue-500/15 border border-purple-400/30" : "hover:bg-indigo-900/30 border border-transparent hover:border-indigo-800/50"}`}>
+            <div key={user.friend.id} className={`group flex justify-between items-center w-full rounded-xl  p-2.5 mb-3 ${GroupUsersSelect.some(u => u.id === user.friend.id) ? "bg-gradient-to-r  from-slate-100 to-slate-100 dark:from-purple-500/15 dark:to-blue-500/15 border  border-purple-400/30" : "dark:hover:bg-indigo-900/30 border border-transparent  dark:hover:border-indigo-800/50"}`}>
               <div className='flex gap-3 items-center flex-1'>
                 <div className='relative rounded-full overflow-hidden size-12 border-2 border-purple-400/20 group-hover:border-purple-400/40'>
-                  <Image src={user.friend.avatar} alt='User' width={96} height={96} className='object-cover scale-105 group-hover:scale-100' />
+                  <Image src={user.friend.avatar || Avatar} alt='User' width={96} height={96} className='object-cover scale-105 group-hover:scale-100' />
                   {GroupUsersSelect.some(u => u.id === user.friend.id) && (
                     <div className='absolute inset-0 bg-purple-400/20 backdrop-blur-sm flex items-center justify-center'>
                       <Check className='w-5 h-5 text-purple-200' />
@@ -135,23 +134,18 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                   )}
                 </div>
                 <div className='flex-1'>
-                  <h2 className='text-indigo-50 font-medium flex items-center gap-2'>
+                  <h2 className='dark:text-indigo-50 font-medium text-black flex items-center gap-2'>
                     {user.friend.name}
-                    <span className='text-xs text-purple-300/60 font-normal'>@{user.friend.username}</span>
+                    <span className='text-xs dark:text-purple-300/60 text-black font-normal'>@{user.friend.username}</span>
                   </h2>
-                  <p className='text-sm text-indigo-300/70 line-clamp-1'>{user.friend.bio || "Digital collaborator • Focused on innovation"}</p>
+                  <p className='text-sm dark:text-indigo-300/70 text-blue-500 line-clamp-1'>{user.friend.bio}</p>
                 </div>
               </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger onClick={() => handleAddGroup(user.friend)} className={`p-1.5 rounded-lg ${GroupUsersSelect?.some(u => u.id === user.friend.id) ? 'bg-purple-400/20 text-purple-300' : 'text-indigo-400/50 hover:text-purple-300 hover:bg-purple-400/10'}`}>
-                    <UserPlus className='w-5 h-5' />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className='px-4 py-2 bg-white text-black rounded-full'>Add to group</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div onClick={() => handleAddToGroup(user.friend)} className={`p-1.5 cursor-pointer rounded-lg ${GroupUsersSelect?.some(u => u.id === user.friend.id) ? 'dark:bg-purple-400/20 bg-gray-300  dark:text-purple-300' : 'dark:text-indigo-400/50 dark:hover:text-purple-300 hover:bg-gray-200 dark:hover:bg-purple-400/10'}`}>
+                {!GroupUsersSelect.some(us => us.id === user.friend.id) ? <UserPlus className='size-5' /> : <X className='size-5' />}
+
+              </div>
+
             </div>
           ))}
 
@@ -168,70 +162,114 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
           <div className='flex gap-3 items-center'>
             <Popover>
               <PopoverTrigger>
-                <div className='rounded-full size-12 border-[1px] cursor-pointer border-purple-500 overflow-hidden'>
-                  <Image src={session?.user?.image || Avatar} alt='You' priority height={100} width={100} />
+                <div className='rounded-full relative size-12 border-[1px] cursor-pointer border-purple-500 overflow-hidden'>
+                  {session?.user?.image &&
+                    <Image src={session?.user?.image} className='object-cover object-center' alt='You' fill priority />
+
+                  }
                 </div>
               </PopoverTrigger>
               <PopoverContent >
                 <UserAccount />
               </PopoverContent>
             </Popover>
-            <h1 className='font-bold text-indigo-100 text-[1.5rem]'>Chats</h1>
+            <h1 className='font-bold dark:text-indigo-100 text-indigo-600 text-[1.5rem]'>Chats</h1>
           </div>
-          <div className='flex gap-2 items-center'>
-
-            <motion.div
+          <div className='flex gap-2  items-center'>
+          <motion.div
               onClick={handleOpenSearch}
-              className="relative cursor-pointer flex items-center gap-2 px-3 py-2 rounded-full bg-slate-800/40 hover:bg-indigo-600/30 transition-colors"
+              className="relative cursor-pointer flex items-center gap-2 px-3 py-2 bg-gray-200 rounded-full dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <div className="relative">
-                <User2 className="size-5 text-indigo-400" />
-                <Plus className="absolute -bottom-1 -right-1 size-3 bg-indigo-500 rounded-full p-[2px] text-white" />
+                <User2 className="size-5 dark:text-indigo-400" />
+                <Plus className="absolute -bottom-1 -right-1 size-3 dark:bg-indigo-500 bg-black  rounded-full p-[2px] text-white" />
               </div>
-              <span className="text-sm text-indigo-200/90 font-light">Add Friend</span>
-            </motion.div>
+              <span className="text-sm dark:text-indigo-200/90  font-light">Add Friends</span>
 
-            <motion.div
-              onClick={handlepopup}
-              className="relative cursor-pointer flex items-center gap-2 px-3 py-2 rounded-full bg-slate-800/40 hover:bg-indigo-600/30 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className="relative">
-                <Users className="size-5 text-indigo-400" />
-                <Plus className="absolute -bottom-1 -right-1 size-3 bg-indigo-500 rounded-full p-[2px] text-white" />
-              </div>
-              <span className="text-sm text-indigo-200/90 font-light">Add Group</span>
             </motion.div>
+            <div className='relative'>
+
+                  <div
+                  onClick={()=>{
+                    setMenu(!Menu)
+                  }}
+                  className='p-2 rounded-full  cursor-pointer dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 '>
+                  
+                  <DotsVerticalIcon className='size-4 ' />
+                  </div>
+                  <AnimatePresence >
+                  {Menu && 
+
+                  <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.1 }}
+                  style={{
+                    transformOrigin: "top left"
+                   }}
+                    exit={{ scale: 0, opacity: 0 }}
+                  className={`absolute  text-gray-300 overflow-hidden  bg-gray-800 rounded-lg p-2 z-[99999] w-[200px] shadow-lg border border-gray-700`}
+                 
+                >
+                  <div className="flex flex-col gap-1.5 p-1">
+                    <div
+                    onClick={()=>{
+                      setCreate(true)
+                      setMenu(false)
+                    }}
+                      className="flex gap-2 dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 p-2 rounded-lg cursor-pointer items-center transition-colors"
+                    >
+                      {/* <DoubleUser /> */}
+                      <Users2 />
+                      <p>Add Groups</p>
+                    </div>
+                    <div
+                    onClick={()=>{
+                      setopenFriendRequest(true)
+                      setMenu(false)
+
+                    }}
+                    className="flex gap-2 dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 p-2 rounded-lg cursor-pointer items-center transition-colors">
+                      <UserPlus />
+                      <p>Friend Requests</p>
+                    </div>
+                  </div>
+                 
+                </motion.div>
+                }
+                  </AnimatePresence>
+            </div>
+
+          
+
           </div>
         </div>
 
         <motion.div
-          whileHover={{ scaleX: 0.96 }}
-          initial={{ scaleX: 0.97 }}
-          transition={{ duration: 0.3 }}
-          className='flex items-center gap-2.5 px-2 py-1.5  focus-within:shadow-[1px_1px_10px_2px_rgba(100,0,100,1)]  ring-1 ring-indigo-600 bg-black/10 rounded-lg'>
-          <Search className="size-5 text-indigo-400" />
+          className={`flex items-center bg-gray-200 gap-2.5 p-2 ${focus ? "ring-2 ring-blue-600 bg-white" : "hover:ring-gray-400 hover:ring-[1px]"}   dark:focus-within:shadow-[1px_1px_10px_2px_rgba(100,0,100,1)]   dark:ring-indigo-600 dark:bg-black/10 rounded-full`}>
+          <Search className="size-5  dark:text-indigo-500" />
           <input
+            onFocus={() => setfocus(true)}
+            onBlur={() => setfocus(false)}
             placeholder='Search Users'
             type='text'
             onChange={handleChange}
-            className='border-none placeholder:text-purple-200/40 text-[0.95rem] text-blue-50 outline-none w-full bg-transparent'
+            className='border-none dark:placeholder:text-purple-200/40 placeholder:text-black/60 text-[0.95rem] text-black/90 outline-none w-full dark:text-white bg-transparent'
           />
         </motion.div>
       </div>
 
       <div className='flex gap-3 my-7 ml-3'>
-        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("All")} className='group relative px-8 cursor-pointer border-[0.7px] text-indigo-500 rounded-md overflow-hidden'>
-          <p className={`relative ${category === "All" ? "z-20" : "group-hover:z-20"} text-white`}>All</p>
-          <div className={`${category === "All" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full -z-0 bg-gradient-to-br to-blue-500 from-indigo-500`} />
+        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("All")} className='group relative px-8 cursor-pointer border-[0.7px] dark:border-indigo-500 border-black/40 dark:text-indigo-500 text-black/70 rounded-md overflow-hidden'>
+          <p className={`relative ${category === "All" ? "z-20" : "group-hover:z-20"} dark:text-white text-black/60`}>All</p>
+          <div className={`${category === "All" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full duration-200 transition-all -z-0 bg-gradient-to-br  bg-black/10 dark:to-blue-500 dark:from-indigo-500`} />
         </motion.div>
 
-        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("Groups")} className='group relative px-8 cursor-pointer border-[0.7px] text-indigo-500 rounded-md overflow-hidden'>
-          <p className={`relative ${category === "Groups" ? "z-20" : "group-hover:z-20"} text-white`}>Groups</p>
-          <div className={`${category === "Groups" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full -z-0 bg-gradient-to-br to-blue-500 from-indigo-500`} />
+        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("Groups")} className='group relative px-8 cursor-pointer border-[0.7px] dark:border-indigo-500 border-black/40 dark:text-indigo-500 text-black/70 rounded-md overflow-hidden'>
+          <p className={`relative ${category === "Groups" ? "z-20" : "group-hover:z-20"} dark:text-white text-black/60`}>Groups</p>
+          <div className={`${category === "Groups" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full duration-200 transition-all -z-0 bg-gradient-to-br  bg-black/10 dark:to-blue-500 dark:from-indigo-500`} />
         </motion.div>
       </div>
 
@@ -245,13 +283,44 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
             <h2 className='text-xl text-white'>No users found...</h2>
           ) : (
             category === "All" ? (
-              userToMap?.map((user, idx) => <User key={user.id} user={user} idx={idx} />)
+              userToMap.length === 0 ? <div className='absolute top-[40%] w-full left-1/2 -translate-1/2'>
+                <div className='flex-col flex gap-1.5 items-center justify-center'>
+                  <div className='flex flex-col items-center gap-3 mb-8'>
+                    <motion.h1
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3, }}
+                      className='text-[1.3rem] text-[#C2E6FF] '>Users not found</motion.h1>
+                    <UserX2 className='size-14 ' />
+
+                  </div>
+                  <motion.button
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 1 }}
+                    transition={{ duration: 0.2, }}
+                    onClick={handleOpenSearch}
+                    className='rounded-full bg-gradient-to-r  from-blue-500 ring-1 hover:ring-0 ring-blue-400 shadow-blue-500 hover:shadow-[0_0_10px_2px_indigo]  to-blue-400 via-sky-600  cursor-pointer flex gap-2 items-center justify-center  w-[40%] px-4 py-2'><p>Connect</p> <UserRoundPlusIcon size={17} />
+                  </motion.button>
+                </div>
+              </div> : userToMap.map((user, idx) => <User key={user.id} user={user} idx={idx} />)
             ) : (
               <GroupUsers />
             )
           )
         )}
       </div>
+      <button
+
+        onClick={() => setsettings(true)}
+        className={`absolute bottom-3 ${settings && "border-blue-600 border-2"} duration-150 hover:scale-105 cursor-pointer focus:scale-100   
+        right-3 rounded-full p-2 bg-gradient-to-r  from-indigo-700/90 to-purple-500/90`} >
+        <Settings className={`text-white size-5 duration-300 transition-all ${settings && "rotate-90 "}`} />
+      </button>
+      {settings && (
+        <Setting setsettings={setsettings} />
+      )}
     </>
   )
 })

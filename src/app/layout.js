@@ -6,6 +6,8 @@ import { Geist, Geist_Mono,Roboto } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Session from "@/SessionProvider/page"; 
 import { getSession } from "@/lib/getserverSession";
+import ThemeProvider from "@/components/ThemeProvider";
+import AddsystemTheme from "@/components/AddsystemTheme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,18 +38,24 @@ export const metadata = {
 };
 export default async function RootLayout({ children }) {
   let session = await getSession()
+  console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL)
+console.log("AUTH_SECRET:", process.env.AUTH_SECRET ? "SET" : "MISSING")
+console.log("GOOGLE_CLIENT_ID:", process.env.CLIENT_ID ? "SET" : "MISSING")
+
   return (
     
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
       className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} antialiased`}>
+        <ThemeProvider>
+      <AddsystemTheme />
       <Session session={session}>
-        <div className="h-dvh  bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+        <div className="min-h-dvh bg-gradient-to-br  overflow-hidden  from-slate-950 via-blue-950 to-slate-900">
       <Toaster/>
-      
             {children}
         </div>
         </Session>
+        </ThemeProvider>
       </body>
     </html>
     

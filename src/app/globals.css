@@ -1,7 +1,9 @@
+/* stylelint-disable at-rule-no-unknown */
 @import "tailwindcss";
-.scroll::-webkit-scrollbar {
-      width: 6px;
-}
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+
 .scroll::-webkit-scrollbar-track {
       background: rgba(45, 26, 71, 0.5);
       border-radius: 10px;
@@ -15,13 +17,14 @@
       background: linear-gradient(135deg, #4F46E5, #6D28D9, #9333EA);
 }
 .scroll::-webkit-scrollbar {
-      width: 10px;
+      width: 4px;
       height: 3px;
+    
 }
 
-*::selection{
-  background-color: rgba(27, 82, 185, 0.5);
-}
+
+
+
 
 .scroll-1::-webkit-scrollbar {
       display: none;

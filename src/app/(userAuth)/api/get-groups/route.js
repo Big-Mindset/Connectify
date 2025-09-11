@@ -15,7 +15,7 @@ export async function GET(req) {
             where : {
                users : {
                 some : {
-                    userId : meId
+                    userId : meId,
                 },
 
                }

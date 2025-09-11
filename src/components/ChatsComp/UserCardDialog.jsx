@@ -1,157 +1,246 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Avatar from "@/assets/Avatar.webp"
-import ImageCLip from "@/assets/Paperclip.svg"
 import Image from 'next/image';
 import { groupValidate } from '@/zod/groupSchema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { authstore } from '@/zustand/store';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, X, Users, Type, FileText, Camera } from 'lucide-react';
 import axios from 'axios';
 import { groupstore } from '@/zustand/groupStore';
-function UserCardDialog({GroupUsersSelect , setOpen,setGroupUsersSelect}) {
-const loading = authstore.use.loading();
-const setLoading = authstore.use.setLoading();
-const socket = authstore.use.socket();
 
-const getGroup = groupstore.use.getGroup();
+function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
+  const loading = authstore.use.loading();
+  const setLoading = authstore.use.setLoading();
+  const socket = authstore.use.socket();
+  const onlineUsers = authstore.use.onlineUsers();
+  const getGroup = groupstore.use.getGroup();
 
+  const { register, handleSubmit, formState: { errors }, watch } = useForm({
+    resolver: zodResolver(groupValidate),
+    defaultValues: {
+      name: "",
+      description: "",
+    }
+  });
+  const [image, setimage] = useState("")
+  const watchedName = watch("name");
+
+  const containerRef = useRef();
   
-  let {register,handleSubmit,formState : {errors}} = useForm({
-     
-    resolver : zodResolver(groupValidate),
-    defaultValues : {
-      name : "",
-      description : ""
+  const handleWheel = (e) => {
+    if (containerRef.current) {
+      e.preventDefault();
+      containerRef.current.scrollLeft += e.deltaY;
     }
-  })
-  let containerRef = useRef()
-  let handleWheel= (e)=>{
-    if (containerRef.current){
-      e.preventDefault()
-      containerRef.current.scrollLeft +=e.deltaY - 40
-    }
-  }
+  };
 
-
-
-
-  let CreateGroup = async (data) => {
-    setLoading(true)
+  const CreateGroup = async (data) => {
+    setLoading(true);
     
     try {
-      let res = await axios.post("/api/create-group", {...data,userIds : GroupUsersSelect.map(user=>user.id)})
+      let res = await axios.post("/api/create-group", {
+        ...data,
+        userIds: GroupUsersSelect.map(user => user.id)
+      });
       
       if (res.status === 201) {
-        toast.success(res.data.message)
-        setOpen(false)
-        setGroupUsersSelect([])
-        getGroup()
-        let groupId = res?.data?.groupId
-        socket.emit("join-to-group",groupId,GroupUsersSelect.map(user=>user.id))
-
+        toast.success(res.data.message);
+        setOpen(false);
+        setGroupUsersSelect([]);
+        getGroup();
+        let groupId = res?.data?.groupId;
+        socket.emit("join-to-group", groupId, GroupUsersSelect.map(user => user.id));
       }
     } catch (error) {
       if (error?.response?.status === 401) {
-        toast.error(error?.response?.data?.message)
-      } else if (error?.response?.status === 404) {
-        toast.error(error.response.data.message)
-        
-        toast.error(error?.response.data.message)
-        
+        toast.error(error?.response?.data?.message);
       } else {
-        toast.error(error?.response?.data?.message)
-
-        
+        toast.error(error?.response?.data?.message);
       }
-    }finally{
+    } finally {
+      setLoading(false);
+    }
+  };
+  let inputRef = useRef(null)
 
-      setLoading(false)
+  const handleClose = () => {
+    setOpen(false);
+  };
+  let handleChange = (e)=>{
+    let files = e.target.files[0]
+    if (files){
+
+      let reader = new FileReader()
+      reader.onload = ()=>{
+        setimage(reader.result)
+      }
+      reader.readAsDataURL(files)
     }
   }
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <form 
-      onSubmit={handleSubmit(CreateGroup)}
-      className="bg-[#1A1035] rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-indigo-200">Create Group</h2>
-        </div>
-        { errors &&
-
-          <p className='text-red-600 text-center'>
-          {errors.description && errors.description.message || errors.name && errors.name.message}
-        </p>
-        }
-
- <div 
-      className={`flex  bg-[#3A2466]  justify-between gap-2 w-full mb-3 pb-3 border-indigo-600    
-    px-2.5  transition-all duration-200  p-1.5 items-center`}>
-      <div className='flex gap-2'>
-        <div className='relative'>
-        <div className='rounded-full  overflow-hidden size-14 border-2 border-indigo-500/30'>
-          <Image
-            src={Avatar}
-            alt='User'
-            width={100}
-            height={100}
-            className='object-cover'
-            />
-        </div>
-          <div className='absolute bottom-1 bg-blue-400 p-1 rounded-xl hover:bg-blue-500 right-0.5 size-4'>
-            <Image src={ImageCLip} alt="Choose Image" width={80} height={80} />
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg transform animate-in slide-in-from-bottom-4 duration-300">
+     
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Create Group
+            </h2>
           </div>
+          <button
+            onClick={handleClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit(CreateGroup)} className="p-6 space-y-6">
+   
+          {errors && (errors.name || errors.description) && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl animate-in slide-in-from-top-2 duration-200">
+              <p className="text-red-600 dark:text-red-400 text-sm font-medium">
+                {errors.name?.message || errors.description?.message}
+              </p>
+            </div>
+          )}
+
+          <div className="flex justify-center">
+            <div className="relative group">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500 p-0.5 shadow-lg">
+                <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-800">
+                  <Image
+                    src={image || Avatar}
+                    alt="Group Avatar"
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              <button
+              onClick={()=>inputRef.current.click()}
+                type="button"
+                className="absolute -bottom-1 -right-1 p-1.5 bg-blue-500 hover:bg-blue-600 rounded-xl shadow-lg transition-all duration-200 hover:scale-110"
+              >
+                <Camera className="w-4 h-4 text-white" />
+              </button>
+              <input 
+              ref={inputRef}
+              type="file"
+              className='hidden'
+              onChange={(e)=>(handleChange(e))} />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+     
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <Type className="w-4 h-4" />
+                Group Name
+              </label>
+              <input
+                {...register("name")}
+                placeholder="Enter group name..."
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
             </div>
 
-        <div className='flex justify-center w-[300px]  flex-col'>
-          <input 
-          placeholder='Add group Name' 
-          
-          {...register("name")}
-          name='name'
-          className='text-[1rem] font-medium outline-none text-indigo-50' />
-          <input 
-          {...register("description")}
-          name='description'
-          placeholder='best group  Ever' 
-          className='flex gap-1 outline-none text-[0.8rem] text-indigo-300/70 line-clamp-1 items-center'/>
-        </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <FileText className="w-4 h-4" />
+                Description
+              </label>
+              <textarea
+                {...register("description")}
+                placeholder="What's this group about?"
+                rows={3}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+              />
+            </div>
+          </div>
 
+        
+          {GroupUsersSelect.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Members ({GroupUsersSelect.length})
+                </h3>
+              </div>
+              
+              <div 
+                ref={containerRef}
+                onWheel={handleWheel}
+                className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+              >
+                {GroupUsersSelect.map((user, index) => (
+                  <div
+                    key={user.id}
+                    className="flex-shrink-0 flex flex-col items-center gap-2 animate-in slide-in-from-right-2"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500 p-0.5 shadow-md">
+                        <div className="w-full h-full rounded-xl overflow-hidden">
+                          <Image
+                            src={user?.avatar || user.image}
+                            alt={user.name}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                      {onlineUsers.includes(user.id) &&
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
+                      }
+                    </div>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 max-w-12 truncate">
+                      {user.name?.split(' ')[0] || 'User'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="flex-1 py-3 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !watchedName?.trim()}
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-400 disabled:to-gray-400 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {loading ? (
+                <LoaderCircle className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Users className="w-4 h-4 mr-2" />
+                  Create Group
+                </>
+              )}
+            </button>
+          </div>
+
+        
+        </form>
       </div>
     </div>
-    <h1 className='text-xl font-bold mb-1 text-white'>Added Users</h1>
-  <div className=' rounded-2xl  p-1  mb-2.5'  >
-    <div onWheel={handleWheel} ref={containerRef} className='mb-2 flex  overflow-x-auto scroll-1 p-1.5 gap-2.5 items-center w-full'>
-  {/* Multiple avatars */}
-  {GroupUsersSelect.map((item) => (
-    
-    <div key={item.id} className='flex-shrink-0 rounded-full overflow-hidden size-14 border-2 border-indigo-500/30'>
-      <Image
-        src={item.image}
-        alt='User'
-        width={100}
-        height={100}
-        className='object-cover w-full h-full'
-      />
-    </div>
-  ))}
-</div>
-  </div >
-
-    <div className='flex gap-1.5'>
-
-
-        <button onClick={()=>setOpen(false)} type='button' className="w-full py-2 bg-indigo-600/30 hover:bg-indigo-600/40 rounded-xl text-white font-medium">
-          Cancel
-        </button>
-        <button disabled={loading}  type='submit' className="w-full py-2 hover:to-indigo-800 duration-75 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl text-white font-medium">
-          {loading ? <LoaderCircle className='ease-in-out animate-spin  mx-auto' /> : "Add Group"}
-        </button>
-    </div>
- 
-  </form>
-</div>
   );
 }
-export default React.memo(UserCardDialog)
+
+export default React.memo(UserCardDialog);

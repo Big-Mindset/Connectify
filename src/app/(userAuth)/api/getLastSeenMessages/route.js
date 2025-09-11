@@ -25,6 +25,7 @@ export async function GET(req) {
                   sender : {
                     select : {
                         lastseen : true
+                        
                     }
                   },
                   receiver : {
@@ -36,30 +37,60 @@ export async function GET(req) {
                 },
     
             })
+
+           
             let AllMessage = await Promise.all(
-                allusers.map( async (user)=>{
+                allusers.map(async (user)=>{
                     let lastseen = user.senderId === userId ? user.sender.lastseen : user.receiver.lastseen
-                    let messages = await prisma.message.findMany({
+
+                    let messages =  await prisma.message.findMany({
                         where : {
 
                             OR : [
                                 {senderId : user.senderId , receiverId : user.receiverId},
                                 {receiverId : user.senderId , senderId : user.receiverId},
                             ],
-                            createdAt : {
+                            updatedAt : {
                                 gte : lastseen
                             }
                         },
+                        include : {
+                            Reactors : true
+                        }
                         
                     })
                     return {id : user.id , messages}
                 })
             )
-            if (AllMessage.length === 0 ){
-            return NextResponse.json({Message : "No Messages Found"},{status : 200})
+            let Reactions = await Promise.all(
+                allusers.map(async (user)=>{
 
+                let lastseen = user.senderId === userId ? user.sender.lastseen : user.receiver.lastseen
+
+                
+                let reactions =  await prisma.reaction.findMany({
+                        where : {
+                            updatedAt : {
+                                gt : lastseen
+                            },
+                            OR : [
+                                {reactorId : user.senderId},
+                                {reactorId : user.receiverId},
+                            ]
+                            
+                        }
+                    })
+                    return {chatId : user.id , Chat_Reactions : reactions}
+                })
+                )
+               
+                    let filteredMessages = AllMessage.filter((msg)=>msg.messages.length > 0)
+                 let filteredReacions = Reactions.filter((reaction)=>reaction.Chat_Reactions.length > 0)
+
+            if (AllMessage.length === 0 ){
+                return NextResponse.json({Message : "No Messages Found"},{status : 200})
             }
-            return NextResponse.json({Message : "Messages Found" , Messages : AllMessage},{status : 200})
+            return NextResponse.json({Message : "Messages Found" , Messages : filteredMessages,Reactions : filteredReacions},{status : 200})
         } catch (error) {
             console.log(error.message);
             

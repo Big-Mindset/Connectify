@@ -11,7 +11,7 @@ const Input = memo(({ label, type, placeholder, id, register, errors }) => {
 
       <div className='flex flex-col'>
 
-        <label htmlFor={id} className="text-sm mb-2.5  relative font-medium text-white/90">
+        <label htmlFor={id} className="text-sm mb-2.5  relative font-medium text-black/80 dark:text-white/90">
           {label}
         </label>
         <input
@@ -22,7 +22,11 @@ const Input = memo(({ label, type, placeholder, id, register, errors }) => {
           name={id}
           {...register(id)}
           placeholder={placeholder}
-          className={`px-4 py-3 ${errors[id] ? "border-red-600 ring-red-600" : "focus:ring-purple-300 border-white/30"} rounded-lg border  focus:outline-none focus:ring-2  focus:border-transparent transition-all duration-200 ease-in-out bg-white/10 backdrop-blur-sm text-white placeholder-white/60 hover:bg-white/20 focus:shadow-lg focus:shadow-purple-400/20`}
+          className={`px-4 py-3 ${errors[id] ? "border-red-600 ring-red-600" : "dark:focus:ring-purple-300 dark:border-white/30"} rounded-lg border
+           border-gray-300 focus:border-blue-500   focus:outline-none dark:focus:ring-2
+            dark:focus:border-transparent transition-all duration-200 ease-in-out bg-white/10 backdrop-blur-sm dark:text-white text-black placeholder:text-black/40 placeholder:text-[0.97rem] 
+             dark:placeholder-white/60 dark:hover:bg-white/20 dark:focus:shadow-lg dark:focus:shadow-purple-400/20`
+            }
         />
       </div>
       {
@@ -31,8 +35,8 @@ const Input = memo(({ label, type, placeholder, id, register, errors }) => {
           
           id === "password" &&(
             
-            (eye ? <Eye onClick={()=>seteye(!eye)} className='absolute right-2 text-gray-300 cursor-pointer hover:text-gray-200 top-1/2 translate-y-[14%] '/>: 
-            <EyeClosed onClick={()=>seteye(!eye)} className='absolute right-2 text-gray-300 cursor-pointer hover:text-gray-200 top-1/2 translate-y-[14%] '/>)
+            (eye ? <Eye onClick={()=>seteye(!eye)} className='absolute right-2 size-5 dark:text-gray-300 cursor-pointer dark:hover:text-gray-200 top-1/2 translate-y-[14%] '/>: 
+            <EyeClosed onClick={()=>seteye(!eye)} className='absolute right-2 size-5 dark:text-gray-300 cursor-pointer dark:hover:text-gray-200 top-1/2 translate-y-[14%] '/>)
             
           )
         )

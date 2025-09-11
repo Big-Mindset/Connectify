@@ -25,15 +25,20 @@ model Account {
   id              String          @id @default(auto()) @map("_id") @db.ObjectId
   provider        String
   email           String
+  verificationOtp String?
+  isVerified Boolean? 
   name            String
   password        String?
   bio             String          @default("busy")
   avatar          String?
   userId          String          @db.ObjectId
   lastseen        DateTime        @default(now())
+  isCompleted Boolean @default(false)
   user            User            @relation(fields: [userId], references: [id])
   sender          Message[]       @relation(name: "sender")
   receiver        Message[]       @relation(name: "receiver")
+  reactions Reaction[]
+  SenderAi OpenAI[]
   groupUsers      groupUser[]
   messageSenderId groupMessages[] @relation(name  :"messageSender")
   requestSent friendRequest[] @relation(name : "sentRequest")
@@ -41,7 +46,8 @@ model Account {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @default(now())
 
-  @@index([email])
+  @@index([name])
+  @@index([lastseen])
 
 }
 
@@ -56,11 +62,26 @@ model Message {
   updatedAt   DateTime  @updatedAt
   sender      Account   @relation(name: "sender", fields: [senderId], references: [id])
   receiver    Account   @relation(name: "receiver", fields: [receiverId], references: [id])
-
-  @@index([senderId, receiverId])
-  @@index([receiverId, senderId])
+  replyToId String? @db.ObjectId
+  Reactors Reaction[]
+  DeleteForMe Boolean? @default(false)
+  DeleteForEveryone Boolean? @default(false)
+  @@index([senderId, receiverId,DeleteForMe,createdAt])
+  @@index([senderId, receiverId,createdAt])
+  @@index([receiverId, senderId,createdAt])
+  @@index([receiverId,senderId ])
 }
 
+model Reaction {
+  id String @db.ObjectId @id @map("_id") @default(auto())
+  emoji String
+  reactorId String @db.ObjectId
+  reactor Account @relation(references: [id] , fields: [reactorId])
+  reactTo String @db.ObjectId
+  Reactto Message @relation(references: [id] , fields: [reactTo],onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 model Groups {
   id             String          @id @default(auto()) @map("_id") @db.ObjectId
   description    String?
@@ -108,6 +129,16 @@ model groupUser {
 
   @@index([groupId, userId])
   @@index([groupId])
+  @@index([userId])
+}
+
+model OpenAI{
+  id String  @id @db.ObjectId @map("_id") @default(auto()) 
+  senderId String @db.ObjectId
+  Sender Account @relation(references: [id] ,fields: [senderId])
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model friendRequest {
@@ -120,7 +151,10 @@ model friendRequest {
   status requestAccepted @default(Pending)
   @@index([senderId])
   @@index([receiverId])
-  @@index([status])
+  @@index([senderId,status])
+  @@index([receiverId,status])
+  @@index([senderId,status,createdAt])
+  @@index([receiverId,status,createdAt])
 }
 enum requestAccepted {
   Pending

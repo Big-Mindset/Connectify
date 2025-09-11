@@ -12,14 +12,15 @@ app.prepare().then(() => {
 
     let io = new Server(server, {
         cors: {
-            origin: [process.env.NEXTAUTH_URL],
+            origin: process.env.NEXTAUTH_URL,
             credentials: true
         }
     });
     let onlineUsers = {};
 
     io.on("connection", async (socket) => {
-
+        console.log(socket.id);
+        
         let userId = socket.handshake?.auth?.userId;
         onlineUsers[userId] = socket.id;
 
@@ -224,30 +225,37 @@ app.prepare().then(() => {
         });
 
         socket.on("receiver-data", async (data,chatId) => {
+         
             let secure_url = ""
             if (data.image) {
                 secure_url = (await cloudinary.uploader.upload(data.image)).secure_url
             }
-            
+            let dbData = {
+                senderId: data.senderId,
+                receiverId: data.receiverId,
+                content: data.content,
+                image: secure_url || "",
+                status: "sent",
+                createdAt: data.createdAt,
+
+            }
+            if (data?.replyToId){
+                dbData = {...dbData,replyToId : data.replyToId}
+            }
                 let message = await prisma.message.create({
-                    data: {
-                        senderId: data.senderId,
-                        receiverId: data.receiverId,
-                        content: data.content,
-                        image: secure_url || "",
-                        status: "sent",
-                        createdAt: data.createdAt
+                    data: dbData,
+                    include : {
+                        Reactors : true
                     }
                 });
+              
                 
-
-            
 
 
             let receiverSocket = onlineUsers[data.receiverId]
             if (receiverSocket) {
                 io.to(receiverSocket).emit("get-message", message,chatId, async () => {
-                 
+
                     await prisma.message.update({
                         where: { id: message?.id, status: "sent" },
                         data: {
@@ -262,11 +270,65 @@ app.prepare().then(() => {
             io.to(userSocket).emit("upodateIndexdb",data.uniqueId,message)
         })
 
+        socket.on("typing",data=>{
+                let receiverSocket = onlineUsers[data.receiverId]
+            io.to(receiverSocket).emit("typingIndicator" , data)
+            
+            
+        })
+
+        socket.on("reaction",(data,receiverId)=>{
+            
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("receive-reaction",data)
+        })
+        socket.on("delete-reaction",(data,receiverId)=>{
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("d-reaction",data)
+        })
+        socket.on("update-reaction",(data,receiverId)=>{
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("u-reaction",data)
+        })
+
+        socket.on("delete-message",(receiverId,id)=>{
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("deleleMessage",id)
+        })
+
+
+        socket.on("sendRequest",(user)=>{
+            let receiverSocket = onlineUsers[user.id]
+            console.log(user);
+            
+            console.log("sending the socket to "+receiverSocket);
+            
+            io.to(receiverSocket).emit("request_receive_notification",user)
+        })
+
+        socket.on("cancelRequest",(user)=>{
+            console.log("in server");
+            console.log(user);
+                
+            let receiverSocket = onlineUsers[user.id]
+            io.to(receiverSocket).emit("cancel_request",user)
+
+        })
+
+        socket.on("requestAccepted",(user,senderId)=>{
+            console.log(user);
+            
+            let receiverSocket = onlineUsers[senderId]
+            io.to(receiverSocket).emit("request_accepted",user)
+
+
+        })  
 
 
         // Disconnect handler
         socket.on("disconnect", async () => {
             delete onlineUsers[userId];
+            console.log("A user disconnected "+userId)
             let OnlineUsers = Object.keys(onlineUsers);
             io.emit("getOnlines", OnlineUsers);
             let date = new Date()

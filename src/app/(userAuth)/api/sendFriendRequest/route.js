@@ -21,7 +21,7 @@ export  async function POST(req) {
 
         }
     })
-    return NextResponse.json({message :  "Request sent successfully",data : {status : res.status,id : res.id}},{success : 204})
+    return NextResponse.json({message :  "Request sent successfully",data : {status : res.status,id : res.id,createdAt : res.createdAt}},{success : 204})
     } catch (error) {
         console.log(error.message);
         

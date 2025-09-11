@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-// Define route constants
-const PUBLIC_ROUTES = ["/sign-up", "/sign-in"];
-const PROTECTED_ROUTES = ["/", "/dashboard","/home","/Editor","/Profile"];
+const PUBLIC_ROUTES = ["/sign-up", "/sign-in","/EmailVerification"];
+const PROTECTED_ROUTES = ["/", "/settings","/Account"];
 const AUTH_ROUTE = "/sign-up";
 const DEFAULT_REDIRECT = "/";
 
@@ -22,21 +21,32 @@ export async function middleware(request) {
   ) {
     return NextResponse.next();
   }
+console.log(process.env.AUTH_SECRET);
 
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
   });
 
+console.log("the token is ");
+console.log(token);
+
 
   if (token?.user) {
+if (token.user.isCompleted && pathname === "/Account"){
+  return NextResponse.redirect(new URL("/", request.url));
 
-    if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
+}
+if (!token.user.isCompleted && pathname !== "/Account"){
+  return NextResponse.redirect(new URL("/Account", request.url));
+
+}
+    if (PUBLIC_ROUTES.includes(pathname)) {
       return NextResponse.redirect(new URL(DEFAULT_REDIRECT, request.url));
     }
     
 
-    if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
+    if (PROTECTED_ROUTES.includes(pathname)) {
       return NextResponse.next();
     }
 
@@ -45,7 +55,7 @@ export async function middleware(request) {
   }
 
 
-  if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
+  if (PUBLIC_ROUTES.includes(pathname)) {
     return NextResponse.next();
   }
 

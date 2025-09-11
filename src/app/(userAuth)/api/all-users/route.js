@@ -63,19 +63,22 @@ export async function GET(req) {
                 let lastmessage =  await prisma.message.findFirst({
             where : {
                 OR : [
-                    {senderId : userId , receiverId : user.friend.id},
+                    {senderId : userId , receiverId : user.friend.id,DeleteForMe : false},
                     {receiverId : userId , senderId : user.friend.id}
-                ]
+                ],
+               
             },
             orderBy : {
                 createdAt : "desc"
             },
             select : {
+                id : true,
                 content : true,
                 image : true,
                 status : true,
                 senderId : true,
-                createdAt : true
+                createdAt : true,
+                DeleteForEveryone : true,
             }
         })
         return  {...user,lastmessage}
