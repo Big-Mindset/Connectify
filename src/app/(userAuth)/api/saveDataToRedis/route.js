@@ -10,7 +10,6 @@ export async function POST(req) {
     try {
 
         let data = await req.json()
-        console.log(data);
         
 
 if (!data) {
@@ -45,25 +44,19 @@ if (!data) {
 
 
         await client.hSet(`User_Session-${token}`, userData)
-        console.log("sending from here");
         
         let res = await transporter.sendMail({
             from: process.env.GMAIL_USER,
             to: data.email,
-            subject: "Test Email",
+            subject: "Connectify Verification Email",
             html: EmailVerification(data.name  , data.email , otp),
           });
           
-          
-        console.log("sended from here");
-
-          console.log(res);
           
         
         return NextResponse.json({ message: "Verify your email", token: token }, { status: 200 })
 
     } catch (error) {
-        console.log(error.message);
 
         return NextResponse.json({ message: "Internal server error",error : error.message }, { status: 500 })
 

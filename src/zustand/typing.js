@@ -6,8 +6,6 @@ export let typingStore = create((set)=>({
     handleTyping : (data)=>{
         
         let selectedInfo = authStore.getState().selectedInfo.id
-        console.log(selectedInfo)
-        console.log(data.chatId)
         if (selectedInfo !== data.chatId) return
         set({isTyping : data.typing})
     }

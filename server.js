@@ -13,7 +13,7 @@ app.prepare().then(() => {
 
     let io = new Server(server, {
         cors: {
-            origin: [process.env.NEXTAUTH_URL,"https://admin.socket.io"],
+            origin: process.env.NEXTAUTH_URL,
             credentials: true
         }
     });
