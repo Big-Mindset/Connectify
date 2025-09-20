@@ -25,9 +25,6 @@ class ChatData{
             },
             request.onupgradeneeded = (event)=>{
                 let db = event.target.result
-                if (!db.objectStoreNames.contains("Session")){
-                    db.createObjectStore("Session",{keyPath : "id"})
-                }
                 if (!db.objectStoreNames.contains("Emojies")){
                     db.createObjectStore("Emojies",{autoIncrement : true})
                 }
@@ -40,58 +37,7 @@ class ChatData{
         })
 
     }
-    async addSession(session){
-        await this.init()
-        let tx = this.db.transaction(["Session"],"readwrite")
-        let sessionObject = tx.objectStore("Session")
-        let addsession =  sessionObject.add({session , id : session?.user?.id})
-        return new Promise((resolve, reject) => {
-            addsession.onsuccess = ()=>{
-                resolve(addsession.result)
-            },
-            addsession.onerror = ()=>{
-                
-                reject(addsession.error)
-            }
-        })
-    }
-    async getSession(){
-        await this.init()
-        let tx = this.db.transaction(["Session"],"readonly")
-        let sessionObject = tx.objectStore("Session")
-        let getsession = sessionObject.getAll()
-        return new Promise((resolve, reject) => {
-            getsession.onsuccess = ()=>{
-                resolve(getsession.result[0]?.session)
-            },
-            getsession.onerror = ()=>{
-                
-                reject(getsession.error)
-            }
-        })
-    }
-    async updateSession(data){
-       
-        await this.init()
-        let tx = this.db.transaction(["Session"],"readwrite")
-        let sessionObject = tx.objectStore("Session")
-        let getsession = sessionObject.getAll()
-        return new Promise((resolve, reject) => {
-            getsession.onsuccess = ()=>{
-                let session = getsession.result[0].session
-                if (session){
-                    session = {...session, user : {...session.user , ...data}}
-                   
-                    sessionObject.put({session , id : session?.user?.id})
-                    resolve(session)
-                }
-            },
-            getsession.onerror = ()=>{
-                
-                reject(getsession.error)
-            }
-        })
-    }
+
     async AddEmojies(emojies){
         await this.init()
         let tx = this.db.transaction(["Emojies"],"readwrite")
@@ -142,6 +88,7 @@ class ChatData{
         
     }
     async AddAllMessages (allMessages){
+
         await this.init()
         let tx = this.db.transaction(["Message"],"readwrite")
         let msgStore = tx.objectStore("Message")
@@ -150,6 +97,7 @@ class ChatData{
             let messagesId= allMessages[i].id
             for (let j = 0; j < messages.length; j++) {
                 let message = messages[j]
+                
                 msgStore.put({...message ,userId : messagesId })
                 
             }
@@ -158,9 +106,11 @@ class ChatData{
         return new Promise((resolve , reject)=>{
 
             tx.oncomplete = ()=>{
+                
                     resolve()
             }
             tx.onerror = ()=>{
+                
                     reject(tx.error)
             }
         })
@@ -194,18 +144,33 @@ class ChatData{
         await this.init()
         let tx = this.db.transaction(["Message"],"readonly")
         let msgStore = tx.objectStore("Message")
-        let indexing = msgStore.index("userId")
-        let messages = indexing.getAll(userId)
+        let indexing = msgStore.index("userId_createdAt")
+        let bound = IDBKeyRange.bound([userId, ""],[userId, "~"])
+        let AllMessages = []
         return new Promise((resolve , reject)=>{
-            messages.onsuccess = ()=>{
+            let messages =  indexing.openCursor(bound,"prev")
+            console.log(messages);
+            
+            messages.onsuccess = (event)=>{
+                let result = event.target?.result
+                console.log(result);
                 
-                resolve(messages.result)
+                if (result){
+                    let message = result.value
+                   AllMessages.push(message)
+                   if (AllMessages.length === 50){
+                    resolve(AllMessages)
+                    return
+                   }
+                    result.continue()
+                }else{
+                    resolve(AllMessages);
+                    
+                }
             }
             messages.onerror = ()=>{
-                
-                
-                reject(messages.error)
-            }
+                reject("Error getting messages")
+            }   
         })
     }
     async updatemessage(id,message,userId){
@@ -228,14 +193,12 @@ class ChatData{
         })
     }
     async deleteMessage(id,boolean){
-        console.log("running delete" , id , boolean);
-        
+       
         await this.init()
         let tx = this.db.transaction(["Message"],"readwrite")
         let msgStore = tx.objectStore("Message")
         if (!boolean){
             msgStore.delete(id)
-            console.log("deleted the message");
             
             return new Promise((resolve, reject) => {
                 msgStore.onsuccess = ()=>resolve("Deleted")
@@ -250,7 +213,6 @@ class ChatData{
                 let result = message.result
                 let fields = {DeleteForEveryone : true, }
                 let updatedMessage = {...result ,...fields,content : "",Reactors : [] }
-                console.log(updatedMessage);
                 
                 let update = msgStore.put(updatedMessage)
                 update.onsuccess = ()=>{
@@ -281,7 +243,6 @@ class ChatData{
         })
     }
     async updateToRead(userId){
-        console.log(userId);
         
         await this.init()
         let tx = this.db.transaction(["Message"],"readwrite")
@@ -458,8 +419,6 @@ class ChatData{
     
 }
 let chat = new ChatData()
-let addsession = (session)=>chat.addSession(session)
-let getsession = () => chat.getSession();
 let addemoji = (emoji)=>chat.AddEmojies(emoji)
 let getemoji = ()=>chat.getEmojies()
 let addallmessages = (allMessages)=>chat.AddAllMessages(allMessages)
@@ -469,10 +428,9 @@ let addmessage = (message)=>chat.addMessages(message)
 let updatemessage = (id,message,userId)=>chat.updatemessage(id,message,userId)
 let updatemessagestatus = (message)=>chat.updatemessagestatus(message)
 let updateToRead = (userId)=>chat.updateToRead(userId)
-let updateSession = (data)=>chat.updateSession(data)
 let deletereaction = (data)=>chat.DeleteReation(data)
 let updatereaction = (data)=>chat.UpdateReaction(data)
 let deletelastmessage = (chatId)=>chat.deleteLastMessage(chatId)
 let deletemessage = (id,boolean)=>chat.deleteMessage(id,boolean)
 let updateallreactions = (array)=>chat.updateAllReactions(array)
-export {addsession,getsession,addemoji,getemoji,addallmessages,getOneMessage,getmessagebyid,addmessage,updatemessage,updatemessagestatus,updateToRead,updateSession,deletereaction,updatereaction,deletelastmessage,deletemessage,updateallreactions}
+export {addemoji,getemoji,addallmessages,getOneMessage,getmessagebyid,addmessage,updatemessage,updatemessagestatus,updateToRead,deletereaction,updatereaction,deletelastmessage,deletemessage,updateallreactions}

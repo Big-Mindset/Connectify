@@ -1,8 +1,8 @@
 "use client"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, } from 'framer-motion'
 import Image from 'next/image'
-import { ImageIcon, Smile, X } from 'lucide-react'
+import { ArrowDownNarrowWide, ChevronDown, ImageIcon, LoaderCircle, Search, Smile, X } from 'lucide-react'
 import FileInput from '../ChatInputs/FileInput'
 import RegularInput from '../ChatInputs/RegularInput'
 import ChatNav from './ChatNav'
@@ -16,6 +16,7 @@ import { useWidth } from '@/app/page'
 import { typingStore } from '@/zustand/typing'
 import { dropDown } from '@/zustand/dropdown'
 import { Cross1Icon } from '@radix-ui/react-icons'
+import { getMoreMessages } from '@/actions/getMoreMessages'
 
 const ChatMain = () => {
 
@@ -26,6 +27,7 @@ const ChatMain = () => {
     image: '',
     file: ''
   })
+
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
   const { isTyping, handleTyping } = typingStore()
   const messages = authstore.use.messages();
@@ -36,15 +38,20 @@ const ChatMain = () => {
   const handleSendMessage = authstore.use.handleSendMessage();
   const session = authstore.use.session();
   const handleUpdate = authstore.use.handleUpdate();
-  const skeleton = authstore.use.skeleton();
+  const setMessages = authstore.use.setMessages();
   const getGroupMessages = groupstore.use.getGroupMessages()
   const groupMessages = groupstore.use.groupMessages();
   const selectedGroup = groupstore.use.selectedGroup();
   const handleReaded = groupstore.use.handleReaded();
   let timeout = useRef(null)
   let typing = useRef(false)
-  let { reply, setReply, Delete, setDelete,DropDown , setDropDown,react,setReact } = dropDown()
-
+  let { reply, setReply, Delete, setDelete, DropDown, setDropDown, } = dropDown()
+  let [load, setLoad] = useState(true)
+  let [intersecting, setintersecting] = useState(false)
+  let [GoDown, setGoDown] = useState(false)
+  let [openSearch , setOpenSearch] = useState(false)
+  let [hasMore , sethasMore] = useState(true)
+  let inputRef = useRef(null)
   useEffect(() => {
     if (Selected) getMessages(Selected, selectedInfo.id)
     if (selectedGroup?.id) getGroupMessages(selectedGroup.id)
@@ -82,22 +89,20 @@ const ChatMain = () => {
 
   const scrollbarsRef = useRef(null);
   useEffect(() => {
-    if (scrollbarsRef.current) {
-      scrollbarsRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (!messages.length) return
+    if (intersecting) {
+      setintersecting(false)
+      return
     }
+    if (load) {
+      scrollbarsRef.current.scrollIntoView({ block: "end" });
+      setLoad(false)
+    }
+    scrollbarsRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
 
   }, [messages?.length, isTyping]);
-  let scrollPosition = useRef(null)
 
-  // useEffect(() => {
-  //   console.log("running");
 
-  //   if (scrollPosition?.current?.scrollTop === 0){
-  //     console.log(true);
-
-  //   }
-
-  // }, [scrollPosition.current.scrollTop])
   const toggleEmojiPicker = () => {
     setIsEmojiPickerOpen(prev => !prev)
   }
@@ -158,6 +163,7 @@ const ChatMain = () => {
   let onchnage = useCallback(
     e => {
       setMessageData(prev => ({ ...prev, content: e.target.value }))
+      if (selectedGroup) return
       if (timeout.current) {
         clearTimeout(timeout.current)
         timeout.current = null
@@ -172,148 +178,207 @@ const ChatMain = () => {
       debounce(500)
     }
     , [])
-  // const [displayMessages, setdisplayMessages] = useState(null)
-  // useEffect(() => {
-  //   let allmessages = messages.slice(-50)
-  //   console.log(akkn);
+    
+    let [loading , setLoading] = useState(false)
+  let width = useWidth()
+  let container = useRef(null)
+  useEffect(() => {
+    if (!messages.length || !container.current || !hasMore) return;
 
-  //     setdisplayMessages(allmessages)
-  // }, [])
+    let topMessage = container.current.querySelector(".message:first-child");
+    if (!topMessage) return;
 
-  let handleScroll = (e) => {
+    let id = topMessage.getAttribute("data-id");
 
+    let prevOffset = topMessage.offsetTop;
+
+    let intersectionObserver = new IntersectionObserver(async (entries) => {
+      if (entries[0].isIntersecting) {
+        
+        setLoading(true)
+
+        intersectionObserver.unobserve(topMessage);
+
+        let res = await getMoreMessages(id);
+
+        if (res.ok) {
+            if (!res.message.length ) {
+              sethasMore(false)
+              return
+            }
+          setMessages([...res.message.reverse(), ...messages]);
+setLoading(false)
+          requestAnimationFrame(() => {
+            let newTopMessage = container.current.querySelector(
+              `.message[data-id="${id}"]`
+            );
+            if (newTopMessage) {
+              container.current.scrollTop =
+                newTopMessage.offsetTop - prevOffset;
+            }
+          });
+        }
+      }
+    }, {
+      root: container.current,
+      rootMargin: "100px"
+    });
+
+    intersectionObserver.observe(topMessage);
+
+    return () => intersectionObserver.disconnect();
+  }, [messages.length]);
+
+  useEffect(() => {
+    const el = container.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      console.log((el.scrollHeight - el.scrollTop - el.clientHeight) > 500);
+
+      const atBottom = (el.scrollHeight - el.scrollTop - el.clientHeight) >= 2500;
+      setGoDown(atBottom);
+    };
+
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  let handleGoDown = () => {
+    setGoDown(false)
+    scrollbarsRef.current.scrollIntoView({ block: "end" });
+    let updatedMessages = [...messages].slice(-50)
+    setMessages(updatedMessages)
   }
 
-  let width = useWidth()
+
   return (
+    <div className='flex gap-0.5 flex-1'>
+
     <motion.div
       initial={{ x: width < 768 ? 0 : "100%", }}
       animate={{ x: 0 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-   
-      className='flex-1 dark:bg-gradient-to-r dark:from-[#0D1520] dark:to-[#111927] relative flex flex-col'>
-      {Delete && <div onClick={() => setDelete(null)} className='absolute z-20 inset-0 opacity-10 bg-gray-800/40 backdrop-blur-2xl'></div>}
-      {DropDown && <div onClick={() => {setDropDown(null)}} className='absolute  z-10  inset-0 '></div>}
-      <ChatNav />
 
-      <div ref={scrollPosition}
-        onScroll={handleScroll}
+      className='flex-2 bg-[#F0F0F0] dark:bg-gradient-to-r dark:from-[#0D1520] dark:to-[#111927] relative flex flex-col'>
+      {Delete && <div onClick={() => setDelete(null)} className='absolute z-20 inset-0 opacity-10 bg-gray-800/40 backdrop-blur-2xl'></div>}
+      {DropDown && <div onClick={() => { setDropDown(null) }} className='absolute  z-10  inset-0 '></div>}
+      <ChatNav setOpenSearch={setOpenSearch} inputRef={inputRef} openSearch={openSearch}/>
+
+      {GoDown && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="absolute bottom-6 right-6 z-40"
+        >
+          <button
+            onClick={handleGoDown}
+            className=" rounded-full 
+            bg-gray-800 cursor-pointer text-white hover:ring-2 ring-indigo-500 shadow-lg 
+            hover:bg-gray-900 active:scale-95 
+            transition-transform duration-200 
+            absolute -right-3 bottom-12 p-1.5"
+            >
+            <ChevronDown size={28} className='text-gray-400' />
+          </button>
+        </motion.div>
+      )}
+
+      <div
+        ref={container}
         className="flex-1 overflow-y-auto relative  scroll">
 
-        <div className='flex flex-col justify-end min-h-full gap-2 max-w-[90%]  mx-auto'>
-          {skeleton ? (
-            [...Array(8)].map((_, i) => {
-              const isSent = i % 3 === 0
-              const lineCount = Math.floor(Math.random() * 4) + 1
+        <div
+          className={`flex flex-col justify-end min-h-full ${!Selected && "gap-2"}  max-w-[90%]  mx-auto`}>
 
-              return (
+          <>
+          {loading &&
+          <div className='flex justify-center mt-1'>
+          <LoaderCircle className='animate-spin text-blue-500 ' />
+          </div>}
+            {Selected && (
+              messages.length === 0 ? <NoMessages /> : messages.map((msg) => (
+
+                <Message
+                
+                
+                key={msg?.uniqueId ?? msg.id}
+                {...{ ...msg, id: msg?.id, uniqueId: msg?.uniqueId }}
+                
+                />
+
+                
+              ))
+            )}
+            {isTyping &&
+              <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center gap-2 px-3 py-2 w-[70px] mb-2.5 bg-gradient-to-r from-indigo-950 to-blue-900 rounded-md"
+              >
                 <motion.div
-                  key={i}
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.3, }}
-                  className={`flex ${isSent ? 'justify-end' : 'justify-start'} items-end gap-2`}
-                >
-                  <div
-                    className={`${isSent ? 'bg-indigo-600/20' : 'bg-gray-700/20'} rounded-xl p-3 animate-pulse ${['w-[40%]', 'w-[55%]', 'w-[65%]', 'w-[75%]', 'w-[85%]'][i % 5]} min-w-[120px] relative`}
+                  className="flex space-x-1"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    visible: { transition: { staggerChildren: 0.2 } },
+                  }}
                   >
-                    <div className='space-y-2 mb-4'>
-                      {Array.from({ length: lineCount }).map((_, index) => (
-                        <div
-                          key={index}
-                          className={`h-4 bg-gradient-to-r ${isSent ? 'from-indigo-500/20 to-indigo-600/20' : 'from-gray-600/20 to-gray-700/20'} rounded-full ${index === lineCount - 1 ? ['w-3/4', 'w-5/6', 'w-2/3'][lineCount % 3] : 'w-full'}`}
-                        />
-                      ))}
-                    </div>
-                    <div className='absolute bottom-1 right-2 flex items-center gap-1.5'>
-                      <div className='h-2 w-12 bg-gray-500/20 rounded-full' />
-                      {isSent && <div className='h-2 w-2 bg-gray-500/20 rounded-full' />}
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })
-          ) : (
-            <>
-              {Selected && (
-                messages.length === 0 ? <NoMessages /> : messages.map((msg) => (
-
-                  <Message
-                    key={msg?.uniqueId ?? msg.id}
-                    {...{ ...msg, id: msg?.id, uniqueId: msg?.uniqueId }}
-
-                  />
-
-
-                ))
-              )}
-              {isTyping &&
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex items-center gap-2 px-3 py-2 w-[70px] mb-2.5 bg-gradient-to-r from-indigo-950 to-blue-900 rounded-md"
-                >
                   <motion.div
-                    className="flex space-x-1"
-                    initial="hidden"
-                    animate="visible"
                     variants={{
-                      visible: { transition: { staggerChildren: 0.2 } },
+                      hidden: { scale: 0.5 },
+                      visible: { scale: 1 }
                     }}
-                  >
-                    <motion.div
-                      variants={{
-                        hidden: { scale: 0.5 },
-                        visible: { scale: 1 }
-                      }}
-                      transition={{
-                        duration: 0.5,
-                        repeat: Infinity,
-                        repeatType: 'reverse'
-                      }}
-                      className="w-2 h-2 bg-indigo-300 rounded-full"
+                    transition={{
+                      duration: 0.5,
+                      repeat: Infinity,
+                      repeatType: 'reverse'
+                    }}
+                    className="w-2 h-2 bg-indigo-300 rounded-full"
                     ></motion.div>
-                    <motion.div
-                      variants={{
-                        hidden: { scale: 0.5 },
-                        visible: { scale: 1 }
-                      }}
-                      transition={{
-                        duration: 0.5,
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                        delay: 0.2
-                      }}
-                      className="w-2 h-2 bg-indigo-300 rounded-full"
+                  <motion.div
+                    variants={{
+                      hidden: { scale: 0.5 },
+                      visible: { scale: 1 }
+                    }}
+                    transition={{
+                      duration: 0.5,
+                      repeat: Infinity,
+                      repeatType: 'reverse',
+                      delay: 0.2
+                    }}
+                    className="w-2 h-2 bg-indigo-300 rounded-full"
+                  ></motion.div>
+                  <motion.div
+                    variants={{
+                      hidden: { scale: 0.5 },
+                      visible: { scale: 1 }
+                    }}
+                    transition={{
+                      duration: 0.5,
+                      repeat: Infinity,
+                      repeatType: 'reverse',
+                      delay: 0.4
+                    }}
+                    className="w-2 h-2 bg-indigo-300 rounded-full"
                     ></motion.div>
-                    <motion.div
-                      variants={{
-                        hidden: { scale: 0.5 },
-                        visible: { scale: 1 }
-                      }}
-                      transition={{
-                        duration: 0.5,
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                        delay: 0.4
-                      }}
-                      className="w-2 h-2 bg-indigo-300 rounded-full"
-                    ></motion.div>
-                  </motion.div>
                 </motion.div>
-              }
-              <div ref={scrollbarsRef}></div>
-              {selectedGroup && (
-                groupMessages.length === 0 ? <NoMessages /> : groupMessages.map((msg) => (
-                  <GroupMessage
-                    key={msg.uniqueId ?? msg.id}
-                    messageData={msg}
-                  />
-                ))
-              )}
-            </>
-          )}
+              </motion.div>
+            }
+            <div ref={scrollbarsRef}></div>
+            {selectedGroup && (
+              groupMessages.length === 0 ? <NoMessages /> : groupMessages.map((msg) => (
+                <GroupMessage
+                  key={msg.uniqueId ?? msg.id}
+                  messageData={msg}
+                />
+              ))
+            )}
+          </>
+
         </div>
 
       </div>
@@ -335,10 +400,10 @@ const ChatMain = () => {
       )}
 
       <div className='sticky   right-0 left-0 bottom-0 z-40 p-2'>
-        <div className={`dark:bg-black/70 sticky bottom-0 w-full   ${reply?.image ? "h-26" : (reply?.content) ? "h-20" : "bottom-0 h-0"} duration-300 ease-in-out transition-all     rounded-t-lg  size-4 `}>
+        <div className={`dark:bg-black/70 bg-gray-50 sticky bottom-0 w-full   ${reply?.image ? "h-26" : (reply?.content) ? "h-20" : "bottom-0 h-0"} duration-300 ease-in-out transition-all     rounded-t-lg  size-4 `}>
           <div className='size-full p-2'>
 
-            <div className={`dark:bg-gray-900 border-l-4 ${reply?.name === "You" ? "border-blue-500" : "border-indigo-600"}   rounded-lg overflow-hidden size-full`}>
+            <div className={`dark:bg-gray-900 bg-gray-100 border-l-4 ${reply?.name === "You" ? "border-blue-500" : "border-indigo-600"}   rounded-lg overflow-hidden size-full`}>
               {reply &&
                 <div
                   onClick={() => setReply(null)}
@@ -346,7 +411,7 @@ const ChatMain = () => {
                   <Cross1Icon />
                 </div>}
               {reply !== null &&
-                <div className='flex items-center justify-between h-full'>
+                <div className='flex items-center  justify-between h-full'>
 
                   <div className='flex flex-col justify-center mt-0.5 ml-2.5 h-full gap-1 '>
                     <span className={`${reply.name === "You" ? "text-blue-500" : "text-indigo-600"}  text-[0.8rem]`}>{reply?.name}</span>
@@ -355,7 +420,7 @@ const ChatMain = () => {
                         reply?.image &&
                         <ImageIcon className='size-4' />
                       }
-                      <p className='text-[0.8rem] mr-1.5 break-all text-gray-300/90'>{reply?.content.length > 200 ? `${reply?.content.slice(0, 200)}...` : reply?.content || "Photo"}</p>
+                      <p className='text-[0.8rem] mr-1.5 break-all text-gray-600 dark:text-gray-300/90'>{reply?.content.length > 200 ? `${reply?.content.slice(0, 200)}...` : reply?.content || "Photo"}</p>
                     </div>
                   </div>
                   {reply?.image && <div className=' mr-20 overflow-hidden'>
@@ -369,7 +434,7 @@ const ChatMain = () => {
 
 
         </div>
-        <div className={` ${reply ? "rounded-b-3xl" : "delay-300  rounded-full" }  overflow-hidden pl-4 pr-2   shadow-[0_0_1px_0_blue]   bg-white dark:bg-black/70  `}>
+        <div className={` ${reply ? "rounded-b-3xl" : "delay-300  rounded-full"}  overflow-hidden pl-4 pr-2   shadow-[0_0_1px_0_blue]   bg-white dark:bg-black/70  `}>
           <div className='flex items-center   py-1.5 gap-2'>
 
             <div className='flex items-center  gap-1 '>
@@ -408,7 +473,44 @@ const ChatMain = () => {
         )}
       </AnimatePresence>
     </motion.div>
+    {openSearch &&
+    <motion.div
+    initial={{width : 0}}
+    animate={{width : "45%"}}
+    transition={{duration : 0.4}}
 
+    className=' border-l relative border-indigo-600/60'>
+      <div className='absolute left-1/2 top-1/2 -translate-1/2 '>
+      <p className='whitespace-nowrap text-gray-300'>Search for messages with <span className='text-blue-300'>${selectedInfo.friend.name}</span></p>
+      </div>
+      <div className='flex flex-col gap-4 p-3'>
+        <div className='flex gap-2  items-center '>
+        <div 
+        
+          onClick={()=>setOpenSearch(!openSearch)}
+        className='overflow-hidden hover:bg-blue-900 rounded-full p-1.5 cursor-pointer'>
+          <X size={20} />
+        </div>
+        <p className='text-[0.95rem]'>Search Messages</p>
+        </div>
+        <div className='rounded-full  bg-blue-950 ring-black focus-within:ring-blue-500 focus-within:bg-[#0D1520] focus-within:ring-2 hover:ring-2 flex-1 py-1 px-2 items-center flex gap-2 '>
+          <div
+          className='rounded-full cursor-pointer p-1.5 hover:bg-blue-500'>
+
+          <Search size={19} className='text-blue-200' />
+          </div>
+          <input
+          ref={inputRef}
+          type="text"
+          className='w-full outline-0 px-2 py-0.5'
+          placeholder='Search'
+          />
+          
+        </div>
+      </div>
+    </motion.div>
+        }
+              </div>
   )
 }
 

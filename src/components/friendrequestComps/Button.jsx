@@ -8,6 +8,8 @@ const Button = ({ status, userdata, setRequests }) => {
   let session = authstore.use.session()
   let socket = authstore.use.socket()
   let handleRequest = async (status) => {
+    console.log(userdata);
+    
     if (status === "Accept") {
 
       setRequests(prev => {
@@ -31,11 +33,12 @@ const Button = ({ status, userdata, setRequests }) => {
           }
           ]
         }
+        
         socket.emit("requestAccepted",{
           id: userdata.id,
           friend: {
             id: session.user.id,
-            avatar: session.user.avatar,
+            avatar: session.user.image,
             bio: session.user.bio,
             name: session.user.name,
 

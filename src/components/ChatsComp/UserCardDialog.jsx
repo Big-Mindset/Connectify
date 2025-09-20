@@ -42,7 +42,8 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
     try {
       let res = await axios.post("/api/create-group", {
         ...data,
-        userIds: GroupUsersSelect.map(user => user.id)
+        userIds: GroupUsersSelect.map(user => user.id),
+        image 
       });
       
       if (res.status === 201) {
@@ -119,6 +120,7 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
                     alt="Group Avatar"
                     width={80}
                     height={80}
+                    
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -133,6 +135,7 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
               <input 
               ref={inputRef}
               type="file"
+              accept='image/*'
               className='hidden'
               onChange={(e)=>(handleChange(e))} />
             </div>
@@ -155,7 +158,7 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
                 <FileText className="w-4 h-4" />
-                Description
+                Description (optional)
               </label>
               <textarea
                 {...register("description")}
@@ -222,7 +225,7 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
             </button>
             <button
               type="submit"
-              disabled={loading || !watchedName?.trim()}
+              disabled={loading || !watchedName?.trim() || !image}
               className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-400 disabled:to-gray-400 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:cursor-not-allowed flex items-center justify-center"
             >
               {loading ? (

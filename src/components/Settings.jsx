@@ -13,10 +13,10 @@ import Img from "@/assets/Avatar.webp"
 import axios from 'axios';
 import toast from 'react-hot-toast'
 import {motion} from "framer-motion";
-import { updateSession } from '@/database/indexdb';
 import { useTheme } from 'next-themes';
+import {useSession} from "next-auth/react"
 export default function Settings({ setsettings }) {
-
+    let {update} =  useSession()
     let session = authstore.use.session()
     const [checked, setchecked] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -30,9 +30,9 @@ export default function Settings({ setsettings }) {
         if (!session) return;
         setProfile({
             ...profile,
-            name: session?.user?.name || "",
+            name: session?.user?.name ,
             email: session?.user?.email,
-            bio: session?.user?.bio || "",
+            bio: session?.user?.bio,
             image: session?.user?.image || "",
         })
     }, [session])
@@ -71,31 +71,28 @@ export default function Settings({ setsettings }) {
         try {
 
             setLoading(true)
-            let res = await axios.put("/api/updateProfile", {
-                id: session?.user?.id,
-                name: profile.name,
-                email: profile.email,
-                bio: profile.bio,
-                avatar: profile.image
-            })
-
-            if (res.status === 200) {
-                setchecked(false)
-                let updatedSession = await updateSession({
+              let data = {
                     id: session?.user?.id,
                     name: profile.name,
                     email: profile.email,
                     bio: profile.bio,
                     image: profile.image
-                })
-                setsession(updatedSession)
+                }
+                 let { image, ...rest } = data;
+
+            let res = await axios.put("/api/updateProfile", {...rest,avatar : data.image})
+
+            if (res.status === 200) {
+                setchecked(false)
+              
+                setsession({...session , user : {...session.user , data}})
+                update(data)
                 toast.success("Profile updated")
 
             } else {
                 toast.error("Failed to update profile")
             }
         } catch (error) {
-            console.log(error.message);
 
         } finally {
             setLoading(false)

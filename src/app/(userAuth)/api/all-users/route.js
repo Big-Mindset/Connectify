@@ -32,8 +32,20 @@ export async function GET(req) {
                      avatar : true,
                      name : true,
                      bio : true,
-                        lastseen : true
-
+                    lastseen : true,
+                    sender : {
+                        
+                        where : {
+                            receiverId : userId,
+                            status : {
+                                not : "read"
+                            },
+                            
+                        },
+                        select :{
+                            id : true
+                        }
+                    }
                 }
             },
                 receiver : {
@@ -42,8 +54,21 @@ export async function GET(req) {
                      avatar : true,
                      name : true,
                      bio : true,
-                     lastseen : true
+                     lastseen : true,
                      
+                    sender : {
+                        
+                        where : {
+                            receiverId : userId,
+                            status : {
+                                not : "read"
+                            },
+                            
+                        },
+                        select :{
+                            id : true
+                        }
+                    }
                     }
                 }
             },
@@ -53,7 +78,9 @@ export async function GET(req) {
         let friends = allusers.map((user)=>{
             let isme = user.sender.id === userId
             let friend = isme ? user.receiver : user.sender
-            return {id : user.id,friend}
+            console.log(user);
+            
+            return {id : user.id,friend : {...friend,UnReadedMessageCount : friend?.sender.length || 0,sender: null}}
         })
 
    
@@ -90,6 +117,8 @@ export async function GET(req) {
         }
         return NextResponse.json({users :Users},{status : 200})
     } catch (error) {
+        console.log(error.message);
+        
         return NextResponse.json({message : "Netowrk Error try again"},{status : 500})
     }
 }

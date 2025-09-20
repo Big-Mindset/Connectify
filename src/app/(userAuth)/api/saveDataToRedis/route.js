@@ -10,6 +10,8 @@ export async function POST(req) {
     try {
 
         let data = await req.json()
+        console.log(data);
+        
 
 if (!data) {
     return NextResponse.json({ message: "All fields are required" }, { status: 400 })
@@ -18,10 +20,10 @@ if (!data) {
             where: {
                 email: data.email
             },
-            select: {
-                accounts: {
-                    select: {
-                        provider: true
+            select : {
+                accounts : {
+                    select : {
+                        provider : true
                     }
                 }
             }

@@ -23,12 +23,16 @@ export async function POST(req) {
         if (image){
              sec_url = await cloudinary.uploader.upload(image)
         }
-        
-        console.log(userIds);
-        let objects = userIds.map(id=>({
-          userId : id
-            
-        }))
+        let userId = session.user.id
+        let objects = userIds.map((id)=>{
+            if (id === userId){
+                return {
+                    userId : id ,
+                    role : "admin"
+                }
+            }
+            return {userId : id}
+        })
         let group = await prisma.groups.create({
                 data : {
                     name,

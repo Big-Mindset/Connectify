@@ -23,7 +23,48 @@ export async function GET(req) {
            include : {
             users : {
                 select : {
-                    userId : true
+                    userId : true,
+                    role : true,
+                    joinedAt : true,
+                    groupUsers : {
+                        select : {
+                            name : true ,
+                            image : true,
+                        }
+                    },
+
+                    
+                    
+                }
+            },
+            groupsMessages : {
+                where : {
+                    createdAt : {
+                        lte : new Date()
+                    },
+                },
+                orderBy : {
+                    createdAt : "desc"
+                },
+                take : 1
+            },
+            _count : {
+                select : {
+                    groupsMessages : {
+                        where : {
+                            status :{
+                                some : {
+                                    id : {
+                                        not : meId
+                                    },
+
+                                }
+                            },
+                            senderId :{
+                                not : meId
+                            }
+                        }
+                    }
                 }
             }
            }

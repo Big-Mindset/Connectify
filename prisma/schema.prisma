@@ -29,8 +29,8 @@ model Account {
   isVerified Boolean? 
   name            String
   password        String?
-  bio             String          @default("busy")
-  avatar          String?
+  bio             String 
+  avatar          String
   userId          String          @db.ObjectId
   lastseen        DateTime        @default(now())
   isCompleted Boolean @default(false)
@@ -130,6 +130,11 @@ model groupUser {
   @@index([groupId, userId])
   @@index([groupId])
   @@index([userId])
+}
+
+enum UserRoles {
+  member
+  admin
 }
 
 model OpenAI{

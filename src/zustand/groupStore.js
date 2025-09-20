@@ -15,7 +15,10 @@ export let groupStore = create((set,get)=>({
 
 
     handleGetMessages :  (messages,uniqueId)=>{
-        
+        console.log("the group func");
+        console.log(messages);
+        console.log(uniqueId);
+        let {groups , setgroups,} = get()
         let selectedGroup = get().selectedGroup
         let {socket,session} = authStore.getState()
         let sender = session?.user.id
@@ -50,6 +53,13 @@ export let groupStore = create((set,get)=>({
                     return message
                 })
                 set({groupMessages : updatedMessage})
+     
+      setgroups(groups.map((group)=>{
+        if (group.id === selectedGroup.id){
+          return {...group,groupsMessages : [messages]}
+        }
+        return group
+      }))
         }else{
             
             set({groupMessages : [...get().groupMessages,messages]})

@@ -38,7 +38,7 @@ export async function GET(req) {
                             ],
                          
                         },
-                        take : 200,
+                        take : 100,
                         orderBy : {
                             createdAt : "desc"
                         },
@@ -56,7 +56,6 @@ export async function GET(req) {
             }
             return NextResponse.json({Message : "Messages Found" , Messages : AllMessage},{status : 200})
         } catch (error) {
-            console.log(error.message);
             
             return NextResponse.json({Message : "Internal Server Error",error : error.message},{status : 500})
         }

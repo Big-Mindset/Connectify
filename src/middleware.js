@@ -21,15 +21,12 @@ export async function middleware(request) {
   ) {
     return NextResponse.next();
   }
-console.log(process.env.AUTH_SECRET);
 
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
   });
 
-console.log("the token is ");
-console.log(token);
 
 
   if (token?.user) {

@@ -18,21 +18,27 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
   const [loading, setloading] = useState(false)
 
   const handleSendRequest = async () => {
+    console.log("running");
+    
     try {
       setloading(true)
       const res = await axios.post("/api/sendFriendRequest", {
         senderId: session?.user.id,
         receiverId : user.id
       })
-      let result = searchResult.map((us)=>{
-        if (us.id === user.id){
-          return {...us,requestReceived : [res?.data?.data]}
-          // us.requestReceived.push(res?.data?.data)
-        }
-        return us
-      })
+
       if (res.status === 200){
-        setsearchResult(result)
+          setsearchResult(prevResults => 
+        prevResults.map((us) => {
+          if (us.id === user.id) {
+            return {
+              ...us,
+              requestReceived: res.data.data ? [res.data.data] : []
+            };
+          }
+          return us;
+        })
+      );
         socket.emit("sendRequest",{...user,requestReceived : res.data.data})
       }
       

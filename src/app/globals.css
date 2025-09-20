@@ -5,16 +5,16 @@
 
 
 .scroll::-webkit-scrollbar-track {
-      background: rgba(45, 26, 71, 0.5);
+      background: transparent;
       border-radius: 10px;
 }
 .scroll::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, #4F46E555, #6D28D955, #9333EA55);
+      background: rgb(70, 0, 200);
       border-radius: 10px;
       border: 2px solid rgba(255, 255, 255, 0.1);
 }
 .scroll::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(135deg, #4F46E5, #6D28D9, #9333EA);
+      background: rgb(70, 0, 200);
 }
 .scroll::-webkit-scrollbar {
       width: 4px;
@@ -22,13 +22,13 @@
     
 }
 
+.scrollStyles {
+  scrollbar-width: thin;              
+  scrollbar-color: white ;   
+}
 
 
 
-
-.scroll-1::-webkit-scrollbar {
-      display: none;
-} 
 
 
 .my-scroll::-webkit-scrollbar {

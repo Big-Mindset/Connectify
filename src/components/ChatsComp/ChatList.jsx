@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import Setting from '@/components/Settings'
-import { Check, Folder, FolderOpen, Plus, PlusCircleIcon, Search, Settings, User2, UserPlus, UserPlus2, UserPlusIcon, UserRoundPlusIcon, Users, Users2, UsersRound, UserX2, X } from 'lucide-react'
+import { Check, Plus, Search, Settings, User2, UserPlus, UserPlus2, UserPlusIcon, UserRoundPlusIcon, Users, Users2, UsersRound, UserX2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import Avatar from '@/assets/Avatar.webp'
@@ -15,7 +15,6 @@ import UserCardDialog from './UserCardDialog'
 import GroupUsers from './GroupUsers'
 import useDebounce from '@/lib/useDebounce'
 import UserAccount from '../UserAccount'
-import { dropDown } from '@/zustand/dropdown'
 import { DotsVerticalIcon, InfoCircledIcon } from '@radix-ui/react-icons'
 import FriendRequests from './FriendRequests'
 
@@ -25,7 +24,6 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
   const session = authstore.use.session()
   const setCategory = messagestore.use.setCategory()
   const category = messagestore.use.category()
-
 
   const [userSearch, setuserSearch] = useState("")
   const [searchResult, setsearchResult] = useState([])
@@ -121,7 +119,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
           <div className="absolute bottom-0 left-0 w-0 h-[1px]  bg-black dark:bg-purple-500/80 transition-all rounded-lg duration-300 group-hover:w-full peer-focus:w-[calc(100%-8px)] mx-auto "></div>
         </div>
 
-        <div className="h-[calc(100%-140px)]  scroll overflow-y-auto relative bg-gradient-to-br border-gray-400 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-3 border dark:border-indigo-800/50 shadow-[inset_0_4px_12px_rgba(99,102,241,0.05)]">
+        <div className="h-[calc(100%-140px)]  scroll overflow-y-auto relative dark:bg-gradient-to-br  border-gray-400 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-3 border dark:border-indigo-800/50 shadow-[inset_0_4px_12px_rgba(99,102,241,0.05)]">
           {userToMap?.map(user => (
             <div key={user.friend.id} className={`group flex justify-between items-center w-full rounded-xl  p-2.5 mb-3 ${GroupUsersSelect.some(u => u.id === user.friend.id) ? "bg-gradient-to-r  from-slate-100 to-slate-100 dark:from-purple-500/15 dark:to-blue-500/15 border  border-purple-400/30" : "dark:hover:bg-indigo-900/30 border border-transparent  dark:hover:border-indigo-800/50"}`}>
               <div className='flex gap-3 items-center flex-1'>
@@ -157,14 +155,14 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
         </div>
       </div>
 
-      <div className='space-y-5.5 mb-2.5 relative '>
+      <div className='space-y-5.5 mb-2.5 relative p-3'>
         <div className='flex justify-between items-center px-5'>
           <div className='flex gap-3 items-center'>
             <Popover>
               <PopoverTrigger>
-                <div className='rounded-full relative size-12 border-[1px] cursor-pointer border-purple-500 overflow-hidden'>
+                <div className='rounded-full relative size-12 border-[1px] cursor-pointer border-[#87A5EF] overflow-hidden'>
                   {session?.user?.image &&
-                    <Image src={session?.user?.image} className='object-cover object-center' alt='You' fill priority />
+                    <Image src={session?.user?.image} className='object-cover object-center' sizes='100px' alt='You' fill priority />
 
                   }
                 </div>
@@ -173,20 +171,18 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                 <UserAccount />
               </PopoverContent>
             </Popover>
-            <h1 className='font-bold dark:text-indigo-100 text-indigo-600 text-[1.5rem]'>Chats</h1>
+            <h1 className='font-bold dark:text-indigo-100 text-[#395BC7] text-[1.5rem]'>Connectify</h1>
           </div>
           <div className='flex gap-2  items-center'>
           <motion.div
               onClick={handleOpenSearch}
-              className="relative cursor-pointer flex items-center gap-2 px-3 py-2 bg-gray-200 rounded-full dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="relative cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-[#E7E8EC] hover:ring-1 ring-gray-400 bg-[#EFF0F3] rounded-full dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 transition-colors"
             >
               <div className="relative">
-                <User2 className="size-5 dark:text-indigo-400" />
-                <Plus className="absolute -bottom-1 -right-1 size-3 dark:bg-indigo-500 bg-black  rounded-full p-[2px] text-white" />
+                <User2 className="size-5 text-[#395BC7] dark:text-indigo-400" />
+                <Plus className="absolute -bottom-1 -right-1 size-3 bg-[#395BC7] dark:bg-indigo-500   rounded-full p-[2px] text-white" />
               </div>
-              <span className="text-sm dark:text-indigo-200/90  font-light">Add Friends</span>
+              <span className="text-sm dark:text-indigo-200/90 text-[#1D2E5C]  font-light">Add Friends</span>
 
             </motion.div>
             <div className='relative'>
@@ -195,10 +191,10 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                   onClick={()=>{
                     setMenu(!Menu)
                   }}
-                  className='p-2 rounded-full  cursor-pointer dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 '>
+                  className='p-2 rounded-full bg-[#EFF0F3]  hover:bg-gray-200  hover:ring-1 ring-gray-400 cursor-pointer dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 '>
                   
-                  <DotsVerticalIcon className='size-4 ' />
-                  </div>
+                  <DotsVerticalIcon scale={1.1} className='text-[#1E1F24] dark:text-white font-bold' />
+                  </div> 
                   <AnimatePresence >
                   {Menu && 
 
@@ -210,7 +206,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                     transformOrigin: "top left"
                    }}
                     exit={{ scale: 0, opacity: 0 }}
-                  className={`absolute  text-gray-300 overflow-hidden  bg-gray-800 rounded-lg p-2 z-[99999] w-[200px] shadow-lg border border-gray-700`}
+                  className={`absolute  dark:text-gray-300 text-gray-600 overflow-hidden bg-gray-200  dark:bg-gray-800 rounded-lg p-2 z-[99999] w-[200px] shadow-lg dark:border  dark:border-gray-700`}
                  
                 >
                   <div className="flex flex-col gap-1.5 p-1">
@@ -219,7 +215,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                       setCreate(true)
                       setMenu(false)
                     }}
-                      className="flex gap-2 dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 p-2 rounded-lg cursor-pointer items-center transition-colors"
+                      className="flex gap-2 dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 hover:bg-gray-100 p-2 rounded-lg cursor-pointer items-center transition-colors"
                     >
                       {/* <DoubleUser /> */}
                       <Users2 />
@@ -231,7 +227,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                       setMenu(false)
 
                     }}
-                    className="flex gap-2 dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 p-2 rounded-lg cursor-pointer items-center transition-colors">
+                    className="flex gap-2 dark:bg-slate-800/40 hover:bg-gray-100 dark:hover:bg-indigo-600/30 p-2 rounded-lg cursor-pointer items-center transition-colors">
                       <UserPlus />
                       <p>Friend Requests</p>
                     </div>
@@ -248,7 +244,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
         </div>
 
         <motion.div
-          className={`flex items-center bg-gray-200 gap-2.5 p-2 ${focus ? "ring-2 ring-blue-600 bg-white" : "hover:ring-gray-400 hover:ring-[1px]"}   dark:focus-within:shadow-[1px_1px_10px_2px_rgba(100,0,100,1)]   dark:ring-indigo-600 dark:bg-black/10 rounded-full`}>
+          className={`flex items-center bg-gray-200  gap-2.5 p-2 ${focus ? "ring-2 ring-[#87A5EF] bg-white" : "hover:ring-gray-400 hover:ring-[1px]"}   dark:focus-within:shadow-[1px_1px_10px_2px_rgba(100,0,100,1)]   dark:ring-indigo-600 dark:bg-blue-900/20 rounded-full`}>
           <Search className="size-5  dark:text-indigo-500" />
           <input
             onFocus={() => setfocus(true)}
@@ -261,24 +257,20 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
         </motion.div>
       </div>
 
-      <div className='flex gap-3 my-7 ml-3'>
-        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("All")} className='group relative px-8 cursor-pointer border-[0.7px] dark:border-indigo-500 border-black/40 dark:text-indigo-500 text-black/70 rounded-md overflow-hidden'>
-          <p className={`relative ${category === "All" ? "z-20" : "group-hover:z-20"} dark:text-white text-black/60`}>All</p>
-          <div className={`${category === "All" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full duration-200 transition-all -z-0 bg-gradient-to-br  bg-black/10 dark:to-blue-500 dark:from-indigo-500`} />
+      <div className='flex gap-3 my-5 ml-3 p-3'>
+        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("All")} className='group relative px-8 cursor-pointer  border-[0.7px] border-[#D8D9E0] dark:border-indigo-500  dark:text-indigo-500 text-black/70 rounded-md overflow-hidden'>
+          <p className={`relative ${category === "All" ? "z-20" : "group-hover:z-20"} dark:text-white text-gray-800`}>All</p>
+          <div className={`${category === "All" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full duration-200 transition-all -z-0 bg-gradient-to-br  bg-gray-200  dark:to-blue-500 dark:from-indigo-500`} />
         </motion.div>
 
-        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("Groups")} className='group relative px-8 cursor-pointer border-[0.7px] dark:border-indigo-500 border-black/40 dark:text-indigo-500 text-black/70 rounded-md overflow-hidden'>
-          <p className={`relative ${category === "Groups" ? "z-20" : "group-hover:z-20"} dark:text-white text-black/60`}>Groups</p>
-          <div className={`${category === "Groups" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full duration-200 transition-all -z-0 bg-gradient-to-br  bg-black/10 dark:to-blue-500 dark:from-indigo-500`} />
+        <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("Groups")} className='group relative px-8 cursor-pointer border-[0.7px] border-[#D8D9E0] dark:border-indigo-500  dark:text-indigo-500 text-black/70 rounded-md overflow-hidden'>
+          <p className={`relative ${category === "Groups" ? "z-20" : "group-hover:z-20"} dark:text-white text-gray-800`}>Groups</p>
+          <div className={`${category === "Groups" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full duration-200 transition-all -z-0 bg-gradient-to-br  bg-gray-200  dark:to-blue-500 dark:from-indigo-500`} />
         </motion.div>
       </div>
 
-      <div className='mt-4'>
-        {loading ? (
-          <div className='absolute text-3xl left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'>
-            <Image src={properLogo} alt="Loading" width={100} height={100} className='animate-pulse' />
-          </div>
-        ) : (
+      <div className='mt-4 px-5 flex flex-col overflow-y-auto h-full gap-1 max-h-[calc(100vh-225px)] w-full scrollStyles '>
+        {
           searchResult.length === 0 && userSearch.length > 0 ? (
             <h2 className='text-xl text-white'>No users found...</h2>
           ) : (
@@ -309,7 +301,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
               <GroupUsers />
             )
           )
-        )}
+        }
       </div>
       <button
 

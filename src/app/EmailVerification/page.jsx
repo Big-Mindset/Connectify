@@ -27,22 +27,22 @@ export default function OTPVerification() {
   };
 
   const [data, setdata] = useState({
-    name : "",
-    email : ""
+    name: "",
+    email: ""
   })
   console.log(data);
-  
+
   useEffect(() => {
-    let savedata = async ()=>{
+    let savedata = async () => {
 
       let res = await axios.post("/api/sign-up", {
         token: token,
-        getData :true
+        getData: true
       })
       console.log(res);
-      
-      let {email , name} = res.data.userData
-      setdata({...data , email ,name })
+
+      let { email, name } = res.data.userData
+      setdata({ ...data, email, name })
     }
     savedata()
   }, [])
@@ -59,17 +59,17 @@ export default function OTPVerification() {
         verifyOtp: otp.join("")
       })
       console.log(data);
-      
-      if (res.status === 201) {
-   
-        let res = await signIn("credentials", {...data, permission : true, redirect: false })
-          if (res.url !== null && res.ok) {
-            toast.success("Account Created")
-            router.push("/Account")
 
-          } else {
-            toast.error("Invalid Email or Password")
-          }
+      if (res.status === 201) {
+
+        let res = await signIn("credentials", { ...data, permission: true, redirect: false })
+        if (res.url !== null && res.ok) {
+          toast.success("Account Created")
+          router.push("/Account")
+
+        } else {
+          toast.error("Invalid Email or Password")
+        }
       } else {
         toast.error(res?.data?.message)
       }
@@ -83,7 +83,7 @@ export default function OTPVerification() {
       } else {
         toast.error(error?.response?.data?.message || "Check your network Connection")
       }
-    } finally{
+    } finally {
       setLoading(false)
     }
   };
@@ -97,9 +97,9 @@ export default function OTPVerification() {
 
     timeInterval.current = setInterval(() => {
       count.current--
-      if (count.current === 0){
+      if (count.current === 0) {
         return
-    }
+      }
       setdisplaycount(count.current)
     }, 1000)
 
@@ -107,7 +107,7 @@ export default function OTPVerification() {
 
   let handleResend = async () => {
     setressending(true)
-    let res = await axios.put("/api/resendOtp", { token ,email : data.email , name : data.name })
+    let res = await axios.put("/api/resendOtp", { token, email: data.email, name: data.name })
     if (res.status === 201) {
       countDownEverySecond()
       count.current = 60
@@ -146,7 +146,7 @@ export default function OTPVerification() {
           ))}
         </div>
         <div className="flex justify-end mb-3">
-          {displaycount> 0 ? <p>
+          {displaycount > 0 ? <p>
             {displaycount}s
           </p> :
             <button
@@ -154,7 +154,7 @@ export default function OTPVerification() {
               onClick={handleResend}
               className="text-blue-500 hover:text-blue-600 text-sm  transition-colors"
             >
-              {ressending ? <Loader2  className="animate-spin mx-auto" /> : "Resend Code"}
+              {ressending ? <Loader2 className="animate-spin mx-auto" /> : "Resend Code"}
 
             </button>
           }
@@ -169,7 +169,6 @@ export default function OTPVerification() {
         </button>
         <Link
           href={"/sign-up"}
-          onClick={handleVerifyOtp}
           className="w-full  mt-3 flex gap-1 items-center justify-center text-white font-semibold py-3 px-4 rounded-lg  transition-all duration-200 mb-4"
         >
           Go Back

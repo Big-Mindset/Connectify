@@ -12,7 +12,6 @@ const AddFriends = React.memo(({setopenfriendSearch,openfriendSearch}) => {
     setloading(true)
     let res = await fetch(`/api/searchUers?name=${encodeURIComponent(debounce)}`)
       let data = await res.json()
-      console.log(data);
       
       if (res.status === 200){
 
@@ -29,7 +28,6 @@ const AddFriends = React.memo(({setopenfriendSearch,openfriendSearch}) => {
         getSearchedUsers(debounce)
       }
     }, [debounce])
-    console.log(!loading , !search);
     
   return (
     <div

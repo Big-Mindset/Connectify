@@ -38,9 +38,6 @@ export const metadata = {
 };
 export default async function RootLayout({ children }) {
   let session = await getSession()
-  console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL)
-console.log("AUTH_SECRET:", process.env.AUTH_SECRET ? "SET" : "MISSING")
-console.log("GOOGLE_CLIENT_ID:", process.env.CLIENT_ID ? "SET" : "MISSING")
 
   return (
     

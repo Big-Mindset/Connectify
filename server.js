@@ -1,5 +1,6 @@
 const cloudinary = require("./src/lib/cloudinary.js");
 require('dotenv').config();
+const {instrument} = require("@socket.io/admin-ui")
 const prisma = require("./src/lib/prisma");
 const next = require("next");
 const Server = require("socket.io").Server;
@@ -12,15 +13,17 @@ app.prepare().then(() => {
 
     let io = new Server(server, {
         cors: {
-            origin: process.env.NEXTAUTH_URL,
+            origin: [process.env.NEXTAUTH_URL,"https://admin.socket.io"],
             credentials: true
         }
     });
+    instrument(io,{
+        auth : false,
+
+    })
     let onlineUsers = {};
 
     io.on("connection", async (socket) => {
-        console.log(socket.id);
-        
         let userId = socket.handshake?.auth?.userId;
         onlineUsers[userId] = socket.id;
 
@@ -31,7 +34,7 @@ app.prepare().then(() => {
 
 
         if (userId) {
-            await Promise.all([
+            let [messagesUpdate, messageStatusUpdate, friendRequests] = await Promise.all([
                 prisma.message.updateMany({
                     where: { receiverId: userId, status: "sent" },
                     data: {
@@ -45,31 +48,65 @@ app.prepare().then(() => {
                     data: {
                         deliveredAt: new Date()
                     }
-                })])
+                }
+            ),
+            prisma.friendRequest.findMany({
+                    where : {
+                        OR : [
+                            {senderId : userId},
+                            {receiverId : userId}
+                        ],
+                        status : "Accepted"
+                    },
+                    select : {
+                        receiverId : true,
+                        senderId : true
+                    }
+                })
+        ]
+        )
+            
+            let ids = friendRequests.map((obj)=>{
+                if (obj.senderId === userId){
+                    return onlineUsers[obj.receiverId]
+                }
+                return onlineUsers[obj.senderId]
+            })
+            
+            for (const id of ids) {
+                if (id){
+                    io.to(id).emit("changeStatus-all", userId)
 
-
-            socket.broadcast.emit("changeStatus-all", userId)
+                }
+            }
         }
 
 
         socket.on("join-users", (groupObj, ack) => {
-            for (let key in groupObj) {
+        
+                
+                for (let key in groupObj) {
+    
+                    
                 groupObj[key].forEach(obj => {
                     let userSocket = io.sockets.sockets.get(onlineUsers[obj.userId])
+                    
                     if (userSocket) {
-
+                        
                         userSocket.join(key)
                     }
                 });
             }
             ack({ success: true })
+       
         })
         socket.on("join-to-group", (groupId, uerIds) => {
-
+            
             uerIds.forEach(user => {
                 let userSocket = io.sockets.sockets.get(onlineUsers[user])
 
                 if (userSocket) {
+     
                     userSocket.join(groupId)
                 }
 
@@ -117,10 +154,9 @@ app.prepare().then(() => {
                         status: true
                     }
                 })
-
-
+                
                 if (newMessages) {
-
+                    
                     io.to(newMessages.groupId).emit("receiveMessages", newMessages, data.uniqueId)
                 }
             } catch (error) {
@@ -299,25 +335,19 @@ app.prepare().then(() => {
 
         socket.on("sendRequest",(user)=>{
             let receiverSocket = onlineUsers[user.id]
-            console.log(user);
-            
-            console.log("sending the socket to "+receiverSocket);
-            
+
             io.to(receiverSocket).emit("request_receive_notification",user)
         })
 
         socket.on("cancelRequest",(user)=>{
-            console.log("in server");
-            console.log(user);
-                
+    
             let receiverSocket = onlineUsers[user.id]
             io.to(receiverSocket).emit("cancel_request",user)
 
         })
 
         socket.on("requestAccepted",(user,senderId)=>{
-            console.log(user);
-            
+
             let receiverSocket = onlineUsers[senderId]
             io.to(receiverSocket).emit("request_accepted",user)
 
@@ -328,7 +358,6 @@ app.prepare().then(() => {
         // Disconnect handler
         socket.on("disconnect", async () => {
             delete onlineUsers[userId];
-            console.log("A user disconnected "+userId)
             let OnlineUsers = Object.keys(onlineUsers);
             io.emit("getOnlines", OnlineUsers);
             let date = new Date()

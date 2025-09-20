@@ -5,9 +5,7 @@ import { create } from "zustand"
 import { groupStore } from "./groupStore"
 import { createSelectors } from "@/lib/Selector"
 import { addallmessages, addmessage, deletelastmessage, deletemessage, deletereaction, getmessagebyid, getOneMessage, updateallreactions, updatemessage, updatemessagestatus, updatereaction, updateToRead } from "@/database/indexdb"
-import { UpdateReaction } from "@/actions/UpdateReactions"
 import { dropDown } from "./dropdown"
-import { UserCheck2 } from "lucide-react"
 import {motion} from "framer-motion"
 export let authStore = create((set, get) => ({
   loading: false,
@@ -127,6 +125,41 @@ export let authStore = create((set, get) => ({
     }
 
   },
+  getChatData : async ()=>{
+    set({loading : true})
+    let setgroups = groupStore.getState().setgroups
+    try {
+    let [res1 , res2] = await Promise.all([
+
+      axios.get("/api/all-users"),
+       axios.get("api/get-groups")
+    ])
+     
+      if (res1.status === 200) {
+        let users = res1?.data.users
+        
+        let sortedUsers = users.sort((a, b) => (new Date(b.lastmessage?.createdAt ?? 0).getTime()) - (new Date(a.lastmessage?.createdAt ?? 0).getTime()))
+
+        set({ users: sortedUsers })
+      }
+      setgroups(res2?.data?.groups)
+      get().getAllMessages()
+    } catch (error) {
+      if (error?.response?.status === 404) {
+        toast.error(error?.response?.data.message)
+      } else if (error?.response?.status === 404) {
+        error?.response?.data.message
+      }
+
+      else {
+        toast.error(error?.response?.data.message)
+
+      }
+    } finally{
+      set({loading : false})
+    }
+
+  },
   handleUpdate: async (uniqueId, message) => {
 
     await updatemessagestatus(message)
@@ -153,12 +186,26 @@ export let authStore = create((set, get) => ({
   },
   getMessages: async (receiverId, userId) => {
     set({ skeleton: true })
+    console.log("running");
+    
     let messages = await getmessagebyid(userId)
+    console.log(messages);
+    
     if (messages.length > 0) {
       
       let sorted = messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       set({ messages: sorted })
     }
+    
+    get().setUsers((users)=>{
+      return users.map((user)=>{
+        if (user.id === userId){
+          return {...user,friend : {...user.friend,UnReadedMessageCount : 0}} 
+        } 
+        return user
+      })
+    })
+    
     set({ skeleton: false })
 
   },
@@ -171,7 +218,7 @@ export let authStore = create((set, get) => ({
       set((state) => ({
         users: state.users.map((user) => {
           if (user.id === userId) {
-            return { ...user, lastmessage: message }
+            return { ...user, lastmessage: message,friend : {...user.friend,UnReadedMessageCount : user.friend.UnReadedMessageCount+ 1} }
           }
           return user
         })
@@ -226,7 +273,9 @@ export let authStore = create((set, get) => ({
     let { content, ...rest } = data
     let uniquId = Date.now().toString()
     let date = new Date()
+    
     if (get().Selected !== null) {
+      
       let chatId = get().selectedInfo.id
       let reply = dropDown.getState().reply
       let setReply = dropDown.getState().setReply
@@ -240,7 +289,7 @@ export let authStore = create((set, get) => ({
       await addmessage({ ...others, id: uniqueId, userId: chatId }) 
      
       
-      let res = await deletelastmessage(chatId)
+      await deletelastmessage(chatId)
       
       get().socket.emit("receiver-data", newdata, chatId)
       setData({
@@ -253,7 +302,7 @@ export let authStore = create((set, get) => ({
     }
     if (selectedGroup !== null) {
 
-      let groupData = { ...rest, content: contents, senderId: get().session?.user.id, groupId: selectedGroup?.id, createdAt: date, status: "pending", uniqueId: uniqueId }
+      let groupData = { ...rest, content: contents, senderId: get().session?.user.id, groupId: selectedGroup?.id, createdAt: date, status: "pending", uniqueId: uniquId }
       setGroupMessages([...groupMessages, groupData])
       setData({
         receiver: "",
@@ -262,6 +311,8 @@ export let authStore = create((set, get) => ({
       })
 
       get().socket?.emit("send-groupMessage", groupData)
+    
+      
 
     }
   },
@@ -307,6 +358,7 @@ export let authStore = create((set, get) => ({
     }
     if (selectedGroup) {
       if (groupMessages.length === 0) return
+      
       let updatedMessage = groupMessages.map((message) => {
 
         return { ...message, status: message.status.map((st) => st.userId === userId ? { ...st, deliveredAt: new Date() } : st) }
@@ -316,11 +368,10 @@ export let authStore = create((set, get) => ({
     }
   },
   getAllMessages: async () => {
-
-    try {
+   
       let messages = await getOneMessage()
-      if (messages !== null) {
-
+      
+      if (messages) {
         let res = await axios.get("/api/getLastSeenMessages")
         if (res.status === 200){
           if (res.data?.Messages.length > 0) {
@@ -335,16 +386,14 @@ export let authStore = create((set, get) => ({
       }
 
       let res = await axios.get("/api/getAllMessages")
-
+      console.log(res);
+      
       if (res.status === 200 && res.data?.Messages.length > 0) {
         await addallmessages(res.data?.Messages)
+    
+        
       }
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
+   
   },
   updateInIndexdb: async (id, message) => {
     
@@ -378,6 +427,7 @@ export let authStore = create((set, get) => ({
   },
 
   updateReaction2 :  (data)=>{
+    console.log("running update reactions");
     
     let {messageId,...rest} = data
     get().addReactionToMessage(messageId,rest)
@@ -396,7 +446,6 @@ export let authStore = create((set, get) => ({
     await updatereaction({reactionId : data.reactionId , id : data.id,url : data.url})
   },
   delete_message : async(id)=>{
-    console.log("Deleting through the socket");
     
     set((state)=>({
       messages : state.messages.map((msg)=>{
@@ -466,8 +515,6 @@ export let authStore = create((set, get) => ({
   },
   handleAccpeted : (data)=>{
     get().playSound()
-    console.log("running accepted");
-    
     toast.custom(
       (t)=>(
         <motion.div 

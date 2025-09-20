@@ -11,7 +11,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
         GoogleProvider({
             clientSecret: process.env.CLIENT_SECRET,
             clientId: process.env.CLIENT_ID,
-            authorization: { params: { access_type: 'offline', prompt: 'consent',response_type : "code" } }
         }),
         GithubProvider({
             clientId: process.env.GITHUB_ID,
@@ -24,7 +23,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                 password: { label: "password", type: "password" }
             },
             async authorize(credentials) {
-                console.log(credentials);
                 
                 try {
                     if (!credentials) return null
@@ -53,9 +51,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                         }
                     })
                     
-                    
-                    
-                   console.log(user);
                    
                     if (!user) {
                         return null
@@ -63,7 +58,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                     let isPasswordCorrect ;
 
                         if (credentials?.password){
-                            console.log(credentials.password);
                             
                             isPasswordCorrect=  await bcrypt.compare(credentials?.password, user.accounts[0]?.password)
                         }
@@ -78,6 +72,10 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
 
                     let account = user.accounts[0]
+                    console.log("signing in");
+                    
+                    console.log(account);
+                    
                     return {
                         id: account.id,
                         name: account.name,
@@ -99,21 +97,22 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
     ],
     callbacks: {
         async jwt({ token, user,trigger ,session }) {
-            console.log("running the token")
-            console.log(token);
             
                 if (user) {
                     token = {}
                     token.user = user
                 }
-                console.log("the data is");
                 
-                console.log(trigger , session);
                 
                 if (trigger === "update" && session?.isCompleted){
-                    console.log("its is completed yall are correct ");
+                    console.log("updated in jwt");
+                    console.log(session);
                     
                     token.user.isCompleted = true
+                    token.user.name = session?.name
+                    token.user.bio = session?.bio
+                    token.user.image = session?.image
+
                 }   
 
             return token
@@ -128,7 +127,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
             return session
         },
         async signIn({ user, account }) {
-            console.log("in signIn ");
                 console.log(user,account);
                 
             try {
@@ -171,8 +169,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
 
                         }else{
-                            console.log("existed user ");
-                            console.log(isAccountExisted);
                             
                             user.id = isAccountExisted.id
                             user.bio = isAccountExisted?.bio || ""
@@ -208,6 +204,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                 }
                             }
                         })
+                     console.log(userdata);
                      
                         if (userdata){
 

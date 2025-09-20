@@ -1,9 +1,8 @@
 "use client"
-import { updateSession } from '@/database/indexdb'
 import { authstore } from '@/zustand/store'
 import axios from 'axios'
 import { Save, User, FileText, Camera, Sparkles, X } from 'lucide-react'
-import { useSession} from "next-auth/react"
+import { useSession } from "next-auth/react"
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
@@ -14,57 +13,56 @@ const page = () => {
   const [avatars, setavatars] = useState([])
   const [userData, setuserData] = useState({
     name: "",
-    avatar:  "",
+    avatar: "",
     bio: ""
   })
-  
+
   const [showAvatars, setShowAvatars] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  
+
   const fileref = useRef()
-  
+
   const handleChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    
+
     const reader = new FileReader()
     reader.onload = () => {
       setuserData(prev => ({ ...prev, avatar: reader.result }))
     }
     reader.readAsDataURL(file)
   }
-  
+
   const getAvatars = async () => {
     const avatarNames = ["Jude", "Jameson", "Eden", "Leah", "Valentina", "Christian", "Andrea", "Christopher", "Brooklynn", "Jocelyn", "Jessica", "Riley", "Katherine", "Oliver", "Liam", "Eliza", "Kingston", "Maria", "Mackenzie", "Robert"]
-    const avatarUrls = avatarNames.map(name => 
+    const avatarUrls = avatarNames.map(name =>
       `https://api.dicebear.com/9.x/avataaars/png?seed=${name}`
     )
     setavatars(avatarUrls)
   }
-  
+
   useEffect(() => {
     getAvatars()
   }, [])
   useEffect(() => {
-    console.log(session);
-    
-      setuserData(prev=>{
-        return {...prev,name : session?.user.name ?? "" , avatar : session?.user.image ?? "",bio : session?.user.bio ?? ""}
-      })
+
+    setuserData(prev => {
+      return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
+    })
   }, [session])
   const handleAvatarSelect = (avatarUrl) => {
     setuserData(prev => ({ ...prev, avatar: avatarUrl }))
     setShowAvatars(false)
   }
-  
+
   const handleInputChange = (field, value) => {
     setuserData(prev => ({ ...prev, [field]: value }))
   }
-  let {update} = useSession()
+  let { update } = useSession()
   const handleSave = async () => {
     if (!userData.bio || !userData.avatar || !userData.name) return
-    
+
     try {
       setIsLoading(true)
       const res = await axios.put("api/updateProfile", {
@@ -72,20 +70,21 @@ const page = () => {
         name: userData.name,
         bio: userData.bio,
         avatar: userData.avatar,
-        isCompleted : true
+        isCompleted: true
 
       })
-      
+
       if (res.status === 200) {
-        const updatedSession = await updateSession({
-          id: session?.user?.id,
+        let data = {
           name: userData.name,
           bio: userData.bio,
           image: userData.avatar,
-          isCompleted : true
+          isCompleted: true
+        }
+        setsession({
+          ...session,data
         })
-        setsession(updatedSession)
-        update({isCompleted : true})
+        update(data)
         router.push("/")
       }
     } catch (error) {
@@ -94,48 +93,32 @@ const page = () => {
       setIsLoading(false)
     }
   }
-  
-  const isFormValid = userData?.bio?.trim() && userData.avatar && userData.name.trim()
-  
+
+  const isFormValid = (userData?.bio?.trim() && userData.avatar && userData.name.trim())
+  let isSame = (userData?.bio?.trim() === session?.user.bio && userData.avatar === session?.user?.image && userData.name.trim() === session?.user?.name)
   return (
-    <div 
+    <div
       className="min-h-screen"
-      style={{
-        background: `linear-gradient(135deg, #0D1520 0%, #111927 25%, #0D2847 50%, #003362 75%, #004074 100%)`
-      }}
     >
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-#70B8FF via-#3B9EFF to-#0090FF bg-clip-text text-transparent mb-3">
             Complete Your Profile
           </h1>
-          <p className="text-#C2E6FF/80 text-lg">
-            Personalize your account with a photo and bio
-          </p>
         </div>
 
-        {/* Main Card */}
         <div className="max-w-2xl mx-auto">
-          <div 
-            className="rounded-3xl shadow-2xl border border-#104D87/30 overflow-hidden backdrop-blur-sm"
-            style={{
-              background: `linear-gradient(145deg, rgba(16, 77, 135, 0.15) 0%, rgba(32, 93, 158, 0.1) 50%, rgba(40, 112, 189, 0.05) 100%)`
-            }}
+          <div
+            className="rounded-3xl overflow-hidden "
           >
-            
-            {/* Avatar Section */}
-            <div className="px-8 py-12 border-b border-#104D87/20">
+
+            <div className="px-8 py-8 ">
               <div className="flex flex-col items-center">
-                
-                {/* Avatar Display */}
+
                 <div className="relative group mb-6">
-                  <div 
-                    className="w-32 h-32 rounded-full overflow-hidden border-4 shadow-xl relative"
-                    style={{
-                      borderColor: '#2870BD',
-                      background: userData.avatar ? 'transparent' : `linear-gradient(135deg, #205D9E, #2870BD)`
-                    }}
+                  <div
+                    className="w-32 h-32 rounded-full border-blue-500 border overflow-hidden relative"
+                  
                   >
                     {userData.avatar ? (
                       <Image
@@ -149,13 +132,12 @@ const page = () => {
                         <User className="w-12 h-12 text-#C2E6FF" />
                       </div>
                     )}
-                    
-                    {/* Hover Overlay */}
+
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center cursor-pointer rounded-full">
                       <Camera className="w-6 h-6 text-white mb-1" />
                       <span className="text-xs text-white font-medium">Change</span>
                     </div>
-                    
+
                     <input
                       type="file"
                       ref={fileref}
@@ -166,14 +148,9 @@ const page = () => {
                   </div>
                 </div>
 
-                {/* Avatar Options Button */}
                 <button
                   onClick={() => setShowAvatars(!showAvatars)}
                   className="px-6 py-2.5 rounded-full font-medium transition-all duration-300 flex items-center gap-2 border border-#2870BD/50 hover:border-#0090FF"
-                  style={{
-                    background: `linear-gradient(135deg, #2870BD 0%, #0090FF 100%)`,
-                    boxShadow: '0 4px 20px rgba(0, 144, 255, 0.25)'
-                  }}
                 >
                   <Sparkles className="w-4 h-4 text-white" />
                   <span className="text-white">Choose Avatar</span>
@@ -181,9 +158,8 @@ const page = () => {
               </div>
             </div>
 
-            {/* Avatar Selection Modal */}
             {showAvatars && (
-              <div className="px-8 py-6 border-b border-#104D87/20">
+              <div className="px-8 py-6 ">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-#C2E6FF flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-#0090FF" />
@@ -196,8 +172,8 @@ const page = () => {
                     <X className="w-5 h-5 text-#C2E6FF" />
                   </button>
                 </div>
-                
-                <div className="grid grid-cols-6 gap-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-#2870BD scrollbar-track-transparent">
+
+                <div className="grid grid-cols-6 gap-1 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-#2870BD scrollbar-track-transparent">
                   {avatars.map((avatar, index) => (
                     <button
                       key={index}
@@ -220,34 +196,21 @@ const page = () => {
               </div>
             )}
 
-            {/* Form Section */}
-            <div className="px-8 py-8 space-y-6">
-              
-              {/* Name Input */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-#C2E6FF flex items-center gap-2">
-                  <User className="w-4 h-4 text-#0090FF" />
-                  Full Name
-                </label>
+            <div className="px-8  space-y-6">
+
                 <input
                   type="text"
                   value={userData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="Enter your full name"
-                  className="w-full px-4 py-3 rounded-xl border border-#104D87/40 focus:border-#0090FF focus:outline-none transition-all duration-300 text-white placeholder-#C2E6FF/50"
+                  className="w-full px-4 py-3 rounded-full outline-none  shadow-[0_0_1px_0.3px_gray] focus:ring-2 ring-blue-400 transition-all duration-300 text-white placeholder-#C2E6FF/50"
                   style={{
                     background: `linear-gradient(135deg, rgba(16, 77, 135, 0.3) 0%, rgba(32, 93, 158, 0.2) 100%)`,
                     backdropFilter: 'blur(10px)'
                   }}
                 />
-              </div>
 
-              {/* Bio Input */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-#C2E6FF flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-#0090FF" />
-                  Bio
-                </label>
+          
                 <div className="relative">
                   <textarea
                     value={userData.bio}
@@ -255,7 +218,7 @@ const page = () => {
                     placeholder="Tell us about yourself..."
                     maxLength={200}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl border border-#104D87/40 focus:border-#0090FF focus:outline-none transition-all duration-300 resize-none text-white placeholder-#C2E6FF/50"
+                    className="w-full px-4 py-3 rounded-lg shadow-[0_0_1px_0.3px_gray] outline-none  focus:ring-2 ring-blue-400 transition-all duration-300 resize-none text-white placeholder-#C2E6FF/50"
                     style={{
                       background: `linear-gradient(135deg, rgba(16, 77, 135, 0.3) 0%, rgba(32, 93, 158, 0.2) 100%)`,
                       backdropFilter: 'blur(10px)'
@@ -264,28 +227,26 @@ const page = () => {
                   <div className="absolute bottom-3 right-3 text-xs text-#C2E6FF/60">
                     {userData.bio.length}/200
                   </div>
-                </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-4 pt-6">
                 <button
-                  onClick={() => setuserData({ name: "", avatar: "", bio: "" })}
-                  disabled={!isFormValid}
-                  className="flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 border border-#104D87/50 text-#C2E6FF hover:bg-#104D87/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setuserData({ name: session?.user?.name, avatar: session?.user?.image, bio:session?.user?.bio})}
+                  disabled={!isSame &&!isFormValid}
+                  className="flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300  text-#C2E6FF hover:bg-#104D87/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Reset
                 </button>
-                
+
                 <button
                   onClick={handleSave}
-                  disabled={!isFormValid || isLoading}
+                  disabled={isSame || !isFormValid || isLoading}
                   className="flex-1 px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 text-white disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
                   style={{
-                    background: isFormValid 
+                    background: isFormValid
                       ? `linear-gradient(135deg, #2870BD 0%, #0090FF 50%, #3B9EFF 100%)`
                       : '#104D87',
-                    boxShadow: isFormValid 
+                    boxShadow: isFormValid
                       ? '0 8px 25px rgba(0, 144, 255, 0.35)'
                       : 'none'
                   }}

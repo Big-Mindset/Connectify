@@ -13,8 +13,18 @@ const FriendRequests = ({ setopenFriendRequest }) => {
   // Texts = #C2E6FF , #70B8FF
     let socket = authstore.use.socket()
   let session = authstore.use.session()
+  let playSound = authstore.use.playSound()
   const [Requests, setRequests] = useState([])
   const [loading, setloading] = useState(true)
+  const [Selected, setSelected] = useState("Received")
+  let isSelected = Selected === "Received"
+  
+  let filteredData = Requests.filter((req)=>{
+    let isSender = session.user.id  === req.senderId
+    return (!isSender && isSelected) || (isSender && !isSelected)
+  })
+  let isSender = filteredData[0]?.senderId === session.user.id
+  
   useEffect(() => {
     let getallRequests = async () => {
       
@@ -29,13 +39,7 @@ const FriendRequests = ({ setopenFriendRequest }) => {
     }
     getallRequests()
   }, [])
-  const [Selected, setSelected] = useState("Received")
-  let isSelected = Selected === "Received"
-  let filteredData = Requests.filter((req)=>{
-    let isSender = session.user.id  === req.senderId
-    return (!isSender && isSelected) || (isSender && !isSelected)
-  })
-  let isSender = filteredData[0]?.senderId === session.user.id
+  
   let handleRequest = async (id)=>{
     setRequests(prev=>{
       return prev.filter((req)=>req.id !== id)
@@ -47,12 +51,7 @@ const FriendRequests = ({ setopenFriendRequest }) => {
   }
   useEffect(() => {
     let handleReuest = (user)=>{
-      const audio = new Audio("/notification_simple-02.mp3") 
-    
-      audio.play().catch((err) => {
-        console.warn("Autoplay blocked:", err)
-      })
-      
+     playSound()
       let isAvailabe = Requests.find((req)=>req.id === user.requestReceived.id)
       if (!isAvailabe){
         
@@ -93,9 +92,9 @@ const FriendRequests = ({ setopenFriendRequest }) => {
     initial={{x : -500 ,}}
     animate={{x : 0 }}
     transition={{duration : 0.5}}
-    className='bg-gradient-to-br p-4  h-full dark:from-[#0D2847] dark:to-[#141726] absolute inset-0 z-20'>
+    className='bg-gradient-to-br p-4  h-full dark:from-[#0D2847] to-gray-100 from-white  dark:to-[#141726] absolute inset-0 z-20'>
       <header className='mb-4 flex justify-between items-center' >
-        <h1 className='font-bold text-[#70B8FF] text-[1.3rem]'>Friend Requests</h1>
+        <h1 className='font-bold dark:text-[#70B8FF] text-blue-950 text-[1.3rem]'>Friend Requests</h1>
         <div
           onClick={() => {
             setopenFriendRequest(false)
@@ -122,7 +121,7 @@ const FriendRequests = ({ setopenFriendRequest }) => {
         loading ?  
         <>
           <div className='absolute inset-0 bg-gray-900/40 z-40'></div>
-        <div className='absolute text-3xl left-1/2  top-1/2 -translate-x-1/2 -translate-y-1/2'>
+        <div className='absolute text-3xl left-1/2 z-50 top-1/2 -translate-x-1/2 -translate-y-1/2'>
                     <Image src={properLogo} alt="Loading" width={100} height={100} className='animate-pulse relative z-30' />
                   </div> 
         </> 
@@ -144,20 +143,20 @@ const FriendRequests = ({ setopenFriendRequest }) => {
                 <div className='flex items-center justify-between gap-1.5 '>
 
                   <div className='flex items-center gap-2 '>
-                    <div className='user-avatar rounded-full overflow-hidden size-14 border-2 b p-0.5'>
-                      <Image alt="user-avatar" height={47} width={48}
+                    <div className='user-avatar rounded-full relative overflow-hidden size-14 border-2 b p-0.5'>
+                      <Image alt="user-avatar" fill sizes={20}
                         className='w-full h-full object-cover'
                         src={req.data?.avatar} />
                     </div>
                     <div className='flex flex-col'>
-                      <p className='font-bold text-blue-100'>{req.data?.name}</p>
-                      <p className='text-[0.8rem] text-gray-300'>{req.data?.bio}</p>
+                      <p className='font-bold dark:text-blue-100 text-gray-800'>{req.data?.name}</p>
+                      <p className='text-[0.8rem] dark:text-gray-300 text-gray-600'>{req.data?.bio}</p>
                     </div>
                   </div>
                   <div className='flex flex-col gap-2 grow-[0.2]'>
                     <div className='flex gap-0.5  items-center'>
-                      <Timer size={14} className='text-blue-300' />
-                      <p className='text-[0.79rem] text-blue-100'>
+                      <Timer size={14} className='dark:text-blue-300 text-blue-800' />
+                      <p className='text-[0.79rem] dark:text-blue-100 text-blue-800'>
                         Sent at {day} {date}</p>
                     </div>
 
@@ -168,8 +167,8 @@ const FriendRequests = ({ setopenFriendRequest }) => {
                           handleRequest(req.id)
                         }}
 
-                        className={`border-[1px]  flex gap-1 justify-center items-center  py-1 px-2 rounded-full border-red-400  hover:text-red-100 hover:border-red-300  text-red-300  cursor-pointer `}>
-                        <X /> Cancel
+                        className={`border-[1px] hover:text-black hover:border-black flex gap-1 justify-center items-center   py-1 px-2 rounded-full border-red-400  dark:hover:text-red-100 dark:hover:border-red-300  dark:text-red-300 text-red-700  cursor-pointer `}>
+                        <X /> <p className=''>Cancel</p>
                       </button>
                       :
                       <div className='flex gap-2 '>
@@ -191,13 +190,13 @@ const FriendRequests = ({ setopenFriendRequest }) => {
     : <div>
         {isSelected ? (
     <div className='absolute left-1/2 top-[40%] -translate-x-1/2 flex flex-col items-center gap-2 mt-2'>
-      <Inbox size={32} className='text-blue-300' />
-      <p className='text-[#C2E6FF]'>You haven't received a friend request</p>
+      <Inbox size={32} className='dark:text-blue-300 text-blue-800' />
+      <p className='dark:text-[#C2E6FF] text-blue-700'>You haven't received a friend request</p>
     </div>
   ) : (
     <div className='absolute left-1/2 top-[40%] -translate-x-1/2 flex flex-col items-center gap-2 mt-2'>
-      <Send size={32} className='text-blue-300' />
-      <p className='text-[#C2E6FF]'>You haven't sent a friend request</p>
+      <Send size={32} className='dark:text-blue-300 text-blue-800' />
+      <p className='dark:text-[#C2E6FF] text-blue-700'>You haven't sent a friend request</p>
     </div>
   )}
       </div>
