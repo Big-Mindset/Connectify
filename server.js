@@ -15,7 +15,15 @@ app.prepare().then(() => {
 
 
     let server = createServer(handler);
-
+server.on('request', (req, res) => {
+    if (req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('Server is healthy!');
+        return;
+    }
+    // Let Next.js handle all other requests
+    handler(req, res);
+});
     let io = new Server(server, {
         cors: {
             origin: process.env.NEXTAUTH_URL,
@@ -402,7 +410,7 @@ app.prepare().then(() => {
         });
     });
 
-    server.listen(port,"0.0.0.0", () => {
+    server.listen(port, () => {
         console.log("=== ENVIRONMENT VARIABLES ===");
 console.log("DATABASE_URL:", process.env.DATABASE_URL ? "SET" : "NOT SET");
 console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
