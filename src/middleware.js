@@ -21,7 +21,8 @@ export async function middleware(request) {
   ) {
     return NextResponse.next();
   }
-
+  console.log("the secret key is "+process.env.NEXTAUTH_SECRET);
+  
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
