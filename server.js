@@ -11,20 +11,7 @@ const app = next({ dev: process.env.NODE_ENV !== "production"});
 const handler = app.getRequestHandler();
 
 app.prepare().then(() => { 
-  const server = createServer((req, res) => {
-    const parsedUrl = parse(req.url, true);
-    const { pathname } = parsedUrl;
-    
-    // Handle health check before passing to Next.js
-    if (pathname === '/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
-      return;
-    }
-    
-    // For all other routes, use Next.js handler
-    handler(req, res, parsedUrl);
-  });
+        let server = createServer(handler);
     let io = new Server(server, {
         cors: {
             origin: process.env.NEXTAUTH_URL,
