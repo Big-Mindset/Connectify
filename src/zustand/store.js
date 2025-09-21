@@ -1,5 +1,4 @@
 "use client"
-import axios from "axios"
 import toast from "react-hot-toast"
 import { create } from "zustand"
 import { groupStore } from "./groupStore"
@@ -7,6 +6,7 @@ import { createSelectors } from "@/lib/Selector"
 import { addallmessages, addmessage, deletelastmessage, deletemessage, deletereaction, getmessagebyid, getOneMessage, updateallreactions, updatemessage, updatemessagestatus, updatereaction, updateToRead } from "@/database/indexdb"
 import { dropDown } from "./dropdown"
 import {motion} from "framer-motion"
+import api from "@/lib/axiosInstance"
 export let authStore = create((set, get) => ({
   loading: false,
   setLoading: (loading) => set({ loading }),
@@ -98,8 +98,13 @@ export let authStore = create((set, get) => ({
   getAllUsers: async () => {
     set({ loading: true })
     try {
-      let res = await axios.get("/api/all-users")
-
+      console.log("running");
+      
+      console.log(api);
+      
+      let res = await api.get("/all-users")
+      console.log(res);
+      
       if (res.status === 200) {
         let users = res?.data.users
         
@@ -127,12 +132,14 @@ export let authStore = create((set, get) => ({
   },
   getChatData : async ()=>{
     set({loading : true})
+    console.log(api);
+    
     let setgroups = groupStore.getState().setgroups
     try {
     let [res1 , res2] = await Promise.all([
 
-      axios.get("/api/all-users"),
-       axios.get("api/get-groups")
+      api.get("/all-users"),
+       api.get("/get-groups")
     ])
      
       if (res1.status === 200) {
@@ -372,7 +379,7 @@ export let authStore = create((set, get) => ({
       let messages = await getOneMessage()
       
       if (messages) {
-        let res = await axios.get("/api/getLastSeenMessages")
+        let res = await api.get("/getLastSeenMessages")
         if (res.status === 200){
           if (res.data?.Messages.length > 0) {
             await addallmessages(res.data?.Messages)
@@ -385,7 +392,7 @@ export let authStore = create((set, get) => ({
           return null
       }
 
-      let res = await axios.get("/api/getAllMessages")
+      let res = await api.get("/getAllMessages")
       console.log(res);
       
       if (res.status === 200 && res.data?.Messages.length > 0) {

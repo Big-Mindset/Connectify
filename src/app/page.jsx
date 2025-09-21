@@ -16,6 +16,7 @@ import Image from 'next/image';
 import Typewriter from 'typewriter-effect';
 import { Moon, Sun } from 'lucide-react';
 import Loader from '@/components/ChatsComp/Loader';
+import api from '@/lib/axiosInstance';
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -53,7 +54,11 @@ const Page = () => {
   useEffect(() => {
     getChatData()
   }, [])
-
+useEffect(()=>{
+  console.log("running");
+  console.log(api);
+  
+},[api])
 
   const [Completed, setCompleted] = useState(false)
   let { setTheme, resolvedTheme } = useTheme()
@@ -91,26 +96,6 @@ const Page = () => {
       <div className={`rounded-xl overflow-hidden relative flex ${showBlur && "shadow-[0_0_8px_4px_rgba(60,0,200,0.6)]"}  transition-all w-full     
      duration-300  before:transition-all
       bg-gray-100 dark:bg-[#111927]`}>
-        {/* <motion.div
-          initial={{ height: 0 }}
-          animate={{ height: mounted ? "100%" : 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-          className={`absolute left-0 top-0 z-50  w-[0.2px] bg-blue-500/60    `}></motion.div>
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: mounted ? "100%" : 0 }}
-          transition={{ duration: 1, ease: "easeInOut", }}
-          className={`absolute left-0 top-0 z-50 h-[0.2px]  bg-blue-500/60   `}></motion.div>
-        <motion.div
-          initial={{ height: 0 }}
-          animate={{ height: mounted ? "100%" : 0 }}
-          transition={{ duration: 1, ease: "easeInOut", }}
-          className={`absolute right-4 top-0 z-50  bg-blue-500/60 `}></motion.div>
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: mounted ? "100%" : 0 }}
-          transition={{ duration: 1, ease: "easeInOut", }}
-          className={`absolute left-0 bottom-0 z-50 w-0 h-[1px] bg-blue-500/60  `}></motion.div> */}
 
 
 

@@ -7,6 +7,7 @@ import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
 import bcrypt from "bcryptjs"
 export const { handlers, auth, signIn, signOut }=NextAuth({
+    trustHost : true,
     providers: [
         GoogleProvider({
             clientSecret: process.env.CLIENT_SECRET,
@@ -72,9 +73,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
 
                     let account = user.accounts[0]
-                    console.log("signing in");
-                    
-                    console.log(account);
                     
                     return {
                         id: account.id,
@@ -86,7 +84,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
                     }
                 } catch (error) {
-                    console.log(error.message);
 
                     return null
 
@@ -97,6 +94,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
     ],
     callbacks: {
         async jwt({ token, user,trigger ,session }) {
+            console.log(token);
             
                 if (user) {
                     token = {}
@@ -105,8 +103,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                 
                 
                 if (trigger === "update" && session?.isCompleted){
-                    console.log("updated in jwt");
-                    console.log(session);
                     
                     token.user.isCompleted = true
                     token.user.name = session?.name
@@ -127,9 +123,8 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
             return session
         },
         async signIn({ user, account }) {
-                console.log(user,account);
                 
-            try {
+            
                 if (user?.email && (account.provider === "google" || account.provider === "github")) {
                     let existingUser = await prisma.user.findUnique({
                         where: { email: user.email },
@@ -204,7 +199,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                 }
                             }
                         })
-                     console.log(userdata);
                      
                         if (userdata){
 
@@ -218,14 +212,11 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                     }
 
                 }
-            } catch (error) {
-                console.log(error.message);
-
-            }
+            
             return true
         }
     },
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
     session: {
         strategy: "jwt",
         maxAge: 60 * 60 * 48,

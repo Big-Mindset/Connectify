@@ -3,6 +3,7 @@ import toast from "react-hot-toast"
 import {create} from "zustand"
 import { authStore } from "./store"
 import { createSelectors } from "@/lib/Selector"
+import api from "@/lib/axiosInstance"
 
 
 export let groupStore = create((set,get)=>({
@@ -15,9 +16,7 @@ export let groupStore = create((set,get)=>({
 
 
     handleGetMessages :  (messages,uniqueId)=>{
-        console.log("the group func");
-        console.log(messages);
-        console.log(uniqueId);
+
         let {groups , setgroups,} = get()
         let selectedGroup = get().selectedGroup
         let {socket,session} = authStore.getState()
@@ -40,7 +39,12 @@ export let groupStore = create((set,get)=>({
         }
     }
 
-    
+    setgroups(groups.map((group)=>{
+        if (group.id === selectedGroup.id){
+          return {...group,groupsMessages : [messages]}
+        }
+        return group
+      }))
     if (!selectedGroup || selectedGroup?.id !== messages?.groupId) return
 
         
@@ -54,12 +58,7 @@ export let groupStore = create((set,get)=>({
                 })
                 set({groupMessages : updatedMessage})
      
-      setgroups(groups.map((group)=>{
-        if (group.id === selectedGroup.id){
-          return {...group,groupsMessages : [messages]}
-        }
-        return group
-      }))
+      
         }else{
             
             set({groupMessages : [...get().groupMessages,messages]})
@@ -71,7 +70,7 @@ export let groupStore = create((set,get)=>({
         let setSkeleton = authStore.getState().setSkeleton
         setSkeleton(true)
         try{
-            let res = await axios.get(`api/groupMessages?groupId=${groupId}`)
+            let res = await api.get(`/groupMessages?groupId=${groupId}`)
             if (res.status === 200){
                 set({groupMessages :res.data.messages })
                 
@@ -81,7 +80,8 @@ export let groupStore = create((set,get)=>({
                 
                 toast.error(err.response.data.message)
             }else{
-                console.log(err.message);
+                toast.error(err.message)
+
                 
             }
         }finally{
@@ -124,13 +124,13 @@ export let groupStore = create((set,get)=>({
     },
      getGroup : async ()=>{
         try {
-          let res = await axios.get("api/get-groups")
+          let res = await api.get("/get-groups")
           set({groups  : res?.data?.groups})
         } catch (error) {
           if (error?.response?.status){
             toast.error(error.response.data.message)
           }else{
-            console.log(error.message);
+            toast.error(error.message);
             
           }
       }

@@ -16,7 +16,7 @@ import { authstore } from "@/zustand/store"
 import Image from "next/image"
 import { AnimatePresence, motion } from "framer-motion"
 import React, { useMemo } from "react"
-import { ChevronDown, TrashIcon } from "lucide-react"
+import { TrashIcon } from "lucide-react"
 import { dropDown } from "@/zustand/dropdown"
 import { CreateReaction } from "@/actions/CreateReaction"
 import {
@@ -437,20 +437,20 @@ const Message = React.memo(
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className={`flex items-center gap-4 justify-between ${isSender ? "bg-blue-950" : "bg-black/40"
+                  className={`flex items-center gap-4 justify-between ${isSender ? "dark:bg-blue-950 bg-gray-50" : "dark:bg-black/40 "
                     } ${isReplySender ? "border-blue-500" : "border-indigo-500"
                     } rounded-lg overflow-hidden border-l-[4px] h-full`}
                 >
                   <div className="flex flex-col justify-center h-full">
                     <span
-                      className={`${isReplySender ? "text-blue-300" : "text-indigo-300"
+                      className={`${isReplySender ? "dark:text-blue-300 text-blue-500" : "dark:text-indigo-300 text-indigo-600"
                         } mx-1.5 mt-1 font-bold text-[0.8rem]`}
                     >
                       {isReplySender ? "You" : selectedInfo?.friend?.name}
                     </span>
                     <div className="flex pb-2 px-1.5 items-center gap-1">
                       {reply?.image && <ImageIcon className="size-4" />}
-                      <p className="text-[0.8rem] break-all text-gray-300/90">
+                      <p className="text-[0.8rem] break-all text-gray-600 dark:text-gray-300/90">
                         {reply?.image
                           ? ` ${reply?.content.slice(0, 87)}...`
                           : reply?.content || "Photo"}

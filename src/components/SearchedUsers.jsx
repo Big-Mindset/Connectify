@@ -1,8 +1,9 @@
 "use client"
 
+import api from '@/lib/axiosInstance'
 import { authstore } from '@/zustand/store'
 import axios from 'axios'
-import { Check, Hourglass, Loader, Loader2, MessageCircleMoreIcon, UserPlus2, X } from 'lucide-react'
+import { Check, Hourglass,  Loader2, MessageCircleMoreIcon, UserPlus2, X } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -18,11 +19,10 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
   const [loading, setloading] = useState(false)
 
   const handleSendRequest = async () => {
-    console.log("running");
-    
+   
     try {
       setloading(true)
-      const res = await axios.post("/api/sendFriendRequest", {
+      const res = await api.post("/sendFriendRequest", {
         senderId: session?.user.id,
         receiverId : user.id
       })
@@ -48,7 +48,6 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
       
       toast.success(res.data.message)
     } catch (error) {
-      console.log(error.message);
       
       toast.error("Failed to send request")
     }
@@ -58,10 +57,9 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
   const isOnline = onlineUsers?.includes(user.id)
   let handleCancelRequest = async ()=>{
     let id = user?.requestReceived.at(-1)?.id
-    console.log("the id is "+ id);
-    
+   
     setloading(true)
-    let res = await axios.delete(`/api/deleteRequest/${id}`)
+    let res = await api.delete(`/deleteRequest/${id}`)
 
     if (res.status === 200){
     
@@ -96,7 +94,7 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
   let handleRequest=async (reqStatus)=>{
     setloading(true)
 
-    let res = await axios.put("api/accept-Reject-Request",{friendRequestId :user.requestSent[0].id ,status : reqStatus})
+    let res = await api.put("/accept-Reject-Request",{friendRequestId :user.requestSent[0].id ,status : reqStatus})
     if (res.status === 200){
       let result = searchResult.map((us) => {
         if (us.id === user.id) {
@@ -131,8 +129,7 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
     let requestReceived = user.requestReceived.at(-1).status
    return ["Pending","Accepted"].includes(requestReceived) && requestReceived
   },[user.requestReceived])
-  console.log(requestSentByThem , requestReceivedByThem);
-  
+
   return (
     <div
       style={{ animationDelay: `${1 * 75}ms` }}

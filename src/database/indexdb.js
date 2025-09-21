@@ -13,7 +13,6 @@ class ChatData{
             request.onsuccess = ()=>{
                 this.db = request.result
                 this.db.onclose = () => {
-                    console.warn("DB connection closed, resetting...");
                     this.db = null; 
                   };
                 res(this.db)
@@ -134,7 +133,6 @@ class ChatData{
             }
     
             cursorRequest.onerror = (event) => {
-                console.error("Error getting message")
                 reject(event.target.error)
             }
         })
@@ -149,12 +147,11 @@ class ChatData{
         let AllMessages = []
         return new Promise((resolve , reject)=>{
             let messages =  indexing.openCursor(bound,"prev")
-            console.log(messages);
+
             
             messages.onsuccess = (event)=>{
                 let result = event.target?.result
-                console.log(result);
-                
+
                 if (result){
                     let message = result.value
                    AllMessages.push(message)
@@ -415,6 +412,22 @@ class ChatData{
     }
     await tx.done
    }
+   async deleteDatabase(){
+    if (this.db){
+        this.db.close()
+        this.db = null
+    }
+    return new Promise((resolve , reject)=>{
+        let deleteDatabase = indexedDB.deleteDatabase("Connectify")
+         deleteDatabase.onsuccess = () => {
+      resolve();
+    };
+
+    deleteDatabase.onerror = (event) => {
+      reject(event);
+    };
+    })  
+   }
 
     
 }
@@ -433,4 +446,5 @@ let updatereaction = (data)=>chat.UpdateReaction(data)
 let deletelastmessage = (chatId)=>chat.deleteLastMessage(chatId)
 let deletemessage = (id,boolean)=>chat.deleteMessage(id,boolean)
 let updateallreactions = (array)=>chat.updateAllReactions(array)
-export {addemoji,getemoji,addallmessages,getOneMessage,getmessagebyid,addmessage,updatemessage,updatemessagestatus,updateToRead,deletereaction,updatereaction,deletelastmessage,deletemessage,updateallreactions}
+let deletedatabase = ()=>chat.deleteDatabase()
+export {addemoji,getemoji,addallmessages,getOneMessage,getmessagebyid,addmessage,updatemessage,updatemessagestatus,updateToRead,deletereaction,updatereaction,deletelastmessage,deletemessage,updateallreactions,deletedatabase}

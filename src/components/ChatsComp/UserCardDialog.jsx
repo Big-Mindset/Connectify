@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { authstore } from '@/zustand/store';
 import { LoaderCircle, X, Users, Type, FileText, Camera } from 'lucide-react';
-import axios from 'axios';
 import { groupstore } from '@/zustand/groupStore';
 
 function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
@@ -40,7 +39,7 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
     setLoading(true);
     
     try {
-      let res = await axios.post("/api/create-group", {
+      let res = await api.post("/create-group", {
         ...data,
         userIds: GroupUsersSelect.map(user => user.id),
         image 

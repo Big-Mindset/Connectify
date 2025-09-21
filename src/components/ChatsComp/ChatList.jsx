@@ -3,23 +3,21 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import Setting from '@/components/Settings'
-import { Check, Plus, Search, Settings, User2, UserPlus, UserPlus2, UserPlusIcon, UserRoundPlusIcon, Users, Users2, UsersRound, UserX2, X } from 'lucide-react'
+import { Check, LogOut, Plus, Search, Settings, SettingsIcon, Trash2, User2, UserPlus, UserRoundPlusIcon, Users2, UserX2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import Avatar from '@/assets/Avatar.webp'
-import properLogo from '@/assets/logop.webp'
 import { messagestore } from '@/zustand/messageSearchStore'
 import { authstore } from '@/zustand/store'
 import User from './User'
 import UserCardDialog from './UserCardDialog'
 import GroupUsers from './GroupUsers'
 import useDebounce from '@/lib/useDebounce'
-import UserAccount from '../UserAccount'
-import { DotsVerticalIcon, InfoCircledIcon } from '@radix-ui/react-icons'
+import { DotsVerticalIcon } from '@radix-ui/react-icons'
 import FriendRequests from './FriendRequests'
+import {  signOut } from 'next-auth/react'
+import { deletedatabase, deleteDatabase } from '@/database/indexdb'
 
 const ChatList = React.memo(({ setopenfriendSearch }) => {
-  const loading = authstore.use.loading()
   const users = authstore.use.users()
   const session = authstore.use.session()
   const setCategory = messagestore.use.setCategory()
@@ -34,7 +32,8 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
   const [settings, setsettings] = useState(false)
   const [focus, setfocus] = useState(false)
   const debounce = useDebounce(200, userSearch)
-
+  const [OpenSettings, setOpenSettings] = useState(false)
+  const [logout ,setLogout] = useState(false)
   const searchedUsers = useMemo(() => {
     if (!debounce.trim()) return []
     return users?.filter(user =>
@@ -52,9 +51,9 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
 
   const handleChange = e => {
     setuserSearch(e.target.value)
-    
-         
-        
+
+
+
   }
 
   const handleAddToGroup = (User) => {
@@ -96,10 +95,14 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
   const [Menu, setMenu] = useState(false)
 
   const [openFriendRequest, setopenFriendRequest] = useState(false)
-
+  let handleLogout = async ()=>{
+    await deletedatabase()
+    signOut({redirectTo : "/login"})
+  }
+  let handleDelete = ()=>{}
   return (
     <>
-        {openFriendRequest && <FriendRequests setopenFriendRequest={setopenFriendRequest} />}
+      {openFriendRequest && <FriendRequests setopenFriendRequest={setopenFriendRequest} />}
       <div className={`absolute ${Create ? "left-0" : "-left-[100%]"} p-4 w-full z-50  dark:bg-black bg-gray-200 duration-500 top-0 bottom-0`}>
         {Open && <UserCardDialog GroupUsersSelect={GroupUsersSelect} Open={Open} setOpen={setOpen} setGroupUsersSelect={setGroupUsersSelect} />}
 
@@ -158,23 +161,56 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
       <div className='space-y-5.5 mb-2.5 relative p-3'>
         <div className='flex justify-between items-center px-5'>
           <div className='flex gap-3 items-center'>
-            <Popover>
-              <PopoverTrigger>
-                <div className='rounded-full relative size-12 border-[1px] cursor-pointer border-[#87A5EF] overflow-hidden'>
-                  {session?.user?.image &&
-                    <Image src={session?.user?.image} className='object-cover object-center' sizes='100px' alt='You' fill priority />
+            <div className='relative'>
 
-                  }
-                </div>
-              </PopoverTrigger>
-              <PopoverContent >
-                <UserAccount />
-              </PopoverContent>
-            </Popover>
+            {OpenSettings && (
+        <div className="absolute left-10 top-10 z-40 mt-1 rounded-lg overflow-hidden w-[220px] border border-blue-600 dark:bg-blue-900/80 bg-slate-800/95 backdrop-blur-sm shadow-xl">
+          <div className='flex items-center gap-3 p-3 border-b border-blue-600/30'>
+            <Settings className="w-5 h-5 text-blue-400" />
+            <h2 className='text-gray-200 font-semibold text-sm'>User Settings</h2>
+          </div>
+          
+          <div className='p-2 space-y-1'>
+            <button
+              onClick={()=>{
+                if (logout){
+                  handleLogout()
+                  return
+                }
+                setLogout(true)
+              }
+
+
+              }
+              className={`flex items-center gap-3  ${logout ? "hover:bg-red-900" : "hover:bg-blue-800/50 "} w-full px-3 py-2.5 text-left text-gray-200 rounded-lg cursor-pointer transition-colors duration-150 group`}
+            >
+              <LogOut className="w-4 h-4 text-gray-400 group-hover:text-blue-300" />
+              <span className="text-sm">{logout ? "Click to Logout" : "Logout"}</span>
+            </button>
+            
+            <button
+              onClick={handleDelete}
+              className="flex items-center gap-3 w-full px-3 py-2.5 text-left text-red-200 bg-red-900/70 hover:bg-red-800/80 rounded-lg cursor-pointer transition-colors duration-150 group"
+            >
+              <Trash2 className="w-4 h-4 text-red-300 group-hover:text-red-200" />
+              <span className="text-sm">Delete Account</span>
+            </button>
+          </div>
+        </div>
+      )}
+            <div
+              onClick={() => {setOpenSettings(!OpenSettings),setLogout(false)}}
+              className='rounded-full relative size-12 border-[1px] cursor-pointer border-[#87A5EF] overflow-hidden'>
+              {session?.user?.image &&
+                <Image src={session?.user?.image} className='object-cover object-center' sizes='100px' alt='You' fill priority />
+
+              }
+            </div>
+            </div>
             <h1 className='font-bold dark:text-indigo-100 text-[#395BC7] text-[1.5rem]'>Connectify</h1>
           </div>
           <div className='flex gap-2  items-center'>
-          <motion.div
+            <motion.div
               onClick={handleOpenSearch}
               className="relative cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-[#E7E8EC] hover:ring-1 ring-gray-400 bg-[#EFF0F3] rounded-full dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 transition-colors"
             >
@@ -187,58 +223,58 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
             </motion.div>
             <div className='relative'>
 
-                  <div
-                  onClick={()=>{
-                    setMenu(!Menu)
-                  }}
-                  className='p-2 rounded-full bg-[#EFF0F3]  hover:bg-gray-200  hover:ring-1 ring-gray-400 cursor-pointer dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 '>
-                  
-                  <DotsVerticalIcon scale={1.1} className='text-[#1E1F24] dark:text-white font-bold' />
-                  </div> 
-                  <AnimatePresence >
-                  {Menu && 
+              <div
+                onClick={() => {
+                  setMenu(!Menu)
+                }}
+                className='p-2 rounded-full bg-[#EFF0F3]  hover:bg-gray-200  hover:ring-1 ring-gray-400 cursor-pointer dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 '>
+
+                <DotsVerticalIcon scale={1.1} className='text-[#1E1F24] dark:text-white font-bold' />
+              </div>
+              <AnimatePresence >
+                {Menu &&
 
                   <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.1 }}
-                  style={{
-                    transformOrigin: "top left"
-                   }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.1 }}
+                    style={{
+                      transformOrigin: "top left"
+                    }}
                     exit={{ scale: 0, opacity: 0 }}
-                  className={`absolute  dark:text-gray-300 text-gray-600 overflow-hidden bg-gray-200  dark:bg-gray-800 rounded-lg p-2 z-[99999] w-[200px] shadow-lg dark:border  dark:border-gray-700`}
-                 
-                >
-                  <div className="flex flex-col gap-1.5 p-1">
-                    <div
-                    onClick={()=>{
-                      setCreate(true)
-                      setMenu(false)
-                    }}
-                      className="flex gap-2 dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 hover:bg-gray-100 p-2 rounded-lg cursor-pointer items-center transition-colors"
-                    >
-                      {/* <DoubleUser /> */}
-                      <Users2 />
-                      <p>Add Groups</p>
-                    </div>
-                    <div
-                    onClick={()=>{
-                      setopenFriendRequest(true)
-                      setMenu(false)
+                    className={`absolute  dark:text-gray-300 text-gray-600 overflow-hidden bg-gray-200  dark:bg-gray-800 rounded-lg p-2 z-[99999] w-[200px] shadow-lg dark:border  dark:border-gray-700`}
 
-                    }}
-                    className="flex gap-2 dark:bg-slate-800/40 hover:bg-gray-100 dark:hover:bg-indigo-600/30 p-2 rounded-lg cursor-pointer items-center transition-colors">
-                      <UserPlus />
-                      <p>Friend Requests</p>
+                  >
+                    <div className="flex flex-col gap-1.5 p-1">
+                      <div
+                        onClick={() => {
+                          setCreate(true)
+                          setMenu(false)
+                        }}
+                        className="flex gap-2 dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 hover:bg-gray-100 p-2 rounded-lg cursor-pointer items-center transition-colors"
+                      >
+                        {/* <DoubleUser /> */}
+                        <Users2 />
+                        <p>Add Groups</p>
+                      </div>
+                      <div
+                        onClick={() => {
+                          setopenFriendRequest(true)
+                          setMenu(false)
+
+                        }}
+                        className="flex gap-2 dark:bg-slate-800/40 hover:bg-gray-100 dark:hover:bg-indigo-600/30 p-2 rounded-lg cursor-pointer items-center transition-colors">
+                        <UserPlus />
+                        <p>Friend Requests</p>
+                      </div>
                     </div>
-                  </div>
-                 
-                </motion.div>
+
+                  </motion.div>
                 }
-                  </AnimatePresence>
+              </AnimatePresence>
             </div>
 
-          
+
 
           </div>
         </div>
