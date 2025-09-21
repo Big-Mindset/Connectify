@@ -417,4 +417,8 @@ console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("================================");
         console.log("> Server running on http://localhost:3000");
     });
-});
+}).catch(()=>{
+     console.error("=== APP PREPARE FAILED ===");
+    console.error(err);
+    process.exit(1);
+})
