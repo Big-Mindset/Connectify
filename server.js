@@ -26,10 +26,10 @@ console.log("13. Next imported");
 
 app.prepare().then(() => {
     console.log("14. Next imported");
-
-
+    
     let server = createServer(handler);
-server.on('request', (req, res) => {
+    server.on('request', (req, res) => {
+    console.log(`=== INCOMING REQUEST: ${req.method} ${req.url} ===`);
     if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('Server is healthy!');
@@ -38,6 +38,8 @@ server.on('request', (req, res) => {
     // Let Next.js handle all other requests
     handler(req, res);
 });
+    console.log("14. Next imported");
+
     let io = new Server(server, {
         cors: {
             origin: process.env.NEXTAUTH_URL,
