@@ -25,10 +25,12 @@ console.log(process.env.NODE_ENV);
 console.log("13. Next imported");
 
 app.prepare().then(() => {
-    console.log("14. Next imported");
-    
-    let server = createServer();
-    console.log(server)
+    try {
+
+        console.log("14. Next imported");
+        
+        let server = createServer();
+        console.log(server)
     server.on('request', (req, res) => {
     console.log(`=== INCOMING REQUEST: ${req.method} ${req.url} ===`);
     if (req.url === '/health') {
@@ -39,6 +41,10 @@ app.prepare().then(() => {
     // Let Next.js handle all other requests
     handler(req, res);
 });
+}catch(error){
+    console.log("There is an error")
+    console.log(error)
+}
     console.log("15. Next imported");
     console.log("the port is ..."+port)
     
