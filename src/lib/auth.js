@@ -122,6 +122,8 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
         },
         async signIn({ user, account }) {
                 
+            console.log(account);
+            console.log(user);
             
                 if (user?.email && (account.provider === "google" || account.provider === "github")) {
                     let existingUser = await prisma.user.findUnique({
