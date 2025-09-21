@@ -429,11 +429,8 @@ app.prepare().then(() => {
         });
     });
 
-    server.listen(port,"0.0.0.0" (error) => {
-        if (error){
-            console.log("error is occuring ")
-            console.log(error)
-        }
+    server.listen(port,"0.0.0.0" () => {
+
         console.log("=== ENVIRONMENT VARIABLES ===");
 console.log("DATABASE_URL:", process.env.DATABASE_URL ? "SET" : "NOT SET");
 console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
