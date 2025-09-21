@@ -27,7 +27,7 @@ console.log("13. Next imported");
 app.prepare().then(() => {
     console.log("14. Next imported");
     
-    let server = createServer(handler);
+    let server = createServer();
     console.log(server)
     server.on('request', (req, res) => {
     console.log(`=== INCOMING REQUEST: ${req.method} ${req.url} ===`);
@@ -40,6 +40,7 @@ app.prepare().then(() => {
     handler(req, res);
 });
     console.log("15. Next imported");
+    console.log("the port is ..."+port)
 
     let io = new Server(server, {
         cors: {
