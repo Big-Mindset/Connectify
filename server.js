@@ -445,6 +445,5 @@ console.log("================================");
     });
 }).catch(()=>{
      console.error("=== APP PREPARE FAILED ===");
-    console.error(err);
     process.exit(1);
 })
