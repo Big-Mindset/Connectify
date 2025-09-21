@@ -16,7 +16,7 @@ import { authStore } from "@/zustand/store"
 import axios from "axios"
 import { ArrowRight, Loader2, Lock, Shield, UserPlus } from "lucide-react"
 import toast from "react-hot-toast"
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 const inder = Inder({
     weight: ["400"],
@@ -65,8 +65,9 @@ const signUp = () => {
         
 
     }
+    let session = useSession()
+  console.log(session)
 
-    console.log(process.env)
     let handleSignUp = async (provider) => {
         setauthLoading(provider)
 
