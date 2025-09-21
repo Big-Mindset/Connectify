@@ -25,26 +25,13 @@ console.log(process.env.NODE_ENV);
 console.log("13. Next imported");
 
 app.prepare().then(() => {
-    try {
+
 
         console.log("14. Next imported");
         
-        let server = createServer();
+        let server = createServer(handler);
         console.log(server)
-    server.on('request', (req, res) => {
-    console.log(`=== INCOMING REQUEST: ${req.method} ${req.url} ===`);
-    if (req.url === '/health') {
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('Server is healthy!');
-        return;
-    }
-    // Let Next.js handle all other requests
-    handler(req, res);
-});
-}catch(error){
-    console.log("There is an error")
-    console.log(error)
-}
+
     console.log("15. Next imported");
     console.log("the port is ..."+port)
     
@@ -443,7 +430,8 @@ console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 console.log("================================");
         console.log("> Server running on http://localhost:3000");
     });
-}).catch(()=>{
+}).catch((error)=>{
+    console.log(error)
      console.error("=== APP PREPARE FAILED ===");
     process.exit(1);
 })
