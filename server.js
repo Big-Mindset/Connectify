@@ -1,40 +1,30 @@
-console.log("1. Next imported");
+
 const cloudinary = require("./src/lib/cloudinary.js");
-console.log("2. Next imported");
 require('dotenv').config();
-console.log("3. Next imported");
 const {instrument} = require("@socket.io/admin-ui")
-console.log("4. Next imported");
 const prisma = require("./src/lib/prisma");
-console.log("5. Next imported");
 const next = require("next");
-console.log("6. Next imported");
 const Server = require("socket.io").Server;
-console.log("7. Next imported");
 const createServer = require("http").createServer;
-console.log("8. Next imported");
-const port = process.env.PORT || 3000
-console.log("9. Next imported");
+const port = process.env.PORT
 const app = next({ dev: process.env.NODE_ENV !== "production"});
-console.log("10. Next imported");
-console.log(process.env.NODE_ENV !== "production")
-console.log("11. Next imported");
 const handler = app.getRequestHandler();
-console.log("12. Next imported");
-console.log(process.env.NODE_ENV);
-console.log("13. Next imported");
 
-app.prepare().then(() => {
-
-
-        console.log("14. Next imported");
-        
-        let server = createServer(handler);
-        console.log(server)
-
-    console.log("15. Next imported");
-    console.log("the port is ..."+port)
+app.prepare().then(() => { 
+  const server = createServer((req, res) => {
+    const parsedUrl = parse(req.url, true);
+    const { pathname } = parsedUrl;
     
+    // Handle health check before passing to Next.js
+    if (pathname === '/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+      return;
+    }
+    
+    // For all other routes, use Next.js handler
+    handler(req, res, parsedUrl);
+  });
     let io = new Server(server, {
         cors: {
             origin: process.env.NEXTAUTH_URL,
@@ -45,7 +35,6 @@ app.prepare().then(() => {
         auth : false,
 
     })
-    console.log("16.Done");
     let onlineUsers = {};
     
     io.on("connection", async (socket) => {
@@ -422,13 +411,9 @@ app.prepare().then(() => {
         });
     });
 
+    console.log(server)
     server.listen(port,"0.0.0.0", () => {
-
-        console.log("=== ENVIRONMENT VARIABLES ===");
-console.log("DATABASE_URL:", process.env.DATABASE_URL ? "SET" : "NOT SET");
-console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
-console.log("================================");
-        console.log("> Server running on http://localhost:3000");
+        console.log(process.env.NEXTAUTH_URL)
     });
 }).catch((error)=>{
     console.log(error)
