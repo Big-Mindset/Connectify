@@ -28,6 +28,7 @@ app.prepare().then(() => {
     console.log("14. Next imported");
     
     let server = createServer(handler);
+    console.log(server)
     server.on('request', (req, res) => {
     console.log(`=== INCOMING REQUEST: ${req.method} ${req.url} ===`);
     if (req.url === '/health') {
@@ -38,7 +39,7 @@ app.prepare().then(() => {
     // Let Next.js handle all other requests
     handler(req, res);
 });
-    console.log("14. Next imported");
+    console.log("15. Next imported");
 
     let io = new Server(server, {
         cors: {
