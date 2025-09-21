@@ -400,7 +400,7 @@ app.prepare().then(() => {
         });
     });
 
-    server.listen(port, () => {
+    server.listen(port,"0.0.0.0", () => {
         console.log("> Server running on http://localhost:3000");
     });
 });
