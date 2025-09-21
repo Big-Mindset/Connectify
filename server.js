@@ -5,7 +5,7 @@ const prisma = require("./src/lib/prisma");
 const next = require("next");
 const Server = require("socket.io").Server;
 const createServer = require("http").createServer;
-const port = process.env.port || 3000
+const port = process.env.PORT || 3000
 const app = next({ dev: process.env.NODE_ENV !== "production"});
 console.log(process.env.NODE_ENV !== "production")
 const handler = app.getRequestHandler();
