@@ -56,7 +56,6 @@ const signUp = () => {
         if (error?.response.status === 400){
             toast.error(error.response.data.message)
         }else{
-            console.log(error.message);
             
         }
         
@@ -67,7 +66,7 @@ const signUp = () => {
 
     }
 
-
+    console.log(process.env)
     let handleSignUp = async (provider) => {
         setauthLoading(provider)
 
@@ -76,7 +75,6 @@ const signUp = () => {
             let res = await signIn(provider, { redirect: true })
 
         } catch (error) {
-            console.log(error.message);
             toast.error("Network Error try again")
 
         } finally {
