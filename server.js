@@ -41,7 +41,7 @@ app.prepare().then(() => {
 });
     console.log("15. Next imported");
     console.log("the port is ..."+port)
-
+    
     let io = new Server(server, {
         cors: {
             origin: process.env.NEXTAUTH_URL,
@@ -52,16 +52,17 @@ app.prepare().then(() => {
         auth : false,
 
     })
+    console.log("16.Done");
     let onlineUsers = {};
-
+    
     io.on("connection", async (socket) => {
         let userId = socket.handshake?.auth?.userId;
         onlineUsers[userId] = socket.id;
-
+        
         let OnlineUsers = Object.keys(onlineUsers);
         io.emit("getOnlines", OnlineUsers);
-
-
+        
+        
 
 
         if (userId) {
