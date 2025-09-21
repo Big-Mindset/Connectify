@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+  url      = "mongodb+srv://wadood:wadood@chat-app.lqqfhzm.mongodb.net/Connectify?retryWrites=true&w=majority&appName=chat-app"
 }
 
 model User {
@@ -70,6 +70,7 @@ model Message {
   @@index([senderId, receiverId,createdAt])
   @@index([receiverId, senderId,createdAt])
   @@index([receiverId,senderId ])
+  @@index([createdAt])
 }
 
 model Reaction {
