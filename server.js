@@ -8,6 +8,8 @@ const createServer = require("http").createServer;
 const port = process.env.port || 3000
 const app = next({ dev: process.env.NODE_ENV !== "production",host : "localhost" ,port});
 const handler = app.getRequestHandler();
+console.log(process.env.NODE_ENV);
+
 app.prepare().then(() => {
     let server = createServer(handler);
 

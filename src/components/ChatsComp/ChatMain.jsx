@@ -1,8 +1,8 @@
 "use client"
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, } from 'framer-motion'
 import Image from 'next/image'
-import { ArrowDownNarrowWide, ChevronDown, ImageIcon, LoaderCircle, Search, Smile, X } from 'lucide-react'
+import { ChevronDown, ImageIcon, LoaderCircle, Search, Smile, X } from 'lucide-react'
 import FileInput from '../ChatInputs/FileInput'
 import RegularInput from '../ChatInputs/RegularInput'
 import ChatNav from './ChatNav'
@@ -234,9 +234,8 @@ setLoading(false)
     if (!el) return;
 
     const handleScroll = () => {
-      console.log((el.scrollHeight - el.scrollTop - el.clientHeight) > 500);
 
-      const atBottom = (el.scrollHeight - el.scrollTop - el.clientHeight) >= 2500;
+      const atBottom = (el.scrollHeight - el.scrollTop - el.clientHeight) >= 1000;
       setGoDown(atBottom);
     };
 

@@ -425,7 +425,7 @@ const Message = React.memo(
               </motion.div>
             )}
 
-            <motion.div
+            <div
               className={` group  relative inline-block dark:shadow-[0] overflow-hidden shadow-sm shadow-gray-200 rounded-md font-[400] px-[5px] py-[4px] ${isSender
                 ? "dark:from-[#253974] dark:to-[#253974]    dark:bg-gradient-to-r   bg-[#dbecff]"
                 : "dark:bg-gradient-to-r  bg-[#FAF9FB]  dark:from-[#003362] dark:to-[#004074]"
@@ -433,10 +433,8 @@ const Message = React.memo(
             >
 
               {(replyToId && !DeleteForEveryone) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
+                <div
+    
                   className={`flex items-center gap-4 justify-between ${isSender ? "dark:bg-blue-950 bg-gray-50" : "dark:bg-black/40 "
                     } ${isReplySender ? "border-blue-500" : "border-indigo-500"
                     } rounded-lg overflow-hidden border-l-[4px] h-full`}
@@ -468,11 +466,11 @@ const Message = React.memo(
                       />
                     </div>
                   )}
-                </motion.div>
+                </div>
               )}
 
               {!DeleteForEveryone && (
-                <motion.div
+                <div
                   onClick={(e) => OpenDropDown(e)}
                   className={`absolute p-1.5 transition-all ${isSender ? "" : ""
                     } duration-150 -right-9 group-hover:right-0 bg-gradient-to-r dark:to-blue-600/50  cursor-pointer bottom-0 top-0 z-20`}
@@ -480,15 +478,13 @@ const Message = React.memo(
                   whileTap={{ scale: 0.95 }}
                 >
                   <ChevronDownIcon className="size-4 text-black dark:text-white/90" />
-                </motion.div>
+                </div>
               )}
 
               {image && (
-                <motion.div
+                <div
                   className="rounded-md bg-white/80 mb-1 max-w-[250px] overflow-hidden"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 }}
+  
                 >
                   <Image
                     src={image}
@@ -497,10 +493,10 @@ const Message = React.memo(
                     width={200}
                     className="object-contain w-full h-full"
                   />
-                </motion.div>
+                </div>
               )}
 
-              <motion.div
+              <div
                 className="flex gap-2"
               >
                 {DeleteForEveryone ? (
@@ -532,8 +528,8 @@ const Message = React.memo(
                     </>
                   )}
                 </div>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
