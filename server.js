@@ -12,6 +12,8 @@ const handler = app.getRequestHandler();
 console.log(process.env.NODE_ENV);
 
 app.prepare().then(() => {
+
+
     let server = createServer(handler);
 
     let io = new Server(server, {
@@ -401,6 +403,10 @@ app.prepare().then(() => {
     });
 
     server.listen(port,"0.0.0.0", () => {
+        console.log("=== ENVIRONMENT VARIABLES ===");
+console.log("DATABASE_URL:", process.env.DATABASE_URL ? "SET" : "NOT SET");
+console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+console.log("================================");
         console.log("> Server running on http://localhost:3000");
     });
 });
