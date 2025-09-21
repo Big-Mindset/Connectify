@@ -1,17 +1,31 @@
+console.log("1. Next imported");
 const cloudinary = require("./src/lib/cloudinary.js");
+console.log("2. Next imported");
 require('dotenv').config();
+console.log("3. Next imported");
 const {instrument} = require("@socket.io/admin-ui")
+console.log("4. Next imported");
 const prisma = require("./src/lib/prisma");
+console.log("5. Next imported");
 const next = require("next");
+console.log("6. Next imported");
 const Server = require("socket.io").Server;
+console.log("7. Next imported");
 const createServer = require("http").createServer;
+console.log("8. Next imported");
 const port = process.env.PORT || 3000
+console.log("9. Next imported");
 const app = next({ dev: process.env.NODE_ENV !== "production"});
+console.log("10. Next imported");
 console.log(process.env.NODE_ENV !== "production")
+console.log("11. Next imported");
 const handler = app.getRequestHandler();
+console.log("12. Next imported");
 console.log(process.env.NODE_ENV);
+console.log("13. Next imported");
 
 app.prepare().then(() => {
+    console.log("14. Next imported");
 
 
     let server = createServer(handler);
