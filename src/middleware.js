@@ -26,7 +26,8 @@ export async function middleware(request) {
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
-
+  console.log("the token is "+token);
+  
 
 
   if (token?.user) {
