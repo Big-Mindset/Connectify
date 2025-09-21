@@ -1,27 +1,35 @@
 import prisma from "@/lib/prisma"
-import bcrypt from "bcryptjs"
 import { NextResponse } from "next/server";
 import { client } from "@/lib/redis";
 
 export async function POST(req) {
     try {
         let { token, verifyOtp,getData } = await req.json()
+        try {
+            
+            let user = await prisma.account.findFirst()
+            console.log(user);
+            
+        } catch (error) {
+            console.log("error is there");
+            
+            console.log(error.message);
+            return
+            
+        }
         if (!token) {
             return NextResponse.json({ message: "Something went wrong try again" }, { status: 400 })
         }
         let userData = await client.hGetAll(`User_Session-${token}`)
-        console.log(userData);
         
         let { email , name , password , otp , otpExpiresAt} = userData
         if (getData){
-            console.log("it is");
             
             return NextResponse.json({ message: "Account created",userData : {
                 email ,
                 name
             } }, { status: 201 })
         }   
-     console.log(Date.now() > parseInt(otpExpiresAt));
      
         if (Date.now() > parseInt(otpExpiresAt) ){
             client.hDel(`User_Session-${token}`,"otp")
@@ -37,12 +45,13 @@ export async function POST(req) {
                     accounts: { select: { provider: true } }
                 }
             })
-      
+      console.log("existing user is");
+            console.log(isExisted);
+            
         if (otp !== verifyOtp) {
             return NextResponse.json({ message: "Invalid otp try again" }, { status: 400 })
 
         }
-        console.log(isExisted);
         
         if (isExisted) {
             await prisma.account.create({
@@ -54,6 +63,8 @@ export async function POST(req) {
                     provider: "credentials",
                     avatar: "",
                     userId: isExisted.id,
+                    isCompleted : false
+
 
 
                 }
@@ -72,6 +83,7 @@ export async function POST(req) {
                             password: password,
                             provider: "credentials",
                             avatar: "",
+                            isCompleted : false
 
 
                         }
@@ -87,7 +99,6 @@ export async function POST(req) {
         client.del(`User_Session-${token}`)
         return response
     } catch (error) {
-        console.log(error.message);
 
         return NextResponse.json({ message: "Server Error", error: error.message }, { status: 500 })
     }
