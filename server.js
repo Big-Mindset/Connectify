@@ -429,7 +429,7 @@ app.prepare().then(() => {
         });
     });
 
-    server.listen(port,"0.0.0.0" () => {
+    server.listen(port,"0.0.0.0", () => {
 
         console.log("=== ENVIRONMENT VARIABLES ===");
 console.log("DATABASE_URL:", process.env.DATABASE_URL ? "SET" : "NOT SET");
