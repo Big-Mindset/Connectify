@@ -249,6 +249,7 @@ setLoading(false)
     let updatedMessages = [...messages].slice(-50)
     setMessages(updatedMessages)
   }
+console.log(session);
 
 
   return (
