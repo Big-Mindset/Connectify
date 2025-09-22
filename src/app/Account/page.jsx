@@ -8,9 +8,10 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
 const page = () => {
-  let session = useSession()
-  let { data, status, update } = session
+  let sesion = useSession()
+  let { data, status, update } = sesion
   const setsession = authstore.use.setsession()
+  const session = authstore.use.session()
   const [avatars, setavatars] = useState([])
   const [userData, setuserData] = useState({
     name: "",
@@ -52,6 +53,7 @@ const page = () => {
       setuserData(prev => {
         return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
       })
+      setsession(data)
     }
   }, [status,data])
   
@@ -70,7 +72,7 @@ const page = () => {
     try {
       setIsLoading(true)
       console.log({
-        id: data?.user?.id,
+        id: session?.user?.id,
         name: userData.name,
         bio: userData.bio,
         avatar: userData.avatar,
