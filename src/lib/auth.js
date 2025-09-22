@@ -125,7 +125,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
             if (token) {
                 console.log("the if token is ");
                 console.log(token);
-                
+                session.user = {}
                 session.user = token.user
             }
             console.log(session);
