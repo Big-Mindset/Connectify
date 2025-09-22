@@ -21,12 +21,22 @@ export async function middleware(request) {
   ) {
     return NextResponse.next();
   }
+  let token;
+  try{
+
+     token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+    console.log("no error");
   console.log("the secret key is "+process.env.NEXTAUTH_SECRET);
-  
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+    
+  }catch(error){
+    console.log("there is an errror");
+    
+    console.log(error);
+    
+  }
   console.log("the token is "+token);
   
 
