@@ -27,6 +27,7 @@ if (!data) {
                 }
             }
         })
+        console.log(isCreated)
         if (isCreated) {
 
             if (isCreated?.accounts?.some((acc) => acc.provider === "credentials")) {

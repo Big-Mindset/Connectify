@@ -218,7 +218,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
             return true
         }
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret:"hello",
     session: {
         strategy: "jwt",
         maxAge: 60 * 60 * 48,

@@ -26,7 +26,7 @@ export async function middleware(request) {
 
      token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: "hello",
     });
     console.log("no error");
   console.log("the secret key is "+process.env.NEXTAUTH_SECRET);
