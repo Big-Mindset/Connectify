@@ -28,6 +28,7 @@ const roboto = Roboto({
 
 const login = () => {
     const [authLoading, setauthLoading] = useState("")
+  
 
     let router = useRouter()
     let { loading, setLoading } = authStore()
@@ -45,7 +46,6 @@ const login = () => {
             let res = await signIn("credentials", { ...data, redirect: false })
             if (res.url !== null && res.ok) {
                 toast.success("Login successfully")
-                await getSession()
                 router.push("/")
 
             } else {

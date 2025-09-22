@@ -3,26 +3,31 @@
 
 import properLogo from '@/assets/logop.webp'
 import { authstore } from '@/zustand/store'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 const Loader = ()=>{
    const [progress, setProgress] = useState(0) 
   const loading = authstore.use.loading()
-
+  let setsession =  authstore.use.setsession()
+    
+  let session = useSession()
   useEffect(() => {
+    if (session.status === "authenticated"){
+      setsession(session.data)
+    }
     if (loading) {
       let interval = setInterval(() => {
         setProgress(prev => {
-          if (prev < 100) return prev + 20;
+          if (prev < 100) return prev + 10;
           clearInterval(interval);
           return 100;
         });
       }, 50); 
-
       return () => clearInterval(interval);
     }
-  }, [loading]);
+  }, [loading,session]);
     return (
         <div className="flex justify-center items-center h-dvh w-full">
             <div className="flex flex-col gap-3 items-center w-full">
