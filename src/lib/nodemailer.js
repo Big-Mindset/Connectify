@@ -1,23 +1,12 @@
-
-import { EmailVerification } from "../components/EmailTemplate";
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
+import { config } from "dotenv";  
+config()
 
 export let transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
     user: "wadoodmemon0@gmail.com",
-    pass: "wzzj iaoh nzts gfra",
+    pass: process.env.NODEMAILER_PASS
   },
 });
-console.log(process.env.GMAIL_USER);
-console.log(EmailVerification("wadood"  , "wadoodmemon0@gmail.com" , "21355"));
 
-
-// await transporter.sendMail({
-//   from: "wadoodmemon0@gmail.com",
-//   to: "wadoodmemon0@gmail.com",
-//   subject: "Connectify Verification Email",
-//   html : ,
-// });
