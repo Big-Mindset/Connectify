@@ -1,11 +1,14 @@
-
-import {  transporter } from "@/lib/nodemailer";
 import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma";
 import { EmailVerification } from "@/components/EmailTemplate";
 import { client } from "@/lib/redis";
+import { Resend } from "resend";
+console.log(RESEND_API_KEY);
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export async function POST(req) {
     try {
 
@@ -44,18 +47,17 @@ if (!data) {
 
 
         await client.hSet(`User_Session-${token}`, userData)
-        console.log(transporter);
-        console.log(process.env.GMAIL_USER);
-        
-        let res = await transporter.sendMail({
-            from: process.env.GMAIL_USER,
-            to: data.email,
-            subject: "Connectify Verification Email",
-            text: "done",
-          });
-          
-          
-        
+               const {  data : emailData , error } = await resend.emails.send({
+            from: 'Connectify <onboarding@resend.dev>', // Use resend.dev for testing
+            to: [data.email],
+            subject: 'Connectify Verification Email',
+            html: EmailVerification(data.name, data.email, otp),
+        });
+        if (error){
+            console.log(error);
+            
+        }
+        console.log('Email sent successfully:', emailData);
         return NextResponse.json({ message: "Verify your email", token: token }, { status: 200 })
 
     } catch (error) {
