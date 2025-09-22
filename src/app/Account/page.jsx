@@ -48,7 +48,7 @@ const page = () => {
     getAvatars()
   }, [])
   useEffect(() => {
-    if (session.status === "authenticated"){
+    if (status === "authenticated"){
 
       setuserData(prev => {
         return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
