@@ -62,7 +62,8 @@ const page = () => {
   let { update } = useSession()
   const handleSave = async () => {
     if (!userData.bio || !userData.avatar || !userData.name) return
-
+      console.log(session);
+      
     try {
       setIsLoading(true)
       const res = await axios.put("api/updateProfile", {
@@ -82,13 +83,12 @@ const page = () => {
           isCompleted: true
         }
         setsession({
-          ...session,data
+          ...session,user : {...user , data}
         })
         update(data)
         router.push("/")
       }
     } catch (error) {
-      console.log(error.message)
     } finally {
       setIsLoading(false)
     }
