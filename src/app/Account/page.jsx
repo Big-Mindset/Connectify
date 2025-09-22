@@ -46,11 +46,12 @@ const page = () => {
     getAvatars()
   }, [])
   useEffect(() => {
-    
+
     setuserData(prev => {
       return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
     })
   }, [session.status])
+  console.log(session);
   
   const handleAvatarSelect = (avatarUrl) => {
     setuserData(prev => ({ ...prev, avatar: avatarUrl }))
