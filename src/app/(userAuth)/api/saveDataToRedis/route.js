@@ -44,6 +44,7 @@ if (!data) {
 
 
         await client.hSet(`User_Session-${token}`, userData)
+        console.log(transporter);
         
         let res = await transporter.sendMail({
             from: process.env.GMAIL_USER,
