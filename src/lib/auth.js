@@ -80,7 +80,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                         email : account.email,
                         image : account.avatar || "",
                         bio : account.bio || "",
-                        isCompleted : account.isCompleted
+                        isCompleted : account.isCompleted 
 
                     }
                 } catch (error) {
@@ -182,7 +182,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                         provider: account.provider,
                                         email: user.email,
                                         avatar: user.image,
-                                        bio : ""
+                                        bio : "",
 
                                     }
                                 },
@@ -206,7 +206,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
                             user.id = userdata.accounts[0].id
                              user.bio = userdata.accounts[0]?.bio || ""
-                             user.isCompleted = userdata.accounts[0].isCompleted
+                             user.isCompleted = false
 
                         }else{
                             return false
