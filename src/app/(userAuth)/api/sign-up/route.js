@@ -33,8 +33,6 @@ export async function POST(req) {
                     accounts: { select: { provider: true } }
                 }
             })
-      console.log("existing user is");
-            console.log(isExisted);
             
         if (otp !== verifyOtp) {
             return NextResponse.json({ message: "Invalid otp try again" }, { status: 400 })
@@ -51,7 +49,8 @@ export async function POST(req) {
                     provider: "credentials",
                     avatar: "",
                     userId: isExisted.id,
-                    isCompleted : false
+                    isCompleted : false,
+                    bio : ""
 
 
 
@@ -71,7 +70,8 @@ export async function POST(req) {
                             password: password,
                             provider: "credentials",
                             avatar: "",
-                            isCompleted : false
+                            isCompleted : false,
+                            bio : ""
 
 
                         }
