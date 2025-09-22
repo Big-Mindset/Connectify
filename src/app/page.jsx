@@ -82,7 +82,6 @@ const Page = () => {
     }
   }, [Completed])
   
-console.log(session)
   return (
     <>
     {loading ? <Loader /> : 
