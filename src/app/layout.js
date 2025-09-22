@@ -38,6 +38,9 @@ export const metadata = {
 };
 export default async function RootLayout({ children }) {
   let session = await getSession()
+  console.log("The session is ");
+    console.log(session);
+    
   return (
     
     <html lang="en" suppressHydrationWarning>
