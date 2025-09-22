@@ -2,6 +2,7 @@
 import { EmailVerification } from "@/components/EmailTemplate";
 import { client } from "@/lib/redis";
 import { NextResponse } from "next/server"
+import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
                                                                                                                
 export async function PUT(req) {

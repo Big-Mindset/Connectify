@@ -47,6 +47,8 @@ if (!data) {
 
 
         await client.hSet(`User_Session-${token}`, userData)
+        console.log("running request");
+        
                const {  data : emailData , error } = await resend.emails.send({
             from: 'Connectify <onboarding@resend.dev>', // Use resend.dev for testing
             to: [data.email],
