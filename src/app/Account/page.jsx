@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 const page = () => {
   let session = useSession()
+  let { data, status, update } = session
   const setsession = authstore.use.setsession()
   const [avatars, setavatars] = useState([])
   const [userData, setuserData] = useState({
@@ -51,9 +52,8 @@ const page = () => {
       setuserData(prev => {
         return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
       })
-      session = session.data
     }
-  }, [session.status])
+  }, [status,data])
   
   const handleAvatarSelect = (avatarUrl) => {
     setuserData(prev => ({ ...prev, avatar: avatarUrl }))
@@ -63,7 +63,6 @@ const page = () => {
   const handleInputChange = (field, value) => {
     setuserData(prev => ({ ...prev, [field]: value }))
   }
-  let { update } = useSession()
   const handleSave = async () => {
     if (!userData.bio || !userData.avatar || !userData.name) return
       console.log(session);
@@ -71,7 +70,7 @@ const page = () => {
     try {
       setIsLoading(true)
       console.log({
-        id: session?.user?.id,
+        id: data?.user?.id,
         name: userData.name,
         bio: userData.bio,
         avatar: userData.avatar,
