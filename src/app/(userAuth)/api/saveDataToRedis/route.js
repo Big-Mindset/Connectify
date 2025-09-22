@@ -1,6 +1,8 @@
 
 import {  transporter } from "@/lib/nodemailer";
 import { randomUUID } from "crypto"
+import {config} from "dotenv"
+config()
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma";
