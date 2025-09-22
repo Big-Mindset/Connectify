@@ -8,10 +8,6 @@ const Session = ({children,session}) => {
   
   let setsession =  authstore.use.setsession()
   useEffect(() => {
-    console.log("setting the session");
-    
-    console.log(session?.data);
-    
         setsession(session)
   }, [session])
   return (

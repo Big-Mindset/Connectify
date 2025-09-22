@@ -45,6 +45,7 @@ const Page = () => {
   }, []);
   const selectedGroup = groupstore.use.selectedGroup()
   const getChatData = authstore.use.getChatData()
+  const session = authstore.use.session()
   const loading = authstore.use.loading()
   const Selected = authstore.use.Selected()
   const [openfriendSearch, setopenfriendSearch] = useState(false)
@@ -80,8 +81,6 @@ const Page = () => {
       setisType(false)
     }
   }, [Completed])
-  let session = useSession()
-    console.log("the session is ");
   
 console.log(session)
   return (
