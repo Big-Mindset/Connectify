@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { signinVAlidation } from "@/zod/userSchema"
 import { motion } from "framer-motion"
-import { signIn } from "next-auth/react"
+import { getSession, signIn } from "next-auth/react"
 import toast from "react-hot-toast"
 import { authStore } from "@/zustand/store"
 import { ArrowRight, Loader2, Lock, LogIn, Shield } from "lucide-react"
@@ -45,6 +45,7 @@ const login = () => {
             let res = await signIn("credentials", { ...data, redirect: false })
             if (res.url !== null && res.ok) {
                 toast.success("Login successfully")
+                await getSession()
                 router.push("/")
 
             } else {
