@@ -95,44 +95,8 @@ export let authStore = create((set, get) => ({
     }))
   }
 ,
-  getAllUsers: async () => {
-    set({ loading: true })
-    try {
-      console.log("running");
-      
-      console.log(api);
-      
-      let res = await api.get("/all-users")
-      console.log(res);
-      
-      if (res.status === 200) {
-        let users = res?.data.users
-        
-        let sortedUsers = users.sort((a, b) => (new Date(b.lastmessage?.createdAt ?? 0).getTime()) - (new Date(a.lastmessage?.createdAt ?? 0).getTime()))
-
-        set({ users: sortedUsers })
-      }
-    } catch (error) {
-      if (error?.response?.status === 404) {
-        toast.error(error?.response?.data.message)
-      } else if (error?.response?.status === 404) {
-        error?.response?.data.message
-      }
-
-      else {
-        toast.error(error?.response?.data.message)
-
-      }
-    } finally {
-      set({ loading: false })
-
-
-    }
-
-  },
   getChatData : async ()=>{
     set({loading : true})
-    console.log(api);
     
     let setgroups = groupStore.getState().setgroups
     try {
@@ -193,12 +157,10 @@ export let authStore = create((set, get) => ({
   },
   getMessages: async (receiverId, userId) => {
     set({ skeleton: true })
-    console.log("running");
     
     let messages = await getmessagebyid(userId)
-    console.log(messages);
     
-    if (messages.length > 0) {
+    if (messages?.length > 0) {
       
       let sorted = messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       set({ messages: sorted })
@@ -381,11 +343,11 @@ export let authStore = create((set, get) => ({
       if (messages) {
         let res = await api.get("/getLastSeenMessages")
         if (res.status === 200){
-          if (res.data?.Messages.length > 0) {
+          if (res.data?.Messages?.length > 0) {
             await addallmessages(res.data?.Messages)
           }
           
-          if (res.data?.Reactions.length > 0){
+          if (res.data?.Reactions?.length > 0){
             await updateallreactions(res.data?.Reactions)
           }
         }
@@ -393,9 +355,8 @@ export let authStore = create((set, get) => ({
       }
 
       let res = await api.get("/getAllMessages")
-      console.log(res);
       
-      if (res.status === 200 && res.data?.Messages.length > 0) {
+      if (res.status === 200 && res.data?.Messages?.length > 0) {
         await addallmessages(res.data?.Messages)
     
         
@@ -434,7 +395,6 @@ export let authStore = create((set, get) => ({
   },
 
   updateReaction2 :  (data)=>{
-    console.log("running update reactions");
     
     let {messageId,...rest} = data
     get().addReactionToMessage(messageId,rest)
@@ -467,10 +427,6 @@ export let authStore = create((set, get) => ({
   },
   playSound : ()=>{
     const audio = new Audio("/notification_simple-02.mp3") 
-    
-    audio.play().catch((err) => {
-      console.warn("Autoplay blocked:", err)
-    })
   }
   ,
   handleRequestNotification : (userdata)=>{
