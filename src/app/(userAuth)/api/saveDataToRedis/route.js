@@ -1,8 +1,6 @@
-
-import {  transporter } from "@/lib/nodemailer";
+import { EmailVerification } from "@/components/EmailTemplate"
+import nodemailer from "nodemailer"
 import { randomUUID } from "crypto"
-import {config} from "dotenv"
-config()
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma";
@@ -12,19 +10,19 @@ export async function POST(req) {
     try {
 
         let data = await req.json()
-        
 
-if (!data) {
-    return NextResponse.json({ message: "All fields are required" }, { status: 400 })
-}
+
+        if (!data) {
+            return NextResponse.json({ message: "All fields are required" }, { status: 400 })
+        }
         let isCreated = await prisma.user.findUnique({
             where: {
                 email: data.email
             },
-            select : {
-                accounts : {
-                    select : {
-                        provider : true
+            select: {
+                accounts: {
+                    select: {
+                        provider: true
                     }
                 }
             }
@@ -46,22 +44,32 @@ if (!data) {
 
 
         await client.hSet(`User_Session-${token}`, userData)
-        console.log(EmailVerification(data.name  , data.email , otp));
-        
+
+
+
+         let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: {
+                user: "wadoodmemon0@gmail.com",
+                pass: "wzzj iaoh nzts gfra",
+            },
+        });
+
         await transporter.sendMail({
-            from: process.env.GMAIL_USER,
+            from: "wadoodmemon0@gmail.com",
             to: data.email,
             subject: "Connectify Verification Email",
-            html: EmailVerification(data.name  , data.email , otp),
-          });
-          
-          
-        
+            html: EmailVerification(data.name , data.email , otp)
+        });
+
+
         return NextResponse.json({ message: "Verify your email", token: token }, { status: 200 })
 
     } catch (error) {
 
-        return NextResponse.json({ message: "Internal server error",error : error.message }, { status: 500 })
+        return NextResponse.json({ message: "Internal server error", error: error.message }, { status: 500 })
 
     }
 
