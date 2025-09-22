@@ -21,26 +21,12 @@ export async function middleware(request) {
   ) {
     return NextResponse.next();
   }
-  console.log("Cookies in middleware:", request.cookies.getAll());
-  let token;
-  try{
 
-  token = await getToken({
+  let token = await getToken({
   req: request,
   secret: process.env.NEXTAUTH_SECRET,
   cookieName: "__Secure-authjs.session-token",
 });
-    console.log("no error");
-  console.log("the secret key is "+process.env.NEXTAUTH_SECRET);
-    
-  }catch(error){
-    console.log("there is an errror");
-    
-    console.log(error);
-    
-  }
-  console.log("the token is "+token);
-  
 
 
   if (token?.user) {

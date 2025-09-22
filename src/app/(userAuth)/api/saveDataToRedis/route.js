@@ -10,6 +10,7 @@ export async function POST(req) {
     try {
 
         let data = await req.json()
+        console.log("the data is "+data);
         
 
 if (!data) {
@@ -27,6 +28,8 @@ if (!data) {
                 }
             }
         })
+        console.log("created");
+        
         console.log(isCreated)
         if (isCreated) {
 
