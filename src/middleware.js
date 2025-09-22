@@ -25,10 +25,11 @@ export async function middleware(request) {
   let token;
   try{
 
-     token = await getToken({
-      req: request,
-      secret: "hello",
-    });
+  token = await getToken({
+  req: request,
+  secret: process.env.NEXTAUTH_SECRET,
+  cookieName: "__Secure-authjs.session-token",
+});
     console.log("no error");
   console.log("the secret key is "+process.env.NEXTAUTH_SECRET);
     
