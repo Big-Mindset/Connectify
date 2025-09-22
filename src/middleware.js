@@ -21,6 +21,7 @@ export async function middleware(request) {
   ) {
     return NextResponse.next();
   }
+  console.log("Cookies in middleware:", request.cookies.getAll());
   let token;
   try{
 
