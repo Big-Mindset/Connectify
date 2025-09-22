@@ -99,7 +99,7 @@ const page = () => {
   }
 
   const isFormValid = (userData?.bio?.trim() && userData.avatar && userData.name.trim())
-  let isSame = (userData?.bio?.trim() === session?.user.bio && userData.avatar === session?.user?.image && userData.name.trim() === session?.user?.name)
+  let isSame = (userData?.bio?.trim() === session?.user?.bio && userData.avatar === session?.user?.image && userData.name.trim() === session?.user?.name)
   return (
     <div
       className="min-h-screen"
