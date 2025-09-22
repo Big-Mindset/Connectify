@@ -111,15 +111,15 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                     token.user.image = session?.image
 
                 }   
-                console.log("the token is ::");
-                    console.log(token);
                     
             return token
   
         },
 
         async session({ session, token }) {
-
+            console.log("the session is ");
+                console.log(session);
+                
             if (token) {
                 session.user = token.user
             }

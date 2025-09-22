@@ -52,7 +52,6 @@ const login = () => {
             }
 
         } catch (error) {
-            console.log(error.message);
 
             toast.error("Network error try again")
         } finally {
@@ -68,7 +67,6 @@ const login = () => {
             let res = await signIn(provider, { redirect: true })
 
         } catch (error) {
-            console.log(error.message);
             toast.error("Network Error try again")
 
         } finally {

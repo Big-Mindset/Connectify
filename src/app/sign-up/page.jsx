@@ -65,8 +65,6 @@ const signUp = () => {
         
 
     }
-    let session = useSession()
-  console.log(session)
 
     let handleSignUp = async (provider) => {
         setauthLoading(provider)

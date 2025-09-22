@@ -10,10 +10,10 @@ export async function POST(res){
                 return NextResponse.json({message : "Unauthorized - login and try again"},{status : 401})
             }
         let {data} = await res.json()
-  console.log(data);
   
         let secure_url ;
         if (data.image){
+            
             let url = await cloudinary.uploader.upload(data.image)
              secure_url = cloudinary.url(url.public_id,{
                 transformation : [
@@ -49,7 +49,6 @@ export async function POST(res){
         }
 
     } catch (error) {
-        console.log(error.message);
         
         return NextResponse.json({message : "Network problem try again"},{status : 500})
         

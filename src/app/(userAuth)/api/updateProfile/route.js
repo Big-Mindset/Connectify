@@ -11,10 +11,6 @@ export async function PUT(req) {
                 data.avatar = secure_url 
             }
             let {id , ...rest} = data
-            console.log("data");
-            
-            console.log(data);
-            
             await prisma.account.update({
                 where : {
                     id : id,

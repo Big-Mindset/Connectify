@@ -16,7 +16,7 @@ import Image from 'next/image';
 import Typewriter from 'typewriter-effect';
 import { Moon, Sun } from 'lucide-react';
 import Loader from '@/components/ChatsComp/Loader';
-import api from '@/lib/axiosInstance';
+
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -54,11 +54,6 @@ const Page = () => {
   useEffect(() => {
     getChatData()
   }, [])
-useEffect(()=>{
-  console.log("running");
-  console.log(api);
-  
-},[api])
 
   const [Completed, setCompleted] = useState(false)
   let { setTheme, resolvedTheme } = useTheme()
@@ -84,7 +79,6 @@ useEffect(()=>{
       setisType(false)
     }
   }, [Completed])
-  
   return (
     <>
     {loading ? <Loader /> : 
