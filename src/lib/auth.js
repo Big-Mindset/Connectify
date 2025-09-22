@@ -78,7 +78,7 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                         id: account.id,
                         name: account.name,
                         email : account.email,
-                        image : account.image || "",
+                        image : account.avatar || "",
                         bio : account.bio || "",
                         isCompleted : account.isCompleted
 

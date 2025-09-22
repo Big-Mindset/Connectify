@@ -15,7 +15,7 @@ import useDebounce from '@/lib/useDebounce'
 import { DotsVerticalIcon } from '@radix-ui/react-icons'
 import FriendRequests from './FriendRequests'
 import {  signOut } from 'next-auth/react'
-import { deletedatabase, deleteDatabase } from '@/database/indexdb'
+import { deletedatabase } from '@/database/indexdb'
 
 const ChatList = React.memo(({ setopenfriendSearch }) => {
   const users = authstore.use.users()
