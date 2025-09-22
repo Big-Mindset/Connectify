@@ -16,6 +16,7 @@ import Image from 'next/image';
 import Typewriter from 'typewriter-effect';
 import { Moon, Sun } from 'lucide-react';
 import Loader from '@/components/ChatsComp/Loader';
+import { useSession } from 'next-auth/react';
 
 
 const roboto = Roboto({
@@ -79,6 +80,10 @@ const Page = () => {
       setisType(false)
     }
   }, [Completed])
+  let session = useSession()
+    console.log("the session is ");
+  
+console.log(session)
   return (
     <>
     {loading ? <Loader /> : 

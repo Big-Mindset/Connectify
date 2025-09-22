@@ -249,6 +249,8 @@ setLoading(false)
     let updatedMessages = [...messages].slice(-50)
     setMessages(updatedMessages)
   }
+  console.log("the session is ");
+  
 console.log(session);
 
 
