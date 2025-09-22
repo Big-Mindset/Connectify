@@ -1,10 +1,11 @@
 import nodemailer from "nodemailer";
-console.log(process.env.NODEMAILER_PASS)
+
 export let transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: "wadoodmemon0@gmail.com",
-    pass: process.env.NODEMAILER_PASS
+    pass: process.env.NODEMAILER_PASS,
   },
 });
-
