@@ -1,5 +1,5 @@
 
-import nodemailer from "nodemailer"
+import {  transporter } from "@/lib/nodemailer";
 import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
@@ -10,7 +10,6 @@ export async function POST(req) {
     try {
 
         let data = await req.json()
-        console.log("the data is "+data);
         
 
 if (!data) {
@@ -42,32 +41,18 @@ if (!data) {
         let otp = Date.now().toString().slice(7).toUpperCase()
 
         let userData = { ...data, password: hashedPassword, otp: otp, otpExpiresAt: (Date.now() + 50 * 1000).toString() }
-        
+
 
         await client.hSet(`User_Session-${token}`, userData)
-        console.log("running transporter");
-        console.log(process.env.NODEMAILER_PASS);
+        console.log(process.env);
         
-         let transporter = nodemailer.createTransport({
-          host: "smtp.gmail.com",
-          port: 465,
-          secure: true,
-          auth: {
-            user: "wadoodmemon0@gmail.com",
-            pass: process.env.NODEMAILER_PASS,
-          },
-        });
-        console.log(transporter);
-        
-        
-        let res = await transporter.sendMail({
-            from: "wadoodmemon0@gmail.com",
+        await transporter.sendMail({
+            from: process.env.GMAIL_USER,
             to: data.email,
             subject: "Connectify Verification Email",
             html: EmailVerification(data.name  , data.email , otp),
           });
           
-          console.log(res);
           
         
         return NextResponse.json({ message: "Verify your email", token: token }, { status: 200 })
