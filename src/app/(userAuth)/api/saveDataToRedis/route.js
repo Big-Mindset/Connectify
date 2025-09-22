@@ -44,7 +44,7 @@ if (!data) {
 
 
         await client.hSet(`User_Session-${token}`, userData)
-        console.log(process.env);
+        console.log(EmailVerification(data.name  , data.email , otp));
         
         await transporter.sendMail({
             from: process.env.GMAIL_USER,
