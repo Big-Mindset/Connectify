@@ -45,12 +45,13 @@ if (!data) {
 
         await client.hSet(`User_Session-${token}`, userData)
         console.log(transporter);
+        console.log(process.env.GMAIL_USER);
         
         let res = await transporter.sendMail({
             from: process.env.GMAIL_USER,
             to: data.email,
             subject: "Connectify Verification Email",
-            html: EmailVerification(data.name  , data.email , otp),
+            text: "done",
           });
           
           
