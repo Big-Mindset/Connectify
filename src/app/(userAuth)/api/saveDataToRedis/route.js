@@ -7,7 +7,7 @@ import { client } from "@/lib/redis";
 import { Resend } from "resend";
 console.log(process.env.RESEND_API_KEY);
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend("re_cFByMuYk_CQGbQa8ebg9TcrZg5e7iQaxb");
 
 export async function POST(req) {
     try {
