@@ -94,6 +94,9 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
     ],
     callbacks: {
         async jwt({ token, user,trigger ,session }) {
+            console.log("the user is this ");
+            console.log(user);
+            
                 if (user) {
                     token = {}
                     token.user = user
@@ -108,7 +111,9 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                     token.user.image = session?.image
 
                 }   
-
+                console.log("the token is ::");
+                    console.log(token);
+                    
             return token
   
         },
@@ -121,10 +126,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
             return session
         },
         async signIn({ user, account }) {
-                
-            console.log(account);
-            console.log(user);
-            console.log("the key is "+process.env.NEXTAUTH_SECRET);
             
                 if (user?.email && (account.provider === "google" || account.provider === "github")) {
                     let existingUser = await prisma.user.findUnique({

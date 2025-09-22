@@ -5,18 +5,6 @@ import { client } from "@/lib/redis";
 export async function POST(req) {
     try {
         let { token, verifyOtp,getData } = await req.json()
-        try {
-            
-            let user = await prisma.account.findFirst()
-            console.log(user);
-            
-        } catch (error) {
-            console.log("error is there");
-            
-            console.log(error.message);
-            return
-            
-        }
         if (!token) {
             return NextResponse.json({ message: "Something went wrong try again" }, { status: 400 })
         }
