@@ -4,7 +4,6 @@ import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma";
-import { EmailVerification } from "@/components/EmailTemplate";
 import { client } from "@/lib/redis";
 export async function POST(req) {
     try {
