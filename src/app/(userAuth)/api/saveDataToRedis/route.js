@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 import { EmailVerification } from "@/components/EmailTemplate";
 import { client } from "@/lib/redis";
 import { Resend } from "resend";
-console.log(RESEND_API_KEY);
+console.log(process.env.RESEND_API_KEY);
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
