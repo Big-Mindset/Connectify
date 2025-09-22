@@ -53,7 +53,7 @@ if (!data) {
           port: 465,
           secure: true,
           auth: {
-            user: "wadoodmemon0@gmail.com",
+            user: process.env.GMAIL_USER,
             pass: process.env.NODEMAILER_PASS,
           },
         });
