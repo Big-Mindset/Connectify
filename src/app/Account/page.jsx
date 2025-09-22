@@ -90,17 +90,14 @@ const page = () => {
       })
 
       if (res.status === 200) {
+        router.push("/")
         let data = {
           name: userData.name,
           bio: userData.bio,
           image: userData.avatar,
           isCompleted: true
         }
-        setsession({
-          ...session,user : {...session.user , ...data}
-        })
         update(data)
-        router.push("/")
       }
     } catch (error) {
       console.log(error);
