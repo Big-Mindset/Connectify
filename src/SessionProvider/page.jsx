@@ -10,7 +10,7 @@ const Session = ({children,session}) => {
   useEffect(() => {
     console.log("setting the session");
     
-    console.log(session);
+    console.log(session?.data);
     
         setsession(session)
   }, [session])
