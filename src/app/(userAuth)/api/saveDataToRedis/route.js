@@ -1,5 +1,5 @@
 import { EmailVerification } from "@/components/EmailTemplate"
-import nodemailer from "nodemailer"
+const nodemailer = require("nodemailer") 
 import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
