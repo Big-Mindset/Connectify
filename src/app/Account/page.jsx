@@ -70,6 +70,15 @@ const page = () => {
       
     try {
       setIsLoading(true)
+      console.log({
+        id: session?.user?.id,
+        name: userData.name,
+        bio: userData.bio,
+        avatar: userData.avatar,
+        isCompleted: true
+
+      });
+      
       const res = await axios.put("api/updateProfile", {
         id: session?.user?.id,
         name: userData.name,
