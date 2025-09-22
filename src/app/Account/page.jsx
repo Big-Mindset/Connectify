@@ -51,6 +51,8 @@ const page = () => {
       return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
     })
   }, [session])
+  console.log(session);
+  
   const handleAvatarSelect = (avatarUrl) => {
     setuserData(prev => ({ ...prev, avatar: avatarUrl }))
     setShowAvatars(false)
