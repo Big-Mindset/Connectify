@@ -122,6 +122,8 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
             if (token) {
                 session.user = token.user
             }
+            console.log(session);
+            
             return session
         },
         async signIn({ user, account }) {
