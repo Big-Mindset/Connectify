@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
 const page = () => {
-  const session = authstore.use.session()
+  let session = useSession()
   const setsession = authstore.use.setsession()
   const [avatars, setavatars] = useState([])
   const [userData, setuserData] = useState({
@@ -46,12 +46,11 @@ const page = () => {
     getAvatars()
   }, [])
   useEffect(() => {
-
+    
     setuserData(prev => {
       return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
     })
-  }, [session])
-  console.log(session);
+  }, [session.status])
   
   const handleAvatarSelect = (avatarUrl) => {
     setuserData(prev => ({ ...prev, avatar: avatarUrl }))
