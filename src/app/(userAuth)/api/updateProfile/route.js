@@ -18,9 +18,7 @@ export async function PUT(req) {
                 where : {
                     id : id,
                 },
-                data :  {
-                    ...rest
-                }
+                data :  rest
             })
             return NextResponse.json({Message : "Updated"},{status : 200})
         } catch (error) {

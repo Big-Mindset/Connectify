@@ -83,7 +83,7 @@ const page = () => {
           isCompleted: true
         }
         setsession({
-          ...session,user : {...session.user , data}
+          ...session,user : {...session.user , ...data}
         })
         update(data)
         router.push("/")
