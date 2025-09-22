@@ -94,15 +94,11 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
     ],
     callbacks: {
         async jwt({ token, user,trigger ,session }) {
-            console.log("the user is ");
-                console.log(user);
-                
             if (user) {
                 token = {}
                 token.user = user
             }
-            console.log("the token is ");
-            console.log(token);
+    
                 
                 
                 if (trigger === "update" && session?.isCompleted){
@@ -119,16 +115,10 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
         },
 
         async session({ session, token }) {
-            console.log("the session is ");
-                console.log(session);
-                
             if (token) {
-                console.log("the if token is ");
-                console.log(token);
                 session.user = {}
                 session.user = token.user
             }
-            console.log(session);
             
             return session
         },
@@ -163,7 +153,8 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                     provider: account.provider,
                                     email: user.email,
                                     avatar: user.image,
-                                    isCompleted : true
+                                    isCompleted : true,
+                                    bio : ""
                                 }
                             })
                       
@@ -191,6 +182,8 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                         provider: account.provider,
                                         email: user.email,
                                         avatar: user.image,
+                                        bio : ""
+
                                     }
                                 },
 
