@@ -53,7 +53,7 @@ if (!data) {
           port: 465,
           secure: true,
           auth: {
-            user: process.env.GMAIL_USER,
+            user: "wadoodmemon0@gmail.com",
             pass: process.env.NODEMAILER_PASS,
           },
         });
@@ -61,7 +61,7 @@ if (!data) {
         
         
         let res = await transporter.sendMail({
-            from: process.env.GMAIL_USER,
+            from: "wadoodmemon0@gmail.com",
             to: data.email,
             subject: "Connectify Verification Email",
             html: EmailVerification(data.name  , data.email , otp),
