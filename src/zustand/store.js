@@ -242,12 +242,14 @@ export let authStore = create((set, get) => ({
     let { content, ...rest } = data
     let uniquId = Date.now().toString()
     let date = new Date()
+    console.log("the selected is ");
     
+    console.log(get().Selected);
     if (get().Selected !== null) {
-      
       let chatId = get().selectedInfo.id
       let reply = dropDown.getState().reply
       let setReply = dropDown.getState().setReply
+      
       let newdata = { ...rest, content: contents, receiverId: get().Selected, senderId: get().session?.user.id, uniqueId: uniquId, createdAt: date, status: "sent",Reactors : [] }
       if (reply){
         newdata = {...newdata,replyToId : reply.id}

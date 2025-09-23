@@ -26,7 +26,7 @@ const ChatNav = memo(({ setOpenSearch, inputRef, openSearch }) => {
         }
 
         if (!selectedInfo?.friend?.lastseen) {
-            return "Last seen unknown";
+            return null;
         }
 
         const nowDate = new Date();
@@ -129,7 +129,7 @@ const ChatNav = memo(({ setOpenSearch, inputRef, openSearch }) => {
                                     </span>
                                 ) : (
                                     <span className='dark:text-gray-300 text-black/70 sm:text-[0.7rem] text-[0.7rem]'>
-                                        {isGroupChat ? lastSeenInfo : `last seen ${lastSeenInfo}`}
+                                        {isGroupChat ? lastSeenInfo :  lastSeenInfo && `last seen ${lastSeenInfo}`}
                                     </span>
                                 )}
                             </p>

@@ -8,9 +8,10 @@ import toast from 'react-hot-toast';
 import { authstore } from '@/zustand/store';
 import { LoaderCircle, X, Users, Type, FileText, Camera } from 'lucide-react';
 import { groupstore } from '@/zustand/groupStore';
+import api from '@/lib/axiosInstance';
 
 function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
-  const loading = authstore.use.loading();
+  let [loading , setloading ] = useState()
   const setLoading = authstore.use.setLoading();
   const socket = authstore.use.socket();
   const onlineUsers = authstore.use.onlineUsers();
@@ -36,14 +37,20 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
   };
 
   const CreateGroup = async (data) => {
-    setLoading(true);
-    
+    setloading(true);
+      console.log("Creating the group");
+        console.log(data);
+        console.log(GroupUsersSelect);
+        console.log(image);
+        
     try {
       let res = await api.post("/create-group", {
         ...data,
         userIds: GroupUsersSelect.map(user => user.id),
         image 
       });
+      console.log(res);
+      
       
       if (res.status === 201) {
         toast.success(res.data.message);
@@ -60,7 +67,7 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
         toast.error(error?.response?.data?.message);
       }
     } finally {
-      setLoading(false);
+      setloading(false);
     }
   };
   let inputRef = useRef(null)

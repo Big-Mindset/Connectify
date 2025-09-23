@@ -51,7 +51,7 @@ const page = () => {
     if (status === "authenticated"){
 
       setuserData(prev => {
-        return { ...prev, name: session?.user?.name ?? "", avatar: session?.user?.image ?? "", bio: session?.user?.bio ?? "" }
+        return { ...prev, name: data?.user?.name ?? "", avatar: data?.user?.image ?? "", bio: data?.user?.bio ?? "" }
       })
       setsession(data)
     }
@@ -67,18 +67,9 @@ const page = () => {
   }
   const handleSave = async () => {
     if (!userData.bio || !userData.avatar || !userData.name) return
-      console.log(session);
       
     try {
       setIsLoading(true)
-      console.log({
-        id: session?.user?.id,
-        name: userData.name,
-        bio: userData.bio,
-        avatar: userData.avatar,
-        isCompleted: true
-
-      });
       
       const res = await axios.put("api/updateProfile", {
         id: session?.user?.id,
@@ -90,19 +81,18 @@ const page = () => {
       })
 
       if (res.status === 200) {
-        router.push("/")
         let data = {
           name: userData.name,
           bio: userData.bio,
           image: userData.avatar,
           isCompleted: true
         }
-        update(data)
+        await update(data)
       }
     } catch (error) {
-      console.log(error);
       
     } finally {
+      router.push("/")
       setIsLoading(false)
     }
   }

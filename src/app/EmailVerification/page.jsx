@@ -30,7 +30,6 @@ export default function OTPVerification() {
     name: "",
     email: ""
   })
-  console.log(data);
 
   useEffect(() => {
     let savedata = async () => {
@@ -39,7 +38,6 @@ export default function OTPVerification() {
         token: token,
         getData: true
       })
-      console.log(res);
 
       let { email, name } = res.data.userData
       setdata({ ...data, email, name })
@@ -58,7 +56,6 @@ export default function OTPVerification() {
         token: token,
         verifyOtp: otp.join("")
       })
-      console.log(data);
 
       if (res.status === 201) {
 
@@ -74,7 +71,6 @@ export default function OTPVerification() {
         toast.error(res?.data?.message)
       }
     } catch (error) {
-      console.log(error.message);
 
       if (error?.response?.status === 404) {
         toast.error(error?.response?.data?.message)
@@ -108,6 +104,8 @@ export default function OTPVerification() {
   let handleResend = async () => {
     setressending(true)
     let res = await axios.put("/api/resendOtp", { token, email: data.email, name: data.name })
+    console.log(res);
+    
     if (res.status === 201) {
       countDownEverySecond()
       count.current = 60

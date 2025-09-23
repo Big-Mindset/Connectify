@@ -58,9 +58,8 @@ export async function POST(req) {
     }
     return NextResponse.json({message : "Group Created",groupId : group?.id},{status : 201})
 } catch (error) {
-    console.log(error.message);
     
-    return NextResponse.json({message : "Network Error try again"},{status : 500})
+    return NextResponse.json({message : "Network Error try again",error},{status : 500})
     
 }
 }

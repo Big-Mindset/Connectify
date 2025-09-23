@@ -59,6 +59,10 @@ const ChatMain = () => {
 
   useEffect(() => {
     const receiverId = session?.user?.id
+    console.log("readomg..");
+    
+    console.log(receiverId ,Selected);
+    
     if (Selected && receiverId) {
       socket.emit('message-readed', {
         receiverId,
@@ -267,10 +271,12 @@ setLoading(false)
       {Delete && <div onClick={() => setDelete(null)} className='absolute z-20 inset-0 opacity-10 bg-gray-800/40 backdrop-blur-2xl'></div>}
       {DropDown && <div onClick={() => { setDropDown(null) }} className='absolute  z-10  inset-0 '></div>}
       <ChatNav setOpenSearch={setOpenSearch} inputRef={inputRef} openSearch={openSearch}/>
+      {
+        selectedInfo &&
  <motion.div
-  initial={{ x: "100%" }}
-  animate={{ x: openSearch ? "0%" : "100%" }}
-  transition={{ duration: 0.4 }}
+ initial={{ x: "100%" }}
+ animate={{ x: openSearch ? "0%" : "100%" }}
+ transition={{ duration: 0.4 }}
   className="fixed top-0 right-0 bottom-0 w-full md:w-[45%] z-50 border-l border-indigo-600/60 dark:bg-blue-950"
 >
   <div className='absolute left-1/2 top-1/2 -translate-1/2 '>
@@ -281,7 +287,7 @@ setLoading(false)
         <div 
         
           onClick={()=>setOpenSearch(!openSearch)}
-        className='overflow-hidden hover:bg-blue-900 rounded-full p-1.5 cursor-pointer'>
+          className='overflow-hidden hover:bg-blue-900 rounded-full p-1.5 cursor-pointer'>
           <X size={20} />
         </div>
         <p className='text-[0.95rem]'>Search Messages</p>
@@ -302,6 +308,7 @@ setLoading(false)
         </div>
       </div>
     </motion.div>
+      }
       {GoDown && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}

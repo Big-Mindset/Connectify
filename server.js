@@ -239,6 +239,7 @@ app.prepare().then(() => {
 
         socket.on("message-readed", async (data) => {
             try {
+                
                 let updated = await prisma.message.updateMany({
                     where: {
                         senderId: data.senderId,
@@ -250,9 +251,11 @@ app.prepare().then(() => {
 
                     }
                 });
+                
                 if (updated.count > 0) {
 
                     let senderSocket = onlineUsers[data.senderId]
+                    
                     io.to(senderSocket).emit("readed", data.chatId);
 
                 }
@@ -398,12 +401,6 @@ app.prepare().then(() => {
         });
     });
 
-    console.log(server)
     server.listen(port,"0.0.0.0", () => {
-        console.log(process.env.NEXTAUTH_URL)
     });
-}).catch((error)=>{
-    console.log(error)
-     console.error("=== APP PREPARE FAILED ===");
-    process.exit(1);
 })

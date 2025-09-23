@@ -60,7 +60,7 @@ const GroupUsers = () => {
                     {group.name}
                   </h3>
                   {group?.groupsMessages?.length > 0 ? <p className="font-light text-[0.9rem] text-gray-800 dark:text-gray-200">
-                    {group?.groupsMessages[0]?.content}
+                    {group?.groupsMessages[0]?.content.slice(0,65) + (group?.groupsMessages[0]?.content.length > 65 ? "..." : "")}
                   </p> :
 
                     <p className="line-clamp-1   text-[0.8rem] text-black/60 dark:text-indigo-300/80">
