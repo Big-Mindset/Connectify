@@ -402,5 +402,7 @@ app.prepare().then(() => {
     });
 
     server.listen(port,"0.0.0.0", () => {
+        console.log("running on port"+port);
+        
     });
 })
