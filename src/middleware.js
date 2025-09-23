@@ -9,7 +9,7 @@ const DEFAULT_REDIRECT = "/";
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-
+  console.log("running the middleware")
   if (pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
