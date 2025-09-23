@@ -80,10 +80,10 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
     }
   }
   return (
-    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg transform animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 md:p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-gray-900 md:rounded-3xl shadow-2xl w-full h-full max-w-lg transform animate-in slide-in-from-bottom-4 duration-300">
      
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between md:p-6 p-2.5 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
               <Users className="w-5 h-5 text-white" />
@@ -96,11 +96,11 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <X className="size-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(CreateGroup)} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit(CreateGroup)} className="md:p-6 p-2 space-y-6">
    
           {errors && (errors.name || errors.description) && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl animate-in slide-in-from-top-2 duration-200">
@@ -112,15 +112,15 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
 
           <div className="flex justify-center">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500 p-0.5 shadow-lg">
-                <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-800">
+              <div className="size-20 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-purple-500 p-0.5 shadow-lg">
+                <div className="size-full rounded-full overflow-hidden bg-white dark:bg-gray-800">
                   <Image
                     src={image || Avatar}
                     alt="Group Avatar"
                     width={80}
                     height={80}
                     
-                    className="w-full h-full object-cover"
+                    className="size-full object-cover"
                   />
                 </div>
               </div>
@@ -129,7 +129,7 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
                 type="button"
                 className="absolute -bottom-1 -right-1 p-1.5 bg-blue-500 hover:bg-blue-600 rounded-xl shadow-lg transition-all duration-200 hover:scale-110"
               >
-                <Camera className="w-4 h-4 text-white" />
+                <Camera className="size-4 text-white" />
               </button>
               <input 
               ref={inputRef}
@@ -218,14 +218,14 @@ function UserCardDialog({ GroupUsersSelect, setOpen, setGroupUsersSelect }) {
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 py-3 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02]"
+              className="flex-1 md:py-3 py-2 md:px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !watchedName?.trim() || !image}
-              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-400 disabled:to-gray-400 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:cursor-not-allowed flex items-center justify-center"
+              className="flex-1 md:py-3 md:px-4 py-2  bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-400 disabled:to-gray-400 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:cursor-not-allowed flex items-center justify-center"
             >
               {loading ? (
                 <LoaderCircle className="w-5 h-5 animate-spin" />

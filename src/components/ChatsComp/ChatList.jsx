@@ -210,6 +210,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
             <h1 className='font-bold dark:text-indigo-100 text-[#395BC7] text-[1.5rem]'>Connectify</h1>
           </div>
           <div className='flex gap-2  items-center'>
+            
             <motion.div
               onClick={handleOpenSearch}
               className="relative cursor-pointer flex items-center gap-2 px-3 py-2 hover:bg-[#E7E8EC] hover:ring-1 ring-gray-400 bg-[#EFF0F3] rounded-full dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 transition-colors"
@@ -218,7 +219,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                 <User2 className="size-5 text-[#395BC7] dark:text-indigo-400" />
                 <Plus className="absolute -bottom-1 -right-1 size-3 bg-[#395BC7] dark:bg-indigo-500   rounded-full p-[2px] text-white" />
               </div>
-              <span className="text-sm dark:text-indigo-200/90 text-[#1D2E5C]  font-light">Add Friends</span>
+              <span className="text-sm dark:text-indigo-200/90 md:visible hidden text-[#1D2E5C]  font-light">Add Friends</span>
 
             </motion.div>
             <div className='relative'>

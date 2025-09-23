@@ -7,7 +7,7 @@ import Image from "next/image"
 import React, { memo, useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from 'framer-motion'
 import { useWidth } from "@/app/page"
-const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
+const ChatNav = memo(({ setOpenSearch, inputRef, openSearch }) => {
     const selectedInfo = authstore.use.selectedInfo();
     const setselectedInfo = authstore.use.setselectedInfo();
     const setSelected = authstore.use.setSelected();
@@ -56,11 +56,11 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
     const isOnline = isIndividualChat ? onlineUsers?.includes(selectedInfo.friend.id) : false;
 
 
-   useEffect(()=>{
-    if (inputRef?.current){
-        inputRef.current.focus()
-    }
-   },[openSearch])
+    useEffect(() => {
+        if (inputRef?.current) {
+            inputRef.current.focus()
+        }
+    }, [openSearch])
     let width = useWidth()
     let handleBack = () => {
         setselectedGroup(null)
@@ -98,7 +98,7 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
                     </div>
                 </motion.div>}
             </AnimatePresence>
-            <nav className="sticky left-0 top-0 right-0  border-b   dark:border-0  border-gray-300 bg-gray-50  dark:bg-[#0D1520] z-30 px-4 text-indigo-100">
+            <nav className="sticky left-0 top-0 right-0  border-b   dark:border-0  border-gray-300 bg-gray-50  dark:bg-[#0D1520] z-30 md:px-4 px-1 text-indigo-100">
 
                 <div className="flex md:justify-between justify-center gap-2 w-full bg-gradient-to-r py-2.5 transition-all duration-200 md:px-5 px-0.5 items-center">
                     {width < 768 &&
@@ -109,7 +109,7 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
                             className="bg-blue-700/60  p-1 sm:mr-2.5    rounded-full  ">
                             <ArrowLeft className="font-light sm:size-6  text-white" />
                         </motion.div>}
-                    <div className='flex gap-2 flex-1/6'>
+                    <div className='flex gap-2 flex-1'>
                         <div className='rounded-full relative overflow-hidden md:size-14 size-12  border-2 border-indigo-500/30'>
                             <Image
                                 src={chatImage}
@@ -137,29 +137,29 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
                     </div>
 
 
-                    <div className="flex gap-4 flex-1 items-center justify-end">
+                    <div className="flex gap-4  items-center justify-end">
 
                         <div
-                            onClick={()=>{
+                            onClick={() => {
                                 setOpenSearch(!openSearch)
                             }}
-                        className='flex   relative cursor-pointer   items-center  dark:hover:bg-indigo-600/30 gap-2 p-2  transition-all duration-200 rounded-full overflow-hidden'>
+                            className='flex   relative cursor-pointer   items-center  dark:hover:bg-indigo-600/30 gap-2 p-2  transition-all duration-200 rounded-full overflow-hidden'>
 
                             <MagnifyingGlassIcon className=" dark:text-white text-gray-900 size-[20px]" />
                         </div>
                         {
-                            width > 786 &&  <div
-                        onClick={() => {
-                                setMenu(!Menu)
-                            }}
-                                  className='p-2 rounded-full bg-[#EFF0F3]  hover:bg-gray-200    cursor-pointer dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 '
+                            width > 786 && <div
+                                onClick={() => {
+                                    setMenu(!Menu)
+                                }}
+                                className='p-2 rounded-full bg-[#EFF0F3]  hover:bg-gray-200    cursor-pointer dark:bg-slate-800/40 dark:hover:bg-indigo-600/30 '
                             >
-                            
 
-                            <DotsVerticalIcon scale={1.1} className='text-[#1E1F24] dark:text-white font-bold' />
-                        </div>
+
+                                <DotsVerticalIcon scale={1.1} className='text-[#1E1F24] dark:text-white font-bold' />
+                            </div>
                         }
-                      
+
                     </div>
 
                 </div>
