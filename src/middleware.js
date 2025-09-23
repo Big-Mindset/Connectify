@@ -21,11 +21,12 @@ export async function middleware(request) {
   ) {
     return NextResponse.next();
   }
-
+  console.log("the key is"+process.env.NEXTAUTH_SECRET);
+  
   let token = await getToken({
   req: request,
   secret: process.env.NEXTAUTH_SECRET,
-  cookieName: process.env.NODE_ENV === "production" ? "__Secure-authjs.session-token" : "authjs.session-token",
+  cookieName: "authjs.session-token",
 });
 console.log(token);
 

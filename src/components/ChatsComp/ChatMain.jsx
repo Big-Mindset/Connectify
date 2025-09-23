@@ -59,9 +59,7 @@ const ChatMain = () => {
 
   useEffect(() => {
     const receiverId = session?.user?.id
-    console.log("readomg..");
     
-    console.log(receiverId ,Selected);
     
     if (Selected && receiverId) {
       socket.emit('message-readed', {
@@ -92,19 +90,32 @@ const ChatMain = () => {
   }, [selectedGroup, groupMessages])
 
   const scrollbarsRef = useRef(null);
+  const [prevChatID , setprevChatID] = useState(null)
   useEffect(() => {
+    
     if (!messages.length) return
     if (intersecting) {
       setintersecting(false)
       return
     }
-    if (load) {
+    let id = selectedInfo ? selectedInfo?.id : selectedGroup.id
+    
+    if (id !== prevChatID) {
+      
       scrollbarsRef.current.scrollIntoView({ block: "end" });
-      setLoad(false)
+      setprevChatID(id)
+    setLoad(false);
+
+      return
     }
+ if (load) {
+    scrollbarsRef.current.scrollIntoView({ block: "end" });
+    setLoad(false);
+    return;
+  }
     scrollbarsRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
 
-  }, [messages?.length, isTyping]);
+  }, [messages?.length, isTyping,selectedInfo,selectedGroup]);
 
 
   const toggleEmojiPicker = () => {
@@ -132,8 +143,8 @@ const ChatMain = () => {
 
 
 
-  let sendMessages = useCallback(
-    () => {
+  let sendMessages = useCallback((inputRef) => {
+    inputRef?.current?.focus()
       handleSendMessage(messageData, setMessageData)
     }
     , [messageData])

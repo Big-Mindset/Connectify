@@ -42,25 +42,24 @@ const GroupUsers = () => {
             className="animate-fade-in-up  opacity-0 [animation-fill-mode:forwards]"
           >
             <div
-              className={` flex ${selectedGroup?.id === group.id ? "bg-gradient-to-r from-gray-200 to-gray-200 dark:from-blue-700/30 dark:to-blue-500/40" : "dark:hover:from-[#2c356b]   dark:hover:to-[#372c64] bg-gradient-to-r hover:from-gray-200 hover:to-gray-200 "} transform  items-center justify-between gap-3 rounded-xl   p-3 transition-all duration-300 `}>
+              className={` flex ${selectedGroup?.id === group.id ? "bg-gradient-to-r from-gray-200 to-gray-200 dark:from-blue-700/30 dark:to-blue-500/40" : "dark:hover:bg-blue-500/20  hover:from-gray-200 hover:to-gray-200 "} transform  items-center justify-between gap-3 rounded-xl   p-2 transition-all duration-300 `}>
               <div className="flex items-center gap-3 flex-1">
 
-                <div className="relative transition-transform duration-300 group-hover:scale-105">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-700/30 to-purple-500/30 opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="relative transition-transform duration-300 overflow-hidden size-16  rounded-full  group-hover:opacity-100 group-hover:scale-105">
                   <Image
                     src={group.image || Avatar}
                     alt={group.name}
                     width={56}
                     height={56}
-                    className="rounded-full border-2 border-indigo-800/50 object-cover"
+                    className="rounded-full border-2 border-indigo-800/50 size-full object-cover"
                   />
-                </div>
+                     </div>
                 <div className="flex-1">
                   <h3 className=" dark:text-indigo-100 text-black transition-colors">
                     {group.name}
                   </h3>
                   {group?.groupsMessages?.length > 0 ? <p className="font-light text-[0.9rem] text-gray-800 dark:text-gray-200">
-                    {group?.groupsMessages[0]?.content.slice(0,65) + (group?.groupsMessages[0]?.content.length > 65 ? "..." : "")}
+                    {group?.groupsMessages[0]?.content.slice(0, 65) + (group?.groupsMessages[0]?.content.length > 65 ? "..." : "")}
                   </p> :
 
                     <p className="line-clamp-1   text-[0.8rem] text-black/60 dark:text-indigo-300/80">
@@ -71,9 +70,9 @@ const GroupUsers = () => {
               </div>
               {group?.groupsMessages?.length > 0
                 &&
-                  <span className="font-light text-[0.7rem] text-gray-700  dark:text-gray-200">{getTime(group?.groupsMessages[0]?.createdAt)}</span>
-              
-                }
+                <span className="font-light text-[0.7rem] text-gray-700  dark:text-gray-200">{getTime(group?.groupsMessages[0]?.createdAt)}</span>
+
+              }
             </div>
           </div>
         ))

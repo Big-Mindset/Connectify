@@ -14,6 +14,7 @@ import toast from 'react-hot-toast'
 import {motion} from "framer-motion";
 import { useTheme } from 'next-themes';
 import {useSession} from "next-auth/react"
+import api from '@/lib/axiosInstance';
 export default function Settings({ setsettings }) {
     let {update} =  useSession()
     let session = authstore.use.session()
@@ -66,26 +67,26 @@ export default function Settings({ setsettings }) {
     }, [profile.name, profile.email, profile.bio, profile.image])
 
     let handleSave = async () => {
+        console.log(checked);
+        
         if (!checked) return;
         try {
 
             setLoading(true)
-              let data = {
-                    id: session?.user?.id,
-                    name: profile.name,
-                    email: profile.email,
-                    bio: profile.bio,
-                    image: profile.image
-                }
-                 let { image, ...rest } = data;
-
+            let data = {
+                id: session?.user?.id,
+                name: profile.name,
+                email: profile.email,
+                bio: profile.bio,
+                image: profile.image
+            }
+            let { image, ...rest } = data;
+            
             let res = await api.put("/updateProfile", {...rest,avatar : data.image})
-
+                
             if (res.status === 200) {
                 setchecked(false)
-              
-                setsession({...session , user : {...session.user , data}})
-                update(data)
+                await update(data)
                 toast.success("Profile updated")
 
             } else {

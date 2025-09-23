@@ -1,16 +1,22 @@
 "use client"
 
+import { dropDown } from "@/zustand/dropdown"
 import { Send } from "lucide-react"
-import { memo } from "react"
+import { memo, useEffect, useRef } from "react"
 
 const RegularInput = memo(({value,onchange,placeholder,handleSendMessage,hasContent})=>{
-  
+  let {reply} = dropDown()
+  let inputRef = useRef(null)
+  useEffect(()=>{
+    inputRef.current.focus()
+  },[reply])
     return(
                 <div
                 
                 className='flex-1 flex  items-center overflow-hidden relative'>
       <input
         type="text"
+        ref={inputRef}
         value={value}
         onChange={onchange}
         placeholder={placeholder}
@@ -18,7 +24,7 @@ const RegularInput = memo(({value,onchange,placeholder,handleSendMessage,hasCont
         onKeyPress={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
-            handleSendMessage()
+            handleSendMessage(inputRef)
           }
         }}
         
