@@ -182,9 +182,11 @@ const ChatMain = () => {
     let [loading , setLoading] = useState(false)
   let width = useWidth()
   let container = useRef(null)
+  const scrolledContent = (el.scrollHeight - el.scrollTop - el.clientHeight) 
+  console.log(scrolledContent);
   useEffect(() => {
     if (!messages.length || !container.current || !hasMore) return;
-
+    
     let topMessage = container.current.querySelector(".message:first-child");
     if (!topMessage) return;
 
