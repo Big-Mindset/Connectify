@@ -10,7 +10,6 @@ import Input from '@/components/settingsComps/Input';
 import { authstore } from '@/zustand/store';
 import Image from 'next/image';
 import Img from "@/assets/Avatar.webp"
-import axios from 'axios';
 import toast from 'react-hot-toast'
 import {motion} from "framer-motion";
 import { useTheme } from 'next-themes';
@@ -80,7 +79,7 @@ export default function Settings({ setsettings }) {
                 }
                  let { image, ...rest } = data;
 
-            let res = await axios.put("/api/updateProfile", {...rest,avatar : data.image})
+            let res = await api.put("/updateProfile", {...rest,avatar : data.image})
 
             if (res.status === 200) {
                 setchecked(false)
@@ -111,8 +110,10 @@ export default function Settings({ setsettings }) {
     let handleTheme = () => {
         if (resolvedTheme === "dark") {
             setTheme("light")
+            localStorage.setItem("theme","light")
         } else {
             setTheme("dark")
+            localStorage.setItem("theme","dark")
         }
     }
     return (

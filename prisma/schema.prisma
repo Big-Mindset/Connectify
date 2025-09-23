@@ -29,7 +29,7 @@ model Account {
   isVerified Boolean? 
   name            String
   password        String?
-  bio             String 
+  bio             String @default("replace your bio with this...")
   avatar          String
   userId          String          @db.ObjectId
   lastseen        DateTime        @default(now())

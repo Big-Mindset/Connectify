@@ -107,7 +107,7 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
                             whileTap={{ scale: 0.95 }}
                             transition={{ duration: 0.1 }}
                             className="bg-blue-700/60  p-1 sm:mr-2.5    rounded-full  ">
-                            <ArrowLeft className="font-light sm:size-6  text-black dark:text-white" />
+                            <ArrowLeft className="font-light sm:size-6  text-white" />
                         </motion.div>}
                     <div className='flex gap-2 flex-1/6'>
                         <div className='rounded-full relative overflow-hidden md:size-14 size-12  border-2 border-indigo-500/30'>
@@ -121,14 +121,14 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
                         </div>
 
                         <div className='flex justify-center flex-col'>
-                            <h2 className='md:text-[1rem] sm:text-[0.9rem] text-black/90 dark:text-white text-[0.8rem] font-medium'>{chatName}</h2>
+                            <h2 className='md:text-[1rem] sm:text-[0.9rem] text-black/90 dark:text-white text-[0.9rem] font-medium'>{chatName}</h2>
                             <p className='flex gap-1 items-center'>
                                 {isIndividualChat && isOnline ? (
                                     <span className="bg-gradient-to-r font-bold from-blue-700 md:text-[0.9rem] text-[0.86rem] to-indigo-500 text-transparent bg-clip-text">
                                         Online
                                     </span>
                                 ) : (
-                                    <span className='dark:text-gray-300 text-black/70 sm:text-[0.7rem] text-[0.5rem]'>
+                                    <span className='dark:text-gray-300 text-black/70 sm:text-[0.7rem] text-[0.7rem]'>
                                         {isGroupChat ? lastSeenInfo : `last seen ${lastSeenInfo}`}
                                     </span>
                                 )}
@@ -145,9 +145,10 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
                             }}
                         className='flex   relative cursor-pointer   items-center  dark:hover:bg-indigo-600/30 gap-2 p-2  transition-all duration-200 rounded-full overflow-hidden'>
 
-                            <MagnifyingGlassIcon className=" dark:text-white size-[20px]" />
+                            <MagnifyingGlassIcon className=" dark:text-white text-gray-900 size-[20px]" />
                         </div>
-                        <div
+                        {
+                            width > 786 &&  <div
                         onClick={() => {
                                 setMenu(!Menu)
                             }}
@@ -157,6 +158,8 @@ const ChatNav = memo(({setOpenSearch,inputRef,openSearch}) => {
 
                             <DotsVerticalIcon scale={1.1} className='text-[#1E1F24] dark:text-white font-bold' />
                         </div>
+                        }
+                      
                     </div>
 
                 </div>

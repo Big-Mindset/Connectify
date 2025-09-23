@@ -158,8 +158,8 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
         </div>
       </div>
 
-      <div className='space-y-5.5 mb-2.5 relative p-3'>
-        <div className='flex justify-between items-center px-5'>
+      <div className='space-y-5.5 mb-2.5 relative md:p-3 p-1.5'>
+        <div className='flex justify-between items-center md:px-5 px-3'>
           <div className='flex gap-3 items-center'>
             <div className='relative'>
 
@@ -239,10 +239,10 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.1 }}
                     style={{
-                      transformOrigin: "top left"
+                      transformOrigin: "top right"
                     }}
                     exit={{ scale: 0, opacity: 0 }}
-                    className={`absolute  dark:text-gray-300 text-gray-600 overflow-hidden bg-gray-200  dark:bg-gray-800 rounded-lg p-2 z-[99999] w-[200px] shadow-lg dark:border  dark:border-gray-700`}
+                    className={`absolute right-0.5 dark:text-gray-300 text-gray-600 overflow-hidden bg-gray-200  dark:bg-gray-800 rounded-lg p-2 z-[99999] w-[200px] shadow-lg dark:border  dark:border-gray-700`}
 
                   >
                     <div className="flex flex-col gap-1.5 p-1">
@@ -293,7 +293,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
         </motion.div>
       </div>
 
-      <div className='flex gap-3 my-5 ml-3 p-3'>
+      <div className='flex gap-3 my-5 md:ml-3 ml-1.5 md:p-3 p-1.5'>
         <motion.div whileTap={{ scale: 0.98 }} initial={{ opacity: 0.9 }} onClick={() => setCategory("All")} className='group relative px-8 cursor-pointer  border-[0.7px] border-[#D8D9E0] dark:border-indigo-500  dark:text-indigo-500 text-black/70 rounded-md overflow-hidden'>
           <p className={`relative ${category === "All" ? "z-20" : "group-hover:z-20"} dark:text-white text-gray-800`}>All</p>
           <div className={`${category === "All" ? "w-full" : "group-hover:w-full w-0"} absolute left-1/2 top-1/2 -translate-1/2 h-full duration-200 transition-all -z-0 bg-gradient-to-br  bg-gray-200  dark:to-blue-500 dark:from-indigo-500`} />
@@ -305,7 +305,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
         </motion.div>
       </div>
 
-      <div className='mt-4 px-5 flex flex-col overflow-y-auto h-full gap-1 max-h-[calc(100vh-225px)] w-full scrollStyles '>
+      <div className='md:mt-4 mt-2 md:px-5 px-1 flex flex-col overflow-y-auto h-full gap-1 max-h-[calc(100vh-225px)] w-full scrollStyles '>
         {
           searchResult.length === 0 && userSearch.length > 0 ? (
             <h2 className='text-xl text-white'>No users found...</h2>

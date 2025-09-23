@@ -474,8 +474,6 @@ const Message = React.memo(
                   onClick={(e) => OpenDropDown(e)}
                   className={`absolute p-1.5 transition-all ${isSender ? "" : ""
                     } duration-150 -right-9 group-hover:right-0 bg-gradient-to-r dark:to-blue-600/50  cursor-pointer bottom-0 top-0 z-20`}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <ChevronDownIcon className="size-4 text-black dark:text-white/90" />
                 </div>
@@ -497,7 +495,7 @@ const Message = React.memo(
               )}
 
               <div
-                className="flex gap-2"
+                className=""
               >
                 {DeleteForEveryone ? (
                   <div className="flex gap-1 items-center ">
@@ -507,13 +505,13 @@ const Message = React.memo(
                     </p>
                   </div>
                 ) : (
-                  <p className={`text-[0.9rem] ml-0.5  break-all  dark:text-[#C2E6FF] text-[#063B64]  ${replyToId && "mt-0.5"}    mb-[1.5px] flex-1 min-w-0`}>
+                  <p className={`text-[0.9rem] ml-0.5  break-all grid-rows-1 grid-cols-2  dark:text-[#C2E6FF] text-[#063B64]  ${replyToId && "mt-0.5"}    mb-[1.5px] flex-1 min-w-0`}>
                     {content}
                   </p>
                 )}
 
-                <div className="flex items-center justify-between self-end gap-[3px] flex-shrink-0">
-                  <p className="text-[0.61rem] dark:text-gray-100 text-[#073a60] font-[400] dark:font-[200]">
+                <div className="flex items-center justify-end gap-[3px] flex-shrink-0">
+                  <p className="text-[0.65rem] dark:text-gray-50 text-[#073a60] font-[400] dark:font-[200]">
                     {newtime.toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",

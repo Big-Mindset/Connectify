@@ -64,8 +64,10 @@ const Page = () => {
   let handleTheme = () => {
     if (resolvedTheme === "dark") {
       setTheme("light")
+      localStorage.setItem("theme","light")
     } else {
       setTheme("dark")
+      localStorage.setItem("theme","dark")
     }
   }
   let width = useWidth()
@@ -113,7 +115,7 @@ const Page = () => {
             <ChatList setopenfriendSearch={setopenfriendSearch} />
 
           </div>
-          : ((Selected || selectedGroup) === null) && <div className={`basis-full md:basis-1/3 relative from-800/20    p-3`}>
+          : ((Selected || selectedGroup) === null) && <div className={`basis-full md:basis-1/3 relative from-800/20    md:p-3 `}>
 
             <AddFriends setopenfriendSearch={setopenfriendSearch} openfriendSearch={openfriendSearch} />
 
@@ -126,7 +128,7 @@ const Page = () => {
         {(Selected || selectedGroup) ? (
           
           <ChatMain />
-        ) : (
+        ) : width > 768 && (
           <div className='flex-1 flex justify-center relative h-full'>
             <div className={`size-0  rounded-full blur-[200px]   bg-blue-600/20 ${Completed && "size-200 "} duration-1000 delay-500 absolute top-1/2 left-1/2 -translate-1/2`}>
               
@@ -157,6 +159,7 @@ const Page = () => {
                   }}
               />
               :
+
               <span className="bg-gradient-to-r from-cyan-500 to-blue-500 text-transparent bg-clip-text font-semibold">OpenAI</span>
               }
 

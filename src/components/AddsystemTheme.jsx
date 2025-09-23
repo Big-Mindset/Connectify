@@ -7,8 +7,11 @@ import React, { useEffect } from 'react'
 const AddsystemTheme = () => {
     let {setTheme} = useTheme()
     useEffect(() => {
+      let theme = localStorage.getItem("theme")
+      
 
-        setTheme("system");
+        setTheme(theme ? theme : "dark");
+      
       }, []);
   return (
     <div></div>

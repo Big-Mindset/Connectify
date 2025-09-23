@@ -25,8 +25,9 @@ export async function middleware(request) {
   let token = await getToken({
   req: request,
   secret: process.env.NEXTAUTH_SECRET,
-  cookieName: "__Secure-authjs.session-token",
+  // cookieName: process.env.NODE_ENV === "production" ? "__Secure-authjs.session-token" : "authjs.csrf-token",
 });
+console.log(token);
 
 
   if (token?.user) {
