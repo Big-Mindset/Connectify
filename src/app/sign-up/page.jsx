@@ -74,7 +74,7 @@ const signUp = () => {
 
     let width = useWidth()
     return (
-        <div className={`${inder.className} min-h-screen dark:bg-gradient-to-br bg-gray-200 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 flex items-center justify-center md:p-4 px-4`}>
+        <div className={`${inder.className} min-h-screen dark:bg-gradient-to-br bg-gray-200 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 flex items-center justify-center md:p-4 `}>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
