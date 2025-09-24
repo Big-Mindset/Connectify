@@ -16,10 +16,8 @@ export function SocketLogic() {
   const handleGetMessages = groupstore.use.handleGetMessages();
   const handleGroupDelivered = groupstore.use.handleGroupDelivered();
   const getGroup = groupstore.use.getGroup();
-  const users = authstore.use.users();
   const setUsers = authstore.use.setUsers();
-  const setselectedInfo = authstore.use.setselectedInfo()
-  const selectedInfo = authstore.use.selectedInfo()
+  const setSelectedInfo = authstore.use.setSelectedInfo()
   const updateReaction2 = authstore.use.updateReaction2()
   const d_reaction = authstore.use.d_reaction()
   const u_reaction = authstore.use.u_reaction()
@@ -79,23 +77,34 @@ export function SocketLogic() {
   }, [socket, Selected, session])
 
   useEffect(() => {
-    socket?.on("lastseen", (data) => {
-
+    let handleLastSeenUpdate = (data) => {
+      console.log(data);
+      let date = new Date(data.lastseen)
+      console.log(date.toLocaleTimeString([],{
+        hour12 : true,
+         hour: "2-digit",
+          minute: "2-digit",
+      }));
+      
       setUsers((prev) =>
         prev.map((user) => {
-          if (user.friend.id === data.updated.id) {
-            return { ...user, friend: { ...user.friend, lastseen: data.updated.lastseen } };
+          if (user.id === data.id) {
+            return { ...user, friend: { ...user.friend, lastseen: data.lastseen } };
           }
           return user;
         }));
-          
-      if (selectedInfo?.id === data.updated.id) {
-        let updated = {...selectedInfo , friend: { ...selectedInfo.friend, lastseen: data.updated.lastseen }}
-          setselectedInfo(updated)
-      }
-
-    })
-  }, [socket, users])
+        
+          setSelectedInfo((prev)=>{
+            if (prev?.id === data.id) {
+              return {...prev , friend: { ...prev.friend, lastseen: data.lastseen }}
+            }
+            return prev
+          })
+      
+        }
+    socket?.on("lastseen",handleLastSeenUpdate )
+    return ()=>socket?.off("lastseen",handleLastSeenUpdate)
+  }, [socket])
 
 
 const isFirstRender = useRef(true);

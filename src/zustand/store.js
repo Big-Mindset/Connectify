@@ -23,6 +23,9 @@ export let authStore = create((set, get) => ({
   setSelected: (newSelected) => set({ Selected: newSelected }),
   selectedInfo: null,
   setselectedInfo: (selectedInfo) => set({ selectedInfo }),
+  setSelectedInfo: (dataFunc) => set((state)=>({
+    selectedInfo : dataFunc(state.selectedInfo)
+  })),
   setSocket: (socket) => set({ socket }),
   skeleton: false,
   setSkeleton: (skeleton) => set({ skeleton }),

@@ -375,7 +375,6 @@ app.prepare().then(() => {
                 },
                 select: {
                     lastseen: true,
-                    id: true
                 }
             })
 
@@ -389,15 +388,16 @@ app.prepare().then(() => {
                 },
                 select: {
                     receiverId: true,
-                    senderId: true
+                    senderId: true,
+                    id : true
                 }
             })
             let friendIds = friends.map((friend) => {
-                return friend.senderId === userId ? friend.receiverId : friend.senderId
+                return friend.senderId === userId ? {friendId : friend.receiverId,id : friend.id} : {friendId :  friend.senderId,id : friend.id}
             })
 
-            for (const id of friendIds) {
-                io.to(onlineUsers[id]).emit("lastseen", { updated })
+            for (const idobj of friendIds) {
+                io.to(onlineUsers[idobj.friendId]).emit("lastseen", { lastseen : updated.lastseen ,id : idobj.id })
             }
         });
     });

@@ -105,11 +105,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.user = {
                     ...token.user,...session
                 }
-                console.log("updated Token");
-                
-                console.log(token);
-                
-
             }
 
             return token

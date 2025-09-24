@@ -19,7 +19,6 @@ import { Cross1Icon } from '@radix-ui/react-icons'
 import { getMoreMessages } from '@/actions/getMoreMessages'
 
 const ChatMain = () => {
-console.log("rerendering");
 
   const fileInputRef = useRef(null)
   const [messageData, setMessageData] = useState({
@@ -56,10 +55,9 @@ console.log("rerendering");
   useEffect(() => {
     if (Selected) getMessages(selectedInfo.id)
     if (selectedGroup?.id) getGroupMessages(selectedGroup.id)
-  }, [selectedInfo, selectedGroup?.id])
+  }, [Selected, selectedGroup?.id])
 
   useEffect(() => {
-    console.log("running useeffect");
     
     const receiverId = session?.user?.id
     
@@ -113,7 +111,6 @@ console.log("rerendering");
     setLoad(false);
     return;
   }
-  console.log("running the scroll ");
   
     scrollbarsRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
 
@@ -124,7 +121,6 @@ console.log("rerendering");
     setIsEmojiPickerOpen(prev => !prev)
   }
 
-console.log(selectedInfo);
 
 
 
