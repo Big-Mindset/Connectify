@@ -314,15 +314,17 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
             <h2 className='text-xl text-white'>No users found...</h2>
           ) : (
             category === "All" ? (
-              userToMap.length === 0 ? <div className='absolute top-[40%] w-full left-1/2 -translate-1/2'>
-                <div className='flex-col flex gap-1.5 items-center justify-center'>
+              userToMap.length === 0 ? <div className='absolute md:top-[40%] top-[50%] w-full left-1/2 -translate-1/2'>
+                <div className='flex-col flex gap-1 items-center justify-center'>
                   <div className='flex flex-col items-center gap-3 mb-8'>
                     <motion.h1
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3, }}
-                      className='text-[1.3rem] text-[#C2E6FF] '>Users not found</motion.h1>
+                      className='text-[1.3rem] text-gray-700 dark:text-[#C2E6FF] '>Users not found</motion.h1>
+                    
                     <UserX2 className='size-14 ' />
+                    
 
                   </div>
                   <motion.button
@@ -332,7 +334,7 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
                     whileTap={{ scale: 1 }}
                     transition={{ duration: 0.2, }}
                     onClick={handleOpenSearch}
-                    className='rounded-full bg-gradient-to-r  from-blue-500 ring-1 hover:ring-0 ring-blue-400 shadow-blue-500 hover:shadow-[0_0_10px_2px_indigo]  to-blue-400 via-sky-600  cursor-pointer flex gap-2 items-center justify-center  w-[40%] px-4 py-2'><p>Connect</p> <UserRoundPlusIcon size={17} />
+                    className='rounded-full bg-gradient-to-r  from-blue-500 ring-1 hover:ring-0 ring-blue-400 shadow-blue-500 hover:shadow-[0_0_10px_2px_indigo]  to-blue-400 via-sky-600  cursor-pointer flex gap-2 items-center justify-center  w-[200px] px-4 py-2'><p>Connect</p> <UserRoundPlusIcon size={17} />
                   </motion.button>
                 </div>
               </div> : userToMap.map((user, idx) => <User key={user.id} user={user} idx={idx} />)

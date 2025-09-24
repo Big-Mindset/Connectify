@@ -21,6 +21,7 @@
     "@radix-ui/react-tooltip": "^1.2.4",
     "@socket.io/admin-ui": "^0.5.1",
     "@tailwindcss/postcss": "^4.1.11",
+    "@use-gesture/react": "^10.3.1",
     "axios": "1.8.4",
     "bcryptjs": "3.0.2",
     "class-variance-authority": "0.7.1",

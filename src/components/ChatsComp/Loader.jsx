@@ -29,7 +29,7 @@ const Loader = ()=>{
     }
   }, [loading,session]);
     return (
-        <div className="flex justify-center items-center h-dvh w-full">
+        <div className="flex justify-center items-center dark:bg-transparent bg-gray-300 h-dvh w-full">
             <div className="flex flex-col gap-3 items-center w-full">
                 <div className='flex flex-col items-center'>
 

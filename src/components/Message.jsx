@@ -14,8 +14,8 @@ import {
 } from "@radix-ui/react-icons"
 import { authstore } from "@/zustand/store"
 import Image from "next/image"
-import { AnimatePresence, motion } from "framer-motion"
-import React, { useMemo } from "react"
+import { AnimatePresence, motion,time,useSpring } from "framer-motion"
+import React, { useEffect, useMemo } from "react"
 import { TrashIcon } from "lucide-react"
 import { dropDown } from "@/zustand/dropdown"
 import { CreateReaction } from "@/actions/CreateReaction"
@@ -30,7 +30,8 @@ import { DeleteReaction } from "@/actions/DeleteReaction"
 import { updateMessage } from "@/actions/updateMessage"
 import { DeleteMessage } from "@/actions/DeleteMessage"
 import toast from "react-hot-toast"
-
+import { useDrag } from "@use-gesture/react"
+import { useWidth } from "@/app/page"
 const Message = React.memo(
   ({
     content,
@@ -76,7 +77,7 @@ const Message = React.memo(
           alt="delivered"
         />
       ) : status === "read" ? (
-         <Image loading="lazy" className="size-3.5 mb-1 dark:invert-0 invert-25" src={twoTicks2} alt="read" /> 
+        <Image loading="lazy" className="size-3.5 mb-1 dark:invert-0 invert-25" src={twoTicks2} alt="read" />
       ) : (
         <Image
           loading="lazy"
@@ -112,8 +113,7 @@ const Message = React.memo(
       const receiver = isSender ? receiverId : senderId
 
       if (!isme) {
-        console.log("Emitting ");
-        
+
         addReactionToMessage(id, reaction)
         const res = await CreateReaction(payload)
         if (res.ok) {
@@ -203,16 +203,57 @@ const Message = React.memo(
       toast.success("Copied")
 
     }
+    let x = useSpring(0 , {stiffness : 200 , damping : 30})
+    let bind = useDrag(({down , movement : [mx]})=>{
+      if (down){
+        if (isSender){
+          x.set(mx < 0 ? Math.max(mx ,-40) : 0)
 
+        }else{
+          x.set(mx > 0 ? Math.min(mx ,20) : 0)
+
+        }
+      }else{
+        if ((!isSender && (mx > 30)) || mx < -20 ){
+           handleReply()
+        }
+        x.set(0)
+      }
+    })
+    let timeout ;
+
+    let handleTouchStart = ()=>{
+      timeout = setTimeout(()=>{
+          setReact(id)
+
+      },1000)
+    }
+    let handleTouchEnd = ()=>{
+        clearTimeout(timeout)
+    }
+    useEffect(()=>{
+      let handleClose = ()=>{
+        if (react){
+          setReact(null)
+        }
+      }
+      document.addEventListener("click",handleClose)
+     return ()=> document.removeEventListener("click",handleClose)
+    },[react])
+    let width = useWidth()
     return (
-      <div
-      data-id={id}
-      data-uniqueid={id}
-        className="relative w-full message ">
+      <motion.div
+        data-id={id}
+        style={{touchAction : "none" ,x}}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        {...bind()}
+        
+        className={`relative ${width < 786 && "noselect"} rounded-md w-full message ${(width < 786 && react === id )&& " bg-blue-900/20 "} `}>
         <div
-          className={`flex text-gray-50 ${Reactors?.length > 0 && "mb-3.5"} group/emoji ${isSender ? "justify-end" : "justify-start"}`}
+          className={`flex  text-gray-50 ${Reactors?.length > 0 && "mb-3.5"} group/emoji ${isSender ? "justify-end" : "justify-start"}`}
         >
-          <div className={`${image ? "max-w-[250px]" : "max-w-[70%]"} relative`}>
+          <div className={`${image ? "max-w-[250px]" : "max-w-[70%]"} relative ` }>
 
             <AnimatePresence>
               {(DropDown && DropDown?.id === id) && (
@@ -331,7 +372,7 @@ const Message = React.memo(
                   exit={{ scale: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   className={`absolute ${isSender
-                    ? "-left-4 -translate-x-1/2"
+                    ? "-left-12 -translate-x-1/2"
                     : "right-0 translate-x-[70%]"
                     } text-gray-300 p-3 overflow-hidden top-1/2 mb-16 -translate-y-[150%] dark:bg-black/90 bg-gray-200 rounded-full z-[99999] w-[270px]`}
                 >
@@ -434,7 +475,7 @@ const Message = React.memo(
 
               {(replyToId && !DeleteForEveryone) && (
                 <div
-    
+
                   className={`flex items-center gap-4 justify-between ${isSender ? "dark:bg-blue-950 bg-gray-50" : "dark:bg-black/40 "
                     } ${isReplySender ? "border-blue-500" : "border-indigo-500"
                     } rounded-lg overflow-hidden border-l-[4px] h-full`}
@@ -482,7 +523,7 @@ const Message = React.memo(
               {image && (
                 <div
                   className="rounded-md bg-white/80 mb-1 max-w-[250px] overflow-hidden"
-  
+
                 >
                   <Image
                     src={image}
@@ -530,7 +571,7 @@ const Message = React.memo(
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     )
 
   }
