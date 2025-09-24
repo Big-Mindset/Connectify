@@ -255,7 +255,6 @@ app.prepare().then(() => {
                 if (updated.count > 0) {
 
                     let senderSocket = onlineUsers[data.senderId]
-                    
                     io.to(senderSocket).emit("readed", data.chatId);
 
                 }
@@ -265,7 +264,7 @@ app.prepare().then(() => {
         });
 
         socket.on("receiver-data", async (data,chatId) => {
-         
+            
             let secure_url = ""
             if (data.image) {
                 secure_url = (await cloudinary.uploader.upload(data.image)).secure_url
@@ -295,7 +294,7 @@ app.prepare().then(() => {
             let receiverSocket = onlineUsers[data.receiverId]
             if (receiverSocket) {
                 io.to(receiverSocket).emit("get-message", message,chatId, async () => {
-
+                    
                     await prisma.message.update({
                         where: { id: message?.id, status: "sent" },
                         data: {
@@ -303,6 +302,8 @@ app.prepare().then(() => {
                         }
                     })
                     let senderSocket = onlineUsers[data.senderId]
+
+                    
                     io.to(senderSocket).emit("delivered-success", data.uniqueId,{...message,status : "delivered" , userId : chatId})
 
             })}

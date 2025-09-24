@@ -50,11 +50,20 @@ export default function OTPVerification() {
   const handleVerifyOtp = async () => {
 
     try {
-
+    let names = ["Leah","Liam","Brooklynn","Kingston","Jude","Sara","Easton","Sawyer","Adrian","Jessica","Valentina","Mason","Jade","Christian","Chase","Mackenzie"]
+      let randomnum = Math.floor(Math.random()* names.length)
+      let randomAvatar = `https://api.dicebear.com/9.x/big-ears-neutral/svg?seed=${names[randomnum]}`
+      console.log({
+        token: token,
+        verifyOtp: otp.join(""),
+        avatar : randomAvatar
+      });
+      
       setLoading(true)
       let res = await axios.post("/api/sign-up", {
         token: token,
-        verifyOtp: otp.join("")
+        verifyOtp: otp.join(""),
+        avatar : randomAvatar
       })
 
       if (res.status === 201) {
@@ -104,8 +113,6 @@ export default function OTPVerification() {
   let handleResend = async () => {
     setressending(true)
     let res = await axios.put("/api/resendOtp", { token, email: data.email, name: data.name })
-    console.log(res);
-    
     if (res.status === 201) {
       countDownEverySecond()
       count.current = 60

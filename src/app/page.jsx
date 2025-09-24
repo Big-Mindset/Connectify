@@ -5,7 +5,6 @@ import ChatList from '@/components/ChatsComp/ChatList';
 import ChatMain from '@/components/ChatsComp/ChatMain';
 import AddFriends from '@/components/AddFriends';
 
-import SocketLogic from '@/lib/SocketLogic';
 import { useEffect, useState } from 'react';
 import { groupstore } from '@/zustand/groupStore';
 import { authstore } from '@/zustand/store';
@@ -16,7 +15,7 @@ import Image from 'next/image';
 import Typewriter from 'typewriter-effect';
 import { Moon, Sun } from 'lucide-react';
 import Loader from '@/components/ChatsComp/Loader';
-import { useSession } from 'next-auth/react';
+import { SocketLogic } from '@/lib/SocketLogic';
 
 
 const roboto = Roboto({
@@ -45,7 +44,6 @@ const Page = () => {
   }, []);
   const selectedGroup = groupstore.use.selectedGroup()
   const getChatData = authstore.use.getChatData()
-  const session = authstore.use.session()
   const loading = authstore.use.loading()
   const Selected = authstore.use.Selected()
   const [openfriendSearch, setopenfriendSearch] = useState(false)

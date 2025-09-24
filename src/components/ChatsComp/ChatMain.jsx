@@ -19,6 +19,7 @@ import { Cross1Icon } from '@radix-ui/react-icons'
 import { getMoreMessages } from '@/actions/getMoreMessages'
 
 const ChatMain = () => {
+console.log("rerendering");
 
   const fileInputRef = useRef(null)
   const [messageData, setMessageData] = useState({
@@ -47,21 +48,24 @@ const ChatMain = () => {
   let typing = useRef(false)
   let { reply, setReply, Delete, setDelete, DropDown, setDropDown, } = dropDown()
   let [load, setLoad] = useState(true)
-  let [intersecting, setintersecting] = useState(false)
+  let intersecting = useRef(null)
   let [GoDown, setGoDown] = useState(false)
   let [openSearch , setOpenSearch] = useState(false)
   let [hasMore , sethasMore] = useState(true)
   let inputRef = useRef(null)
   useEffect(() => {
-    if (Selected) getMessages(Selected, selectedInfo.id)
+    if (Selected) getMessages(selectedInfo.id)
     if (selectedGroup?.id) getGroupMessages(selectedGroup.id)
-  }, [Selected, selectedGroup?.id])
+  }, [selectedInfo, selectedGroup?.id])
 
   useEffect(() => {
+    console.log("running useeffect");
+    
     const receiverId = session?.user?.id
     
     
     if (Selected && receiverId) {
+      
       socket.emit('message-readed', {
         receiverId,
         senderId: Selected,
@@ -94,10 +98,6 @@ const ChatMain = () => {
   useEffect(() => {
     
     if (!messages.length) return
-    if (intersecting) {
-      setintersecting(false)
-      return
-    }
     let id = selectedInfo ? selectedInfo?.id : selectedGroup.id
     
     if (id !== prevChatID) {
@@ -113,9 +113,11 @@ const ChatMain = () => {
     setLoad(false);
     return;
   }
+  console.log("running the scroll ");
+  
     scrollbarsRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
 
-  }, [messages?.length, isTyping,selectedInfo,selectedGroup]);
+  }, [messages?.length, isTyping,Selected,selectedGroup?.id]);
 
 
   const toggleEmojiPicker = () => {
@@ -212,31 +214,40 @@ const ChatMain = () => {
     let prevOffset = topMessage.offsetTop;
 
     let intersectionObserver = new IntersectionObserver(async (entries) => {
-      if (entries[0].isIntersecting) {
+      if (entries[0].isIntersecting && !intersecting.current) {
         
         setLoading(true)
+        intersecting.current = true
 
         intersectionObserver.unobserve(topMessage);
+try{
 
-        let res = await getMoreMessages(id);
-
+  let res = await getMoreMessages(id);
+  
         if (res.ok) {
             if (!res.message.length ) {
-              return
+              sethasMore(false)
+            }else{
+              
+              setMessages([...res.message.reverse(), ...messages]);
             }
-            sethasMore(false)
-          setMessages([...res.message.reverse(), ...messages]);
-setLoading(false)
-          requestAnimationFrame(() => {
-            let newTopMessage = container.current.querySelector(
-              `.message[data-id="${id}"]`
+            requestAnimationFrame(() => {
+              let newTopMessage = container.current.querySelector(
+                `.message[data-id="${id}"]`
             );
             if (newTopMessage) {
               container.current.scrollTop =
-                newTopMessage.offsetTop - prevOffset;
+              newTopMessage.offsetTop - prevOffset;
             }
           });
         }
+      }finally{
+            setLoading(false)
+            setTimeout(() => {
+        intersecting.current = false; 
+      }, 100);
+      
+      }
       }
     }, {
       root: container.current,
@@ -246,7 +257,7 @@ setLoading(false)
     intersectionObserver.observe(topMessage);
 
     return () => intersectionObserver.disconnect();
-  }, [messages.length]);
+  }, [messages.length,hasMore,loading]);
 
   useEffect(() => {
     const el = container.current;

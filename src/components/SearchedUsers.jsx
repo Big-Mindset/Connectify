@@ -2,7 +2,6 @@
 
 import api from '@/lib/axiosInstance'
 import { authstore } from '@/zustand/store'
-import axios from 'axios'
 import { Check, Hourglass,  Loader2, MessageCircleMoreIcon, UserPlus2, X } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
@@ -26,6 +25,7 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
         senderId: session?.user.id,
         receiverId : user.id
       })
+console.log(res);
 
       if (res.status === 200){
           setsearchResult(prevResults => 
@@ -95,6 +95,8 @@ const SearchedUsers = ({ user,setsearchResult,searchResult }) => {
     setloading(true)
 
     let res = await api.put("/accept-Reject-Request",{friendRequestId :user.requestSent[0].id ,status : reqStatus})
+    console.log(res);
+    
     if (res.status === 200){
       let result = searchResult.map((us) => {
         if (us.id === user.id) {

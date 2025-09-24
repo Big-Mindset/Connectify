@@ -45,7 +45,7 @@ const GroupUsers = () => {
               className={` flex ${selectedGroup?.id === group.id ? "bg-gradient-to-r from-gray-200 to-gray-200 dark:from-blue-700/30 dark:to-blue-500/40" : "dark:hover:bg-blue-500/20  hover:from-gray-200 hover:to-gray-200 "} transform  items-center justify-between gap-3 rounded-xl   p-2 transition-all duration-300 `}>
               <div className="flex items-center gap-3 flex-1">
 
-                <div className="relative transition-transform duration-300 overflow-hidden size-16  rounded-full  group-hover:opacity-100 group-hover:scale-105">
+                <div className="relative transition-transform duration-300 overflow-hidden size-14  rounded-full  group-hover:opacity-100 group-hover:scale-105">
                   <Image
                     src={group.image || Avatar}
                     alt={group.name}

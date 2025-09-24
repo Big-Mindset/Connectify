@@ -1,10 +1,12 @@
 import prisma from "@/lib/prisma"
 import { NextResponse } from "next/server";
 import { client } from "@/lib/redis";
-
+import cloudinary from "@/lib/cloudinary"
 export async function POST(req) {
     try {
-        let { token, verifyOtp,getData } = await req.json()
+        let { token, verifyOtp,getData,avatar } = await req.json()
+        console.log(token,verifyOtp,getData,avatar);
+        
         if (!token) {
             return NextResponse.json({ message: "Something went wrong try again" }, { status: 400 })
         }
@@ -38,6 +40,8 @@ export async function POST(req) {
             return NextResponse.json({ message: "Invalid otp try again" }, { status: 400 })
 
         }
+       let {secure_url} =  await cloudinary.uploader.upload(avatar)
+        console.log(avatar,secure_url);
         
         if (isExisted) {
             await prisma.account.create({
@@ -47,19 +51,12 @@ export async function POST(req) {
                     name: name,
                     password: password,
                     provider: "credentials",
-                    avatar: "",
+                    avatar: secure_url,
                     userId: isExisted.id,
-                    isCompleted : false,
-                    bio : ""
-
-
-
                 }
             })
 
         } else {
-
-
             await prisma.user.create({
                 data: {
                     email: email,
@@ -69,11 +66,7 @@ export async function POST(req) {
                             name: name,
                             password: password,
                             provider: "credentials",
-                            avatar: "",
-                            isCompleted : false,
-                            bio : ""
-
-
+                            avatar: secure_url,
                         }
                     }
                 },

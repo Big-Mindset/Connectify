@@ -88,10 +88,8 @@ export function SocketLogic() {
           return user;
         }));
       if (Selected === data.updated.id) {
-
-        let update = { ...selectedInfo, friend: { ...selectedInfo.friend, lastseen: data.updated.lastseen } }
-
-        setselectedInfo(update)
+        let updated = {...selectedInfo , friend: { ...selectedInfo.friend, lastseen: data.updated.lastseen }}
+          // setselectedInfo(updated)
       }
 
     })
@@ -140,7 +138,7 @@ useEffect(() => {
     const timeout = setTimeout(() => {
       socket.emit("join-users", usersObj, (res) => {
         if (res && res.success) {
-          console.log("Successfully joined groups:", Object.keys(usersObj));
+          console.log("Successfully joined groups:");
         }
     });
   }, 200);
@@ -150,5 +148,3 @@ useEffect(() => {
 }, [socket?.connected, groups]);
 
 }
-
-export default SocketLogic

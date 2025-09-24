@@ -100,8 +100,8 @@ const ChatList = React.memo(({ setopenfriendSearch }) => {
     signOut({redirectTo : "/login"})
   }
   let handleDelete = ()=>{}
-  console.log(users);
   
+    
   return (
     <>
       {openFriendRequest && <FriendRequests setopenFriendRequest={setopenFriendRequest} />}

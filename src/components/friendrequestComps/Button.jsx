@@ -1,21 +1,20 @@
 import React from 'react'
 import { motion } from "framer-motion"
 import toast from 'react-hot-toast'
-import axios from 'axios'
 import { authstore } from '@/zustand/store'
+import api from '@/lib/axiosInstance'
 const Button = ({ status, userdata, setRequests }) => {
   let setUsers = authstore.use.setUsers()
   let session = authstore.use.session()
   let socket = authstore.use.socket()
   let handleRequest = async (status) => {
-    console.log(userdata);
-    
     if (status === "Accept") {
 
       setRequests(prev => {
         return prev.filter((obj) => obj.id !== userdata.id)
       })
-      let res = await axios.put("api/accept-Reject-Request", { friendRequestId: userdata.id, status: "Accepted" })
+      let res = await api.put("/accept-Reject-Request", { friendRequestId: userdata.id, status: "Accepted" })
+    
       if (res.status === 200) {
         toast.success("friend request Accepted")
 
@@ -28,11 +27,13 @@ const Button = ({ status, userdata, setRequests }) => {
               avatar: userdata.data.avatar,
               bio: userdata.data.bio,
               name: userdata.data.name,
+             UnReadedMessageCount : 0
 
             }
           }
           ]
         }
+        setUsers(handleUsers)
         
         socket.emit("requestAccepted",{
           id: userdata.id,
@@ -41,16 +42,17 @@ const Button = ({ status, userdata, setRequests }) => {
             avatar: session.user.image,
             bio: session.user.bio,
             name: session.user.name,
+            UnReadedMessageCount : 0
+
 
           }
         },userdata.senderId)
-        setUsers(handleUsers)
       }
     } else {
       setRequests(prev => {
         return prev.filter((obj) => obj.id !== userdata.id)
       })
-      let res = await axios.put("api/accept-Reject-Request", { friendRequestId: userdata.id, status: "Rejected" })
+      let res = await api.put("/accept-Reject-Request", { friendRequestId: userdata.id, status: "Rejected" })
       if (res.status === 200) {
         toast.success("friend request Rejected")
       }

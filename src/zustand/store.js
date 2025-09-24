@@ -132,7 +132,7 @@ export let authStore = create((set, get) => ({
 
   },
   handleUpdate: async (uniqueId, message) => {
-
+    
     await updatemessagestatus(message)
     if (!get().Selected) return
     set(state => ({
@@ -155,7 +155,8 @@ export let authStore = create((set, get) => ({
     }))
 
   },
-  getMessages: async (receiverId, userId) => {
+  getMessages: async (userId) => {
+    set({messages : []})
     set({ skeleton: true })
     
     let messages = await getmessagebyid(userId)
@@ -242,9 +243,6 @@ export let authStore = create((set, get) => ({
     let { content, ...rest } = data
     let uniquId = Date.now().toString()
     let date = new Date()
-    console.log("the selected is ");
-    
-    console.log(get().Selected);
     if (get().Selected !== null) {
       let chatId = get().selectedInfo.id
       let reply = dropDown.getState().reply
@@ -288,6 +286,7 @@ export let authStore = create((set, get) => ({
     }
   },
   readed: async (userId) => {
+    
     let chatId = get().selectedInfo.id
     await updateToRead(userId)
     let messages = get().messages
@@ -427,8 +426,9 @@ export let authStore = create((set, get) => ({
 
     await deletemessage(id,true)
   },
-  playSound : ()=>{
+  playSound :async ()=>{
     const audio = new Audio("/notification_simple-02.mp3") 
+     audio.play()
   }
   ,
   handleRequestNotification : (userdata)=>{

@@ -37,6 +37,6 @@ export async function PUT(req) {
         return NextResponse.json({ Message: "Rsend Successfully" }, { status: 201 })
     } catch (err) {
 
-        return NextResponse.json({ Message: "Internal Server Error" }, { status: 500 })
+        return NextResponse.json({ Message: "Internal Server Error" ,err}, { status: 500 })
     }
 }

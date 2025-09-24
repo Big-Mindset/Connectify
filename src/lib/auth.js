@@ -45,7 +45,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                     avatar: true,
                                     password: true,
                                     bio : true,
-                                    isCompleted : true
 
                                 }
                             }
@@ -80,7 +79,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                         email : account.email,
                         image : account.avatar || "",
                         bio : account.bio || "",
-                        isCompleted : account.isCompleted 
 
                     }
                 } catch (error) {
@@ -101,9 +99,8 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
     
                 
                 
-                if (trigger === "update" && session?.isCompleted){
+                if (trigger === "update"){
                     
-                    token.user.isCompleted = true
                     token.user.name = session?.name
                     token.user.bio = session?.bio
                     token.user.image = session?.image
@@ -134,7 +131,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                      provider: true, 
                                      id: true,
                                      bio : true ,
-                                     isCompleted : true
                                 }
                              }
                             
@@ -153,21 +149,17 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                     provider: account.provider,
                                     email: user.email,
                                     avatar: user.image,
-                                    isCompleted : true,
-                                    bio : ""
                                 }
                             })
                       
                             user.id = userdata.id
                             user.bio = userdata?.bio || ""
-                            user.isCompleted = isAccountExisted.isCompleted
 
 
                         }else{
                             
                             user.id = isAccountExisted.id
                             user.bio = isAccountExisted?.bio || ""
-                            user.isCompleted = isAccountExisted.isCompleted
 
                         }
                     } else {
@@ -182,7 +174,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                         provider: account.provider,
                                         email: user.email,
                                         avatar: user.image,
-                                        bio : "",
 
                                     }
                                 },
@@ -196,7 +187,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                     select: {
                                         id: true,
                                         bio : true,
-                                        isCompleted : true
                                     }
                                 }
                             }
@@ -206,7 +196,6 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
                             user.id = userdata.accounts[0].id
                              user.bio = userdata.accounts[0]?.bio || ""
-                             user.isCompleted = false
 
                         }else{
                             return false

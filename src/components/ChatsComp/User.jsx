@@ -20,6 +20,7 @@ const User = React.memo(({ user, idx }) => {
   let setselectedInfo = authstore.use.setselectedInfo();
   
   const handleSelect = (user) => {
+    
     setSelected(user.friend.id)
     setselectedInfo(user)
     setselectedGroup(null)
