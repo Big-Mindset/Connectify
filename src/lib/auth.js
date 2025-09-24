@@ -6,8 +6,8 @@ import Credentials from "next-auth/providers/credentials"
 import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
 import bcrypt from "bcryptjs"
-export const { handlers, auth, signIn, signOut }=NextAuth({
-    trustHost : true,
+export const { handlers, auth, signIn, signOut } = NextAuth({
+    trustHost: true,
     providers: [
         GoogleProvider({
             clientSecret: process.env.CLIENT_SECRET,
@@ -24,11 +24,11 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                 password: { label: "password", type: "password" }
             },
             async authorize(credentials) {
-                
+
                 try {
                     if (!credentials) return null
                     let user = await prisma.user.findUnique({
-                        where: {  
+                        where: {
                             email: credentials.email,
                         },
                         select: {
@@ -44,24 +44,24 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                                     name: true,
                                     avatar: true,
                                     password: true,
-                                    bio : true,
+                                    bio: true,
 
                                 }
                             }
                         }
                     })
-                    
-                   
+
+
                     if (!user) {
                         return null
                     }
-                    let isPasswordCorrect ;
+                    let isPasswordCorrect;
 
-                        if (credentials?.password){
-                            
-                            isPasswordCorrect=  await bcrypt.compare(credentials?.password, user.accounts[0]?.password)
-                        }
-                       
+                    if (credentials?.password) {
+
+                        isPasswordCorrect = await bcrypt.compare(credentials?.password, user.accounts[0]?.password)
+                    }
+
                     if (!isPasswordCorrect && !credentials?.permission) {
                         return null
 
@@ -72,13 +72,13 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
 
 
                     let account = user.accounts[0]
-                    
+
                     return {
                         id: account.id,
                         name: account.name,
-                        email : account.email,
-                        image : account.avatar || "",
-                        bio : account.bio || "",
+                        email: account.email,
+                        image: account.avatar || "",
+                        bio: account.bio || "",
 
                     }
                 } catch (error) {
@@ -91,24 +91,29 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
         }),
     ],
     callbacks: {
-        async jwt({ token, user,trigger ,session }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token = {}
                 token.user = user
             }
-    
-                
-                
-                if (trigger === "update"){
-                    
-                    token.user.name = session?.name
-                    token.user.bio = session?.bio
-                    token.user.image = session?.image
 
-                }   
-                    
+
+
+            if (trigger === "update") {
+                console.log("triggered");
+                console.log(session);
+                token.user = {
+                    ...token.user,...session
+                }
+                console.log("updated Token");
+                
+                console.log(token);
+                
+
+            }
+
             return token
-  
+
         },
 
         async session({ session, token }) {
@@ -116,94 +121,95 @@ export const { handlers, auth, signIn, signOut }=NextAuth({
                 session.user = {}
                 session.user = token.user
             }
-            
+
             return session
         },
         async signIn({ user, account }) {
-            
-                if (user?.email && (account.provider === "google" || account.provider === "github")) {
-                    let existingUser = await prisma.user.findUnique({
-                        where: { email: user.email },
-                        select: {
-                            id: true,
-                            accounts: { select: 
-                                {
-                                     provider: true, 
-                                     id: true,
-                                     bio : true ,
-                                }
-                             }
-                            
-                        }
-                    })
 
-                    if (existingUser) {
-                        
-                        let isAccountExisted = existingUser.accounts.find(userr => userr.provider === account.provider)
-                        if (!isAccountExisted) {
-             
-                            let userdata = await prisma.account.create({
-                                data: {
-                                    userId: existingUser.id,
+            if (user?.email && (account.provider === "google" || account.provider === "github")) {
+                let existingUser = await prisma.user.findUnique({
+                    where: { email: user.email },
+                    select: {
+                        id: true,
+                        accounts: {
+                            select:
+                            {
+                                provider: true,
+                                id: true,
+                                bio: true,
+                            }
+                        }
+
+                    }
+                })
+
+                if (existingUser) {
+
+                    let isAccountExisted = existingUser.accounts.find(userr => userr.provider === account.provider)
+                    if (!isAccountExisted) {
+
+                        let userdata = await prisma.account.create({
+                            data: {
+                                userId: existingUser.id,
+                                name: user.name,
+                                provider: account.provider,
+                                email: user.email,
+                                avatar: user.image,
+                            }
+                        })
+
+                        user.id = userdata.id
+                        user.bio = userdata?.bio || ""
+
+
+                    } else {
+
+                        user.id = isAccountExisted.id
+                        user.bio = isAccountExisted?.bio || ""
+
+                    }
+                } else {
+
+
+                    let userdata = await prisma.user.create({
+                        data: {
+                            email: user.email,
+                            accounts: {
+                                create: {
                                     name: user.name,
                                     provider: account.provider,
                                     email: user.email,
                                     avatar: user.image,
+
                                 }
-                            })
-                      
-                            user.id = userdata.id
-                            user.bio = userdata?.bio || ""
-
-
-                        }else{
-                            
-                            user.id = isAccountExisted.id
-                            user.bio = isAccountExisted?.bio || ""
-
-                        }
-                    } else {
-                        
-                        
-                        let userdata = await prisma.user.create({
-                            data: {
-                                email: user.email,
-                                accounts: {
-                                    create: {
-                                        name: user.name,
-                                        provider: account.provider,
-                                        email: user.email,
-                                        avatar: user.image,
-
-                                    }
-                                },
-
                             },
-                            include: {
-                                accounts: {
-                                    where: {
-                                        provider: account.provider
-                                    },
-                                    select: {
-                                        id: true,
-                                        bio : true,
-                                    }
+
+                        },
+                        include: {
+                            accounts: {
+                                where: {
+                                    provider: account.provider
+                                },
+                                select: {
+                                    id: true,
+                                    bio: true,
                                 }
                             }
-                        })
-                     
-                        if (userdata){
-
-                            user.id = userdata.accounts[0].id
-                             user.bio = userdata.accounts[0]?.bio || ""
-
-                        }else{
-                            return false
                         }
-                    }
+                    })
 
+                    if (userdata) {
+
+                        user.id = userdata.accounts[0].id
+                        user.bio = userdata.accounts[0]?.bio || ""
+
+                    } else {
+                        return false
+                    }
                 }
-            
+
+            }
+
             return true
         }
     },

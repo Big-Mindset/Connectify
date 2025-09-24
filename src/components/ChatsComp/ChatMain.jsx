@@ -124,6 +124,7 @@ console.log("rerendering");
     setIsEmojiPickerOpen(prev => !prev)
   }
 
+console.log(selectedInfo);
 
 
 

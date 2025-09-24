@@ -80,6 +80,7 @@ export function SocketLogic() {
 
   useEffect(() => {
     socket?.on("lastseen", (data) => {
+
       setUsers((prev) =>
         prev.map((user) => {
           if (user.friend.id === data.updated.id) {
@@ -87,9 +88,10 @@ export function SocketLogic() {
           }
           return user;
         }));
-      if (Selected === data.updated.id) {
+          
+      if (selectedInfo?.id === data.updated.id) {
         let updated = {...selectedInfo , friend: { ...selectedInfo.friend, lastseen: data.updated.lastseen }}
-          // setselectedInfo(updated)
+          setselectedInfo(updated)
       }
 
     })

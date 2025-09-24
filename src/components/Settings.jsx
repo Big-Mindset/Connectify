@@ -67,26 +67,26 @@ export default function Settings({ setsettings }) {
     }, [profile.name, profile.email, profile.bio, profile.image])
 
     let handleSave = async () => {
-        console.log(checked);
         
         if (!checked) return;
         try {
 
             setLoading(true)
             let data = {
-                id: session?.user?.id,
                 name: profile.name,
-                email: profile.email,
                 bio: profile.bio,
                 image: profile.image
             }
             let { image, ...rest } = data;
             
-            let res = await api.put("/updateProfile", {...rest,avatar : data.image})
+            let res = await api.put("/updateProfile", {...rest,avatar : data.image,id : session?.user?.id})
                 
             if (res.status === 200) {
                 setchecked(false)
+                console.log(data);
+                
                 await update(data)
+                setsession({...session,user : {...session.user,...data}})
                 toast.success("Profile updated")
 
             } else {
@@ -107,7 +107,8 @@ export default function Settings({ setsettings }) {
     let { setTheme, resolvedTheme} = useTheme()
  
     if (!mounted) return "Loading...";
- 
+    console.log(session);
+    
     let handleTheme = () => {
         if (resolvedTheme === "dark") {
             setTheme("light")
@@ -150,6 +151,7 @@ export default function Settings({ setsettings }) {
                             <div className="relative group  ">
                                 <div className="size-20 transition-transform overflow-hidden rounded-full ">
                                     <Image src={profile.image || Img}
+                                        accessKey=''
                                         className='bg-cover group rounded-full group-hover:scale-105  duration-300'
                                         height={100} width={100} alt='Avatar' />
 
@@ -165,6 +167,7 @@ export default function Settings({ setsettings }) {
 
                                     <input
                                         ref={fileRef}
+                                        accept='image/*'
                                         onChange={(e) => handleChange(e)}
                                         type="file" id="file" className='hidden' htmlFor="Button" />
                                 </Button>
