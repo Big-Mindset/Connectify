@@ -24,6 +24,8 @@ export function SocketLogic() {
   const delete_message = authstore.use.delete_message()
   const handleRequestNotification = authstore.use.handleRequestNotification()
   const handleAccpeted = authstore.use.handleAccpeted()
+  const handleMessageRead = authstore.use.handleMessageRead()
+  const handleUpdate = authstore.use.handleUpdate()
   useEffect(() => {
     if (session?.user?.id) {
 
@@ -46,9 +48,13 @@ export function SocketLogic() {
     "deleleMessage": delete_message,
     "request_receive_notification": handleRequestNotification,
     "request_accepted": handleAccpeted,
+    "changeToRead": handleMessageRead,
+    'delivered-success': handleUpdate
 
 
-  }), [handleGetMessage, readed, changeAllStatus, handleGetMessage, handleGroupDelivered, getGroup, updateInIndexdb, updateReaction2, d_reaction, u_reaction, delete_message, handleRequestNotification, handleAccpeted])
+  }), [handleGetMessage,readed, changeAllStatus,handleUpdate, handleGetMessage, handleGroupDelivered, getGroup, updateInIndexdb, updateReaction2, d_reaction, u_reaction, delete_message, handleRequestNotification, handleAccpeted,handleMessageRead])
+  
+  // Will add readed later
   useEffect(() => {
 
 
@@ -78,14 +84,6 @@ export function SocketLogic() {
 
   useEffect(() => {
     let handleLastSeenUpdate = (data) => {
-      console.log(data);
-      let date = new Date(data.lastseen)
-      console.log(date.toLocaleTimeString([],{
-        hour12 : true,
-         hour: "2-digit",
-          minute: "2-digit",
-      }));
-      
       setUsers((prev) =>
         prev.map((user) => {
           if (user.id === data.id) {

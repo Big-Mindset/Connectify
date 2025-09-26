@@ -100,8 +100,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
 
             if (trigger === "update") {
-                console.log("triggered");
-                console.log(session);
                 token.user = {
                     ...token.user,...session
                 }
@@ -120,7 +118,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return session
         },
         async signIn({ user, account }) {
-
+            console.log("running the signin callback...");
+            
             if (user?.email && (account.provider === "google" || account.provider === "github")) {
                 let existingUser = await prisma.user.findUnique({
                     where: { email: user.email },
@@ -132,15 +131,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 provider: true,
                                 id: true,
                                 bio: true,
+                                avatar : true
                             }
                         }
 
                     }
                 })
-
+                console.log("the account that existed already...");
+                console.log(existingUser);
+                
                 if (existingUser) {
 
                     let isAccountExisted = existingUser.accounts.find(userr => userr.provider === account.provider)
+                    console.log(isAccountExisted);
+                    
                     if (!isAccountExisted) {
 
                         let userdata = await prisma.account.create({
@@ -158,9 +162,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
 
                     } else {
-
+                        console.log("already existed");
+                            console.log(isAccountExisted.avatar);
+                            
                         user.id = isAccountExisted.id
-                        user.bio = isAccountExisted?.bio || ""
+                        user.bio = isAccountExisted?.bio
+                        user.image = isAccountExisted?.avatar
 
                     }
                 } else {

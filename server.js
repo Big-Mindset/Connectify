@@ -1,37 +1,37 @@
 
 const cloudinary = require("./src/lib/cloudinary.js");
 require('dotenv').config();
-const {instrument} = require("@socket.io/admin-ui")
+const { instrument } = require("@socket.io/admin-ui")
 const prisma = require("./src/lib/prisma");
 const next = require("next");
 const Server = require("socket.io").Server;
 const createServer = require("http").createServer;
 const port = process.env.PORT
-const app = next({ dev: process.env.NODE_ENV !== "production"});
+const app = next({ dev: process.env.NODE_ENV !== "production" });
 const handler = app.getRequestHandler();
 
-app.prepare().then(() => { 
-        let server = createServer(handler);
+app.prepare().then(() => {
+    let server = createServer(handler);
     let io = new Server(server, {
         cors: {
             origin: process.env.NEXTAUTH_URL,
             credentials: true
         }
     });
-    instrument(io,{
-        auth : false,
+    instrument(io, {
+        auth: false,
 
     })
     let onlineUsers = {};
-    
+
     io.on("connection", async (socket) => {
         let userId = socket.handshake?.auth?.userId;
         onlineUsers[userId] = socket.id;
-        
+
         let OnlineUsers = Object.keys(onlineUsers);
         io.emit("getOnlines", OnlineUsers);
-        
-        
+
+
 
 
         if (userId) {
@@ -50,33 +50,35 @@ app.prepare().then(() => {
                         deliveredAt: new Date()
                     }
                 }
-            ),
-            prisma.friendRequest.findMany({
-                    where : {
-                        OR : [
-                            {senderId : userId},
-                            {receiverId : userId}
+                ),
+                prisma.friendRequest.findMany({
+                    where: {
+                        OR: [
+                            { senderId: userId },
+                            { receiverId: userId }
                         ],
-                        status : "Accepted"
+                        status: "Accepted"
                     },
-                    select : {
-                        receiverId : true,
-                        senderId : true
+                    select: {
+                        receiverId: true,
+                        senderId: true,
+                        id: true
                     }
                 })
-        ]
-        )
-            
-            let ids = friendRequests.map((obj)=>{
-                if (obj.senderId === userId){
-                    return onlineUsers[obj.receiverId]
+            ]
+            )
+
+            let ids = friendRequests.map((obj) => {
+
+                if (obj.senderId === userId) {
+                    return { userId: onlineUsers[obj.receiverId], chatId: obj.id }
                 }
-                return onlineUsers[obj.senderId]
+                return { userId: onlineUsers[obj.senderId], chatId: obj.id }
             })
-            
-            for (const id of ids) {
-                if (id){
-                    io.to(id).emit("changeStatus-all", userId)
+
+            for (const obj of ids) {
+                if (obj.userId) {
+                    io.to(obj.userId).emit("changeStatus-all", userId, obj.chatId)
 
                 }
             }
@@ -84,30 +86,30 @@ app.prepare().then(() => {
 
 
         socket.on("join-users", (groupObj, ack) => {
-        
-                
-                for (let key in groupObj) {
-    
-                    
+
+
+            for (let key in groupObj) {
+
+
                 groupObj[key].forEach(obj => {
                     let userSocket = io.sockets.sockets.get(onlineUsers[obj.userId])
-                    
+
                     if (userSocket) {
-                        
+
                         userSocket.join(key)
                     }
                 });
             }
             ack({ success: true })
-       
+
         })
         socket.on("join-to-group", (groupId, uerIds) => {
-            
+
             uerIds.forEach(user => {
                 let userSocket = io.sockets.sockets.get(onlineUsers[user])
 
                 if (userSocket) {
-     
+
                     userSocket.join(groupId)
                 }
 
@@ -155,9 +157,9 @@ app.prepare().then(() => {
                         status: true
                     }
                 })
-                
+
                 if (newMessages) {
-                    
+
                     io.to(newMessages.groupId).emit("receiveMessages", newMessages, data.uniqueId)
                 }
             } catch (error) {
@@ -239,7 +241,7 @@ app.prepare().then(() => {
 
         socket.on("message-readed", async (data) => {
             try {
-                
+
                 let updated = await prisma.message.updateMany({
                     where: {
                         senderId: data.senderId,
@@ -251,9 +253,10 @@ app.prepare().then(() => {
 
                     }
                 });
-                
-                if (updated.count > 0) {
 
+                if (updated.count > 0) {
+                    console.log("emitting reading");
+                    
                     let senderSocket = onlineUsers[data.senderId]
                     io.to(senderSocket).emit("readed", data.chatId);
 
@@ -262,9 +265,22 @@ app.prepare().then(() => {
                 console.log(err.message);
             }
         });
+        socket.on("readed-message", async (message) => {
+            let senderSocket = onlineUsers[message.senderId]
+            if (!senderSocket) return
+            io.to(senderSocket).emit("changeToRead", message)
+            await prisma.message.update({
+                where: {
+                    id: message.id
+                },
+                data: {
+                    status: "read"
+                }
+            })
+        })
 
-        socket.on("receiver-data", async (data,chatId) => {
-            
+        socket.on("receiver-data", async (data, chatId) => {
+
             let secure_url = ""
             if (data.image) {
                 secure_url = (await cloudinary.uploader.upload(data.image)).secure_url
@@ -278,86 +294,89 @@ app.prepare().then(() => {
                 createdAt: data.createdAt,
 
             }
-            if (data?.replyToId){
-                dbData = {...dbData,replyToId : data.replyToId}
+            if (data?.replyToId) {
+                dbData = { ...dbData, replyToId: data.replyToId }
             }
-                let message = await prisma.message.create({
-                    data: dbData,
-                    include : {
-                        Reactors : true
-                    }
-                });
-              
-                
+            let message = await prisma.message.create({
+                data: dbData,
+                include: {
+                    Reactors: true
+                }
+            });
+
+
 
 
             let receiverSocket = onlineUsers[data.receiverId]
             if (receiverSocket) {
-                io.to(receiverSocket).emit("get-message", message,chatId, async () => {
-                    
-                    await prisma.message.update({
-                        where: { id: message?.id, status: "sent" },
-                        data: {
-                            status: "delivered"
-                        }
-                    })
-                    let senderSocket = onlineUsers[data.senderId]
+                io.to(receiverSocket).emit("get-message", message, chatId,data.uniqueId)
 
-                    
-                    io.to(senderSocket).emit("delivered-success", data.uniqueId,{...message,status : "delivered" , userId : chatId})
-
-            })}
+            }
             let userSocket = onlineUsers[userId]
-            io.to(userSocket).emit("upodateIndexdb",data.uniqueId,message)
+            io.to(userSocket).emit("upodateIndexdb", data.uniqueId, message)
         })
-
-        socket.on("typing",data=>{
-                let receiverSocket = onlineUsers[data.receiverId]
-            io.to(receiverSocket).emit("typingIndicator" , data)
+        socket.on("message-delivered", async (message,uniqueId,userId) => {
             
+            await prisma.message.update({
+                where: { id: message.id, status: "sent" },
+                data: { status: "delivered" }
+            })
+            let senderSocket = onlineUsers[message.senderId]
             
+            io.to(senderSocket).emit("delivered-success", uniqueId, {
+                ...message,
+                status: "delivered",
+                userId: userId
+            })
         })
 
-        socket.on("reaction",(data,receiverId)=>{
-            
-            let receiverSocket = onlineUsers[receiverId]
-            io.to(receiverSocket).emit("receive-reaction",data)
-        })
-        socket.on("delete-reaction",(data,receiverId)=>{
-            let receiverSocket = onlineUsers[receiverId]
-            io.to(receiverSocket).emit("d-reaction",data)
-        })
-        socket.on("update-reaction",(data,receiverId)=>{
-            let receiverSocket = onlineUsers[receiverId]
-            io.to(receiverSocket).emit("u-reaction",data)
-        })
-
-        socket.on("delete-message",(receiverId,id)=>{
-            let receiverSocket = onlineUsers[receiverId]
-            io.to(receiverSocket).emit("deleleMessage",id)
-        })
+        socket.on("typing", data => {
+            let receiverSocket = onlineUsers[data.receiverId]
+            io.to(receiverSocket).emit("typingIndicator", data)
 
 
-        socket.on("sendRequest",(user)=>{
+        })
+
+        socket.on("reaction", (data, receiverId) => {
+
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("receive-reaction", data)
+        })
+        socket.on("delete-reaction", (data, receiverId) => {
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("d-reaction", data)
+        })
+        socket.on("update-reaction", (data, receiverId) => {
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("u-reaction", data)
+        })
+
+        socket.on("delete-message", (receiverId, id) => {
+            let receiverSocket = onlineUsers[receiverId]
+            io.to(receiverSocket).emit("deleleMessage", id)
+        })
+
+
+        socket.on("sendRequest", (user) => {
             let receiverSocket = onlineUsers[user.id]
 
-            io.to(receiverSocket).emit("request_receive_notification",user)
+            io.to(receiverSocket).emit("request_receive_notification", user)
         })
 
-        socket.on("cancelRequest",(user)=>{
-    
+        socket.on("cancelRequest", (user) => {
+
             let receiverSocket = onlineUsers[user.id]
-            io.to(receiverSocket).emit("cancel_request",user)
+            io.to(receiverSocket).emit("cancel_request", user)
 
         })
 
-        socket.on("requestAccepted",(user,senderId)=>{
+        socket.on("requestAccepted", (user, senderId) => {
 
             let receiverSocket = onlineUsers[senderId]
-            io.to(receiverSocket).emit("request_accepted",user)
+            io.to(receiverSocket).emit("request_accepted", user)
 
 
-        })  
+        })
 
 
         // Disconnect handler
@@ -389,21 +408,23 @@ app.prepare().then(() => {
                 select: {
                     receiverId: true,
                     senderId: true,
-                    id : true
+                    id: true
                 }
             })
             let friendIds = friends.map((friend) => {
-                return friend.senderId === userId ? {friendId : friend.receiverId,id : friend.id} : {friendId :  friend.senderId,id : friend.id}
+                return friend.senderId === userId ? { friendId: friend.receiverId, id: friend.id } : { friendId: friend.senderId, id: friend.id }
             })
 
             for (const idobj of friendIds) {
-                io.to(onlineUsers[idobj.friendId]).emit("lastseen", { lastseen : updated.lastseen ,id : idobj.id })
+                let senderSocket = onlineUsers[idobj.friendId]
+                if (!senderSocket) continue
+                io.to(senderSocket).emit("lastseen", { lastseen: updated.lastseen, id: idobj.id })
             }
         });
     });
 
-    server.listen(port,"0.0.0.0", () => {
-        console.log("running on port"+port);
-        
+    server.listen(port, "0.0.0.0", () => {
+        console.log("running on port" + port);
+
     });
 })

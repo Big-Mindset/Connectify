@@ -3,7 +3,7 @@ import toast from "react-hot-toast"
 import { create } from "zustand"
 import { groupStore } from "./groupStore"
 import { createSelectors } from "@/lib/Selector"
-import { addallmessages, addmessage, deletelastmessage, deletemessage, deletereaction, getmessagebyid, getOneMessage, updateallreactions, updatemessage, updatemessagestatus, updatereaction, updateToRead } from "@/database/indexdb"
+import { addallmessages, addmessage, deletelastmessage, deletemessage, deletereaction, getmessagebyid, getOneMessage, updateallreactions,  updatemessage, updatereaction, updateToRead } from "@/database/indexdb"
 import { dropDown } from "./dropdown"
 import {motion} from "framer-motion"
 import api from "@/lib/axiosInstance"
@@ -135,8 +135,7 @@ export let authStore = create((set, get) => ({
 
   },
   handleUpdate: async (uniqueId, message) => {
-    
-    await updatemessagestatus(message)
+    await addmessage(message)
     if (!get().Selected) return
     set(state => ({
       messages: state.messages.map((val) => {
@@ -182,12 +181,11 @@ export let authStore = create((set, get) => ({
     set({ skeleton: false })
 
   },
-  handleGetMessage: async (message, userId, acknowledge) => {
-    
-    if (message.senderId !== get().Selected) {
-      
-      
-      await addmessage({ ...message, userId: userId })
+  handleGetMessage: async (message, userId,unqiueId) => {
+      let chatId = get().selectedInfo?.id
+
+    if (!get().selectedInfo || userId !== chatId) {
+   
       set((state) => ({
         users: state.users.map((user) => {
           if (user.id === userId) {
@@ -196,11 +194,13 @@ export let authStore = create((set, get) => ({
           return user
         })
       }))
-      acknowledge()
+      
+      get().socket.emit("message-delivered", message,unqiueId,userId)
+      await addmessage({ ...message, userId: userId })
       return
     }
-    set({ messages: [...get().messages, message] })
-
+    set((state)=>({ messages: [...state.messages, message] }))
+    get().socket.emit("readed-message",{...message, userId ,status : "read"} )
     set((state) => ({
       users: state.users.map((user) => {
         if (user.id === userId) {
@@ -212,6 +212,30 @@ export let authStore = create((set, get) => ({
     await addmessage({ ...message, userId: userId })
 
   },
+  handleMessageRead : async (message)=>{
+    let chatId = get().selectedInfo.id
+    if (message.userId ===chatId ){
+      set((state)=>({
+        messages : state.messages.map((msg)=>{
+          if (msg.id === message.id){
+            return message
+          }
+          return msg
+        })
+      }))
+      
+    }
+     set((state) => ({
+      users: state.users.map((user) => {
+        if (user.id === message.userId) {
+          return { ...user, lastmessage: message }
+        }
+        return user
+      })
+    }))
+    await addmessage(message)
+  }
+  ,
   connectSocket: async () => {
     let {io} = await import("socket.io-client")
     let userId = get().session?.user?.id
@@ -270,7 +294,6 @@ export let authStore = create((set, get) => ({
         image: ""
       })
 
-      get().socket?.emit('read-message', { receiver: get().Selected, update: true })
     }
     if (selectedGroup !== null) {
 
@@ -289,9 +312,11 @@ export let authStore = create((set, get) => ({
     }
   },
   readed: async (userId) => {
+    console.log("updating messages in client ot read");
     
-    let chatId = get().selectedInfo.id
-    await updateToRead(userId)
+    let chatId = get().selectedInfo?.id
+    await updateToRead(userId,"read")
+    if (chatId !== userId) return 
     let messages = get().messages
     if (messages.length === 0) return
     set(state => ({
@@ -315,10 +340,19 @@ export let authStore = create((set, get) => ({
     }))
 
   },
-  changeAllStatus: (userId) => {
+  changeAllStatus: async(userId,chatId) => {
     let { selectedGroup, groupMessages, setGroupMessages } = groupStore.getState()
+    await updateToRead(chatId , "delivered")
+    get().setUsers((users)=>{
+      return users.map((user)=>{
+        if (user.id === chatId && user?.lastmessage?.status === "sent"){
+          return {...user,lastmessage : {...user.lastmessage,status : "delivered"}}
+        }
+        return user
+      })
+    })
     if (get().Selected) {
-
+      
       let messages = get().messages
       if (messages.length === 0) return
       let newMessages = messages.map((msg => {
@@ -346,6 +380,8 @@ export let authStore = create((set, get) => ({
       
       if (messages) {
         let res = await api.get("/getLastSeenMessages")
+        console.log(res);
+        
         if (res.status === 200){
           if (res.data?.Messages?.length > 0) {
             await addallmessages(res.data?.Messages)

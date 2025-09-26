@@ -29,11 +29,10 @@ model Account {
   isVerified Boolean? 
   name            String
   password        String?
-  bio             String @default("replace your bio with this...")
+  bio             String @default("Available")
   avatar          String
   userId          String          @db.ObjectId
   lastseen        DateTime        @default(now())
-  isCompleted Boolean @default(false)
   user            User            @relation(fields: [userId], references: [id])
   sender          Message[]       @relation(name: "sender")
   receiver        Message[]       @relation(name: "receiver")

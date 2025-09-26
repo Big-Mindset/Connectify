@@ -77,7 +77,7 @@ const Message = React.memo(
           alt="delivered"
         />
       ) : status === "read" ? (
-        <Image loading="lazy" className="size-3.5 mb-1 dark:invert-0 invert-25" src={twoTicks2} alt="read" />
+        <Image loading="lazy" className="size-3 mb-1 dark:invert-0 invert-25" src={twoTicks2} alt="read" />
       ) : (
         <Image
           loading="lazy"
@@ -203,14 +203,16 @@ const Message = React.memo(
       toast.success("Copied")
 
     }
+    let timeout ;
     let x = useSpring(0 , {stiffness : 200 , damping : 30})
     let bind = useDrag(({down , movement : [mx]})=>{
       if (down){
         if (isSender){
           x.set(mx < 0 ? Math.max(mx ,-40) : 0)
-
+          clearTimeout(timeout)
         }else{
           x.set(mx > 0 ? Math.min(mx ,20) : 0)
+          clearTimeout(timeout)
 
         }
       }else{
@@ -220,13 +222,12 @@ const Message = React.memo(
         x.set(0)
       }
     })
-    let timeout ;
 
     let handleTouchStart = ()=>{
       timeout = setTimeout(()=>{
           setReact(id)
 
-      },1000)
+      },500)
     }
     let handleTouchEnd = ()=>{
         clearTimeout(timeout)
@@ -244,10 +245,7 @@ const Message = React.memo(
     return (
       <motion.div
         data-id={id}
-        style={{touchAction : "none" ,x}}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        {...bind()}
+        data-createdat={createdAt}
         
         className={`relative ${width < 786 && "noselect"} rounded-md w-full message ${(width < 786 && react === id )&& " bg-blue-900/20 "} `}>
         <div
@@ -372,8 +370,8 @@ const Message = React.memo(
                   exit={{ scale: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   className={`absolute ${isSender
-                    ? "-left-12 -translate-x-1/2"
-                    : "right-0 translate-x-[70%]"
+                    ? "md:-left-12 right-[2%] md:-translate-x-1/2"
+                    : "md:right-0 md:translate-x-[70%]"
                     } text-gray-300 p-3 overflow-hidden top-1/2 mb-16 -translate-y-[150%] dark:bg-black/90 bg-gray-200 rounded-full z-[99999] w-[270px]`}
                 >
                   <div className="flex gap-2 items-center">
@@ -466,7 +464,11 @@ const Message = React.memo(
               </motion.div>
             )}
 
-            <div
+            <motion.div
+               style={{touchAction : "none" ,x}}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        {...bind()}
               className={` group  relative inline-block dark:shadow-[0] overflow-hidden shadow-sm shadow-gray-200 rounded-md font-[400] px-[5px] py-[4px] ${isSender
                 ? "dark:from-[#253974] dark:to-[#253974]    dark:bg-gradient-to-r   bg-[#dbecff]"
                 : "dark:bg-gradient-to-r  bg-[#FAF9FB]  dark:from-[#003362] dark:to-[#004074]"
@@ -568,7 +570,7 @@ const Message = React.memo(
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </motion.div>

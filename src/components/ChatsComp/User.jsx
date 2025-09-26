@@ -3,7 +3,7 @@ import { authstore } from '@/zustand/store'
 import Avatar from "@/assets/Avatar.webp"
 
 import Image from 'next/image'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import ColoredTick from "@/assets/coloredTick.svg"
 import twoTicks2 from "@/assets/ticksTwo2.svg"
@@ -80,7 +80,7 @@ const User = React.memo(({ user, idx }) => {
               fill
               priority
               sizes='100px'
-              className='object-cover'
+              className='object-cover object-center'
             />
           </div>
         </div>

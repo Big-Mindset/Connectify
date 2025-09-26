@@ -106,7 +106,7 @@ const ChatNav = memo(({ setOpenSearch, inputRef, openSearch }) => {
                             onClick={handleBack}
                             whileTap={{ scale: 0.95 }}
                             transition={{ duration: 0.1 }}
-                            className="bg-blue-700/60  p-1 sm:mr-2.5    rounded-full  ">
+                            className="  p-1 sm:mr-2.5    rounded-full  ">
                             <ArrowLeft className="font-light sm:size-6  text-white" />
                         </motion.div>}
                     <div className='flex gap-2 flex-1'>
